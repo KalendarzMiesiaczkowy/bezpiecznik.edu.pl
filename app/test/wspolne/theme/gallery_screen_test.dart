@@ -1,6 +1,7 @@
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:bezpiecznik/wspolne/theme/gallery_screen.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -23,7 +24,9 @@ void main() {
         addTearDown(tester.view.reset);
 
         await tester.pumpWidget(
-          MaterialApp(theme: buildBzTheme(), home: const GalleryScreen()),
+          ProviderScope(
+            child: MaterialApp(theme: buildBzTheme(), home: const GalleryScreen()),
+          ),
         );
         expect(find.text('Typografia'), findsOneWidget);
         expect(find.text('display · 40/44 · w800'), findsOneWidget);
@@ -50,11 +53,15 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(theme: buildBzTheme(), home: const GalleryScreen()),
+      ProviderScope(
+        child: MaterialApp(theme: buildBzTheme(), home: const GalleryScreen()),
+      ),
     );
-    await tester.scrollUntilVisible(find.text('paper-ink'), 500);
+    // The gallery's text fields are scrollables too: scroll the page itself.
+    final page = find.byType(Scrollable).first;
+    await tester.scrollUntilVisible(find.text('paper-ink'), 500, scrollable: page);
     expect(find.text('#2B2722'), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('#C9A66B66'), -200);
+    await tester.scrollUntilVisible(find.text('#C9A66B66'), -200, scrollable: page);
     expect(find.text('#C9A66B66'), findsOneWidget);
   });
 

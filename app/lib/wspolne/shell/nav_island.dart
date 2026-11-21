@@ -1,6 +1,7 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../theme/bz_theme.dart';
 import 'shell_icon_button.dart';
 
 /// Capsule in the top-left corner of the chat (E1): menu (P1) and map (E2).
@@ -18,6 +19,8 @@ class NavIsland extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           ShellIconButton(icon: LucideIcons.menu, label: 'Menu', onTap: onMenu),
+          // DS `.bz-island__sep`.
+          SizedBox(width: 1, height: 20, child: ColoredBox(color: context.bz.line150)),
           ShellIconButton(icon: LucideIcons.map, label: 'Mapa', onTap: onMap),
         ],
       ),

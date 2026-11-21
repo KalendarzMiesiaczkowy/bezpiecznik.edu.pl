@@ -2,6 +2,11 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../czat/templates/panel_card.dart';
+import '../../czat/templates/panel_model.dart';
+import '../shell/cpr_indicator.dart';
+import '../shell/nav_island.dart';
+import '../shell/sos_button.dart';
 import 'bz_buttons.dart';
 import 'bz_theme.dart';
 
@@ -13,7 +18,8 @@ import 'bz_theme.dart';
 /// release/profile builds.
 const galleryRoutePath = '/gallery';
 
-/// Debug-only showcase: type scale, colours, buttons, icons, Polish glyphs.
+/// Debug-only showcase: type scale, colours, buttons, shared components,
+/// icons, Polish glyphs.
 class GalleryScreen extends StatelessWidget {
   const GalleryScreen({super.key});
 
@@ -42,6 +48,14 @@ class GalleryScreen extends StatelessWidget {
             const _Section('Kolory'),
             for (final e in t.colorsByName.entries)
               _Swatch(name: e.key, color: e.value),
+            const _Section('Przyciski Material'),
+            const _MaterialButtons(),
+            const _Section('Powłoka'),
+            const _Shell(),
+            const _Section('Karta, źródło, wybór'),
+            const _Cards(),
+            const _Section('Formularz'),
+            const _Form(),
             const _Section('Przyciski'),
             const _Buttons(),
             const _Section('Ikony Lucide'),
@@ -283,6 +297,183 @@ class _Spacing extends StatelessWidget {
                 child: Text(e.key, style: t.caption),
               ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MaterialButtons extends StatelessWidget {
+  const _MaterialButtons();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.bz;
+    return Wrap(
+      spacing: t.space2,
+      runSpacing: t.space2,
+      children: [
+        FilledButton(onPressed: () {}, child: const Text('Zapisz')),
+        const FilledButton(onPressed: null, child: Text('Zapisz')),
+        OutlinedButton(onPressed: () {}, child: const Text('Anuluj')),
+        const OutlinedButton(onPressed: null, child: Text('Anuluj')),
+        TextButton(onPressed: () {}, child: const Text('Pomiń')),
+        IconButton(
+          onPressed: () {},
+          tooltip: 'Zamknij',
+          icon: const Icon(LucideIcons.x),
+        ),
+      ],
+    );
+  }
+}
+
+class _Shell extends StatelessWidget {
+  const _Shell();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.bz;
+    return Wrap(
+      spacing: t.space4,
+      runSpacing: t.space3,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        NavIsland(onMenu: () {}, onMap: () {}),
+        BzBackButton(onBack: () {}),
+        const SosButton(),
+        CprIndicator(onTap: () {}),
+      ],
+    );
+  }
+}
+
+class _Cards extends StatefulWidget {
+  const _Cards();
+
+  @override
+  State<_Cards> createState() => _CardsState();
+}
+
+class _CardsState extends State<_Cards> {
+  bool _checked = false;
+  String _yesNo = 'tak';
+  String _variant = 'dorosly';
+
+  static const _short = SourceRecord(
+    sourceId: 'g1',
+    docTitle: 'Poradnik bezpieczeństwa',
+    docShort: 'Poradnik RCB 2025',
+    pageLabel: '33',
+  );
+  static const _long = SourceRecord(
+    sourceId: 'g2',
+    docTitle: 'Wytyczne resuscytacji',
+    docShort: 'Wytyczne ERC 2025, podstawowe zabiegi resuscytacyjne u dorosłych',
+    pageLabel: '167',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.bz;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        PanelCard(
+          title: 'Przygotowanie na brak prądu',
+          aside: Text('1 z 4', style: t.caption.copyWith(color: t.ink300)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text('Naładuj powerbanki.', style: t.chat),
+                  ),
+                  BzCheck(
+                    value: _checked,
+                    onChanged: (v) => setState(() => _checked = v),
+                    label: 'Naładuj powerbanki.',
+                  ),
+                  BzCheck(value: true, onChanged: (_) {}, label: 'Zrobione'),
+                ],
+              ),
+              SourceChip(source: _short, onTap: () {}),
+              SourceChip(source: _long, onTap: () {}),
+            ],
+          ),
+        ),
+        SizedBox(height: t.space3),
+        PanelCard(
+          title: 'Wszystko gotowe',
+          done: true,
+          child: Text('Karta po odhaczeniu kroków.', style: t.chat),
+        ),
+        SizedBox(height: t.space3),
+        BzSegmented(
+          options: const [VariantOption('tak', 'Tak'), VariantOption('nie', 'Nie')],
+          value: _yesNo,
+          onChanged: (v) => setState(() => _yesNo = v),
+        ),
+        SizedBox(height: t.space2),
+        BzSegmented(
+          options: const [
+            VariantOption('dorosly', 'Dorosły'),
+            VariantOption('dziecko', 'Dziecko'),
+            VariantOption('niemowle', 'Niemowlę'),
+          ],
+          value: _variant,
+          onChanged: (v) => setState(() => _variant = v),
+        ),
+      ],
+    );
+  }
+}
+
+class _Form extends StatefulWidget {
+  const _Form();
+
+  @override
+  State<_Form> createState() => _FormState();
+}
+
+class _FormState extends State<_Form> {
+  bool _on = true;
+  final _filled = TextEditingController(text: 'Insulina');
+
+  @override
+  void dispose() {
+    _filled.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.bz;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const TextField(decoration: InputDecoration(hintText: 'Nazwa leku')),
+        SizedBox(height: t.space3),
+        TextField(
+          controller: _filled,
+          decoration: const InputDecoration(errorText: 'Podaj dawkę'),
+        ),
+        SizedBox(height: t.space3),
+        Row(
+          children: [
+            Expanded(child: Text('Dołącz dane z profilu', style: t.chat)),
+            Switch(value: _on, onChanged: (v) => setState(() => _on = v)),
+            Switch(value: !_on, onChanged: (v) => setState(() => _on = !v)),
+            const Switch(value: true, onChanged: null),
+          ],
+        ),
+        const Divider(),
+        const ListTile(
+          title: Text('Rozmiar tekstu'),
+          subtitle: Text('Wiersz listy'),
+          trailing: Icon(LucideIcons.chevronRight),
         ),
       ],
     );
