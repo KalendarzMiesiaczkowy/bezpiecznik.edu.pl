@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../wspolne/theme/bz_theme.dart';
@@ -35,51 +36,101 @@ class QuotePanelView extends StatelessWidget {
           Text(source.docTitle, style: t.label.copyWith(fontSize: 15, fontWeight: FontWeight.w700)),
           Text(meta, style: t.caption.copyWith(color: t.ink300)),
           SizedBox(height: t.space3),
-          Semantics(
-            label: source.text,
-            excludeSemantics: true,
-            button: true,
-            onTap: () => scope.onOpenSource(source),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => scope.onOpenSource(source),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(t.radiusMd),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  child: Stack(
-                    children: [
-                      ColoredBox(
-                        color: t.paper,
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                            child: Text.rich(
-                              TextSpan(
-                                text: source.text,
-                                style: TextStyle(
-                                  backgroundColor: t.highlight,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: t.signalPress,
-                                  decorationThickness: 2,
-                                ),
-                              ),
+          _QuoteWindow(text: source.text, onTap: () => scope.onOpenSource(source)),
+          SizedBox(height: t.space2),
+          Align(
+            alignment: Alignment.centerRight,
+            child: OutlinedButton.icon(
+              onPressed: () => scope.onOpenSource(source),
+              style: OutlinedButton.styleFrom(
+                minimumSize: Size(t.minTouchTarget, t.minTouchTarget),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: const StadiumBorder(),
+                side: BorderSide(color: t.line150),
+                foregroundColor: t.ink100,
+                textStyle: t.label.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              icon: const Icon(LucideIcons.maximize2, size: 16),
+              label: const Text(quoteExpandLabel),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+const double _lineHeight = 22;
+const double _padV = 18;
+const double _padH = 20;
+const int _maxLines = 8;
+
+/// Collapsed window height: top padding plus a whole number of lines.
+const double quoteWindowMaxHeight = _padV + _maxLines * _lineHeight;
+
+/// Paper window with the highlighted fragment. Clipped to whole lines; the
+/// fade into the paper only shows when the text is actually clipped.
+class _QuoteWindow extends StatelessWidget {
+  const _QuoteWindow({required this.text, required this.onTap});
+
+  final String text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.bz;
+    const baseStyle = TextStyle(fontFamily: 'serif', fontSize: 14, height: _lineHeight / 14);
+    return Semantics(
+      label: text,
+      excludeSemantics: true,
+      button: true,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(t.radiusMd),
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final painter = TextPainter(
+                text: TextSpan(text: text, style: baseStyle),
+                textDirection: TextDirection.ltr,
+                textScaler: MediaQuery.textScalerOf(context),
+              )..layout(maxWidth: (box.maxWidth - 2 * _padH).clamp(0, double.infinity));
+              final clipped = painter.height + _padV * 2 > quoteWindowMaxHeight;
+              painter.dispose();
+              return ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: quoteWindowMaxHeight),
+                child: Stack(
+                  children: [
+                    ColoredBox(
+                      color: t.paper,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: _padH, vertical: _padV),
+                          child: Text.rich(
+                            TextSpan(
+                              text: text,
                               style: TextStyle(
-                                fontFamily: 'serif',
-                                fontSize: 14,
-                                height: 22 / 14,
-                                color: t.paperInk,
+                                backgroundColor: t.highlight,
+                                decoration: TextDecoration.underline,
+                                decorationColor: t.signalPress,
+                                decorationThickness: 2,
                               ),
                             ),
+                            style: baseStyle.copyWith(color: t.paperInk),
                           ),
                         ),
                       ),
+                    ),
+                    if (clipped)
                       Positioned(
+                        key: const ValueKey('quote-fade'),
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        height: 32,
+                        height: 2 * _lineHeight,
                         child: IgnorePointer(
                           child: DecoratedBox(
                             decoration: BoxDecoration(
@@ -92,20 +143,12 @@ class QuotePanelView extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
-              ),
-            ),
+              );
+            },
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => scope.onOpenSource(source),
-              child: const Text(quoteExpandLabel),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
