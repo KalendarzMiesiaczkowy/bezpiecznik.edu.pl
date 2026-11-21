@@ -10,6 +10,7 @@ import '../../../mapa/punkty/geo.dart';
 import '../../../mapa/punkty/point_sheet.dart';
 import '../../../mapa/punkty/points_db.dart';
 import '../../../mapa/position_provider.dart';
+import '../../../wspolne/theme/bz_buttons.dart';
 import '../../../wspolne/theme/bz_theme.dart';
 import '../panel_card.dart';
 import '../panel_model.dart';
@@ -21,7 +22,7 @@ const mapHospitalCardTitle =
     'Najbliższy szpital'; // verify:true (spec: no title)
 const mapNoPositionText = 'Nie znam twojej pozycji.'; // state: no position
 const mapUnknownDistancesText =
-    'Odległości nieznane. Poniżej schrony najbliżej centrum Szczecina.'; // verify:true
+    'Poniżej schrony najbliżej centrum Szczecina.'; // verify:true
 const mapShowOnMapText = 'Pokaż na mapie'; // button without a position
 const mapNoPointsText =
     'Brak takich punktów w pobranych danych mapy.'; // state: no points of kind
@@ -192,8 +193,12 @@ class _Points extends StatelessWidget {
             key: const ValueKey('map-card-minimap'),
             behavior: HitTestBehavior.opaque,
             onTap: focus,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(bz.radiusMd),
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(bz.radiusMd),
+                border: Border.all(color: bz.line100),
+              ),
               child: SizedBox(
                 height: 96,
                 child: CustomPaint(
@@ -221,7 +226,7 @@ class _Points extends StatelessWidget {
             constraints: BoxConstraints(minHeight: bz.minTouchTarget),
             child: Row(
               children: [
-                _KindMarker(confirmed: point.confirmed),
+                PointMarker(point: point),
                 SizedBox(width: bz.space3),
                 Expanded(
                   child: Column(
@@ -236,7 +241,10 @@ class _Points extends StatelessWidget {
                       if (distance != null)
                         Text(
                           distanceLineText(distance),
-                          style: bz.label.copyWith(color: bz.ink100),
+                          style: bz.label.copyWith(
+                            color: bz.ink100,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
                         ),
                       if (!point.confirmed)
                         Text(
@@ -246,21 +254,18 @@ class _Points extends StatelessWidget {
                       if (months != null)
                         Text(
                           staleMonthsText(months),
-                          style: bz.caption.copyWith(color: bz.ink200),
+                          style: bz.caption.copyWith(color: bz.signal),
                         ),
                     ],
                   ),
                 ),
-                if (bearing != null)
-                  Transform.rotate(
+                if (bearing != null) ...[
+                  SizedBox(width: bz.space2),
+                  KeyedSubtree(
                     key: ValueKey('map-card-bearing-${point.id}'),
-                    angle: bearing * math.pi / 180,
-                    child: Icon(
-                      LucideIcons.navigation2,
-                      size: 24,
-                      color: bz.ink100,
-                    ),
+                    child: BearingArrow(bearing: bearing, color: bz.ink200),
                   ),
+                ],
               ],
             ),
           ),
@@ -271,46 +276,23 @@ class _Points extends StatelessWidget {
           child: _SourceChip(point: point),
         ),
         SizedBox(height: bz.space3),
-        ConstrainedBox(
-          constraints: BoxConstraints(minHeight: bz.minTouchTarget),
-          child: FilledButton(
-            key: const ValueKey('map-card-open'),
-            onPressed: focus,
-            child: Text(_hasPosition ? pointGuideText : mapShowOnMapText),
-          ),
+        BzButton(
+          key: const ValueKey('map-card-open'),
+          label: _hasPosition ? pointGuideText : mapShowOnMapText,
+          icon: _hasPosition ? LucideIcons.navigation2 : LucideIcons.map,
+          onPressed: focus,
+          variant: BzButtonVariant.primary,
+          size: BzButtonSize.lg,
+          fullWidth: true,
         ),
       ],
     );
   }
 }
 
-class _KindMarker extends StatelessWidget {
-  const _KindMarker({required this.confirmed});
-
-  final bool confirmed;
-
-  @override
-  Widget build(BuildContext context) {
-    final bz = context.bz;
-    // Unconfirmed: empty (outlined) marker, per DS.
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: confirmed ? bz.ink100 : Colors.transparent,
-        border: Border.all(color: bz.ink100, width: 2),
-      ),
-      child: Icon(
-        LucideIcons.shield,
-        size: 16,
-        color: confirmed ? bz.bg000 : bz.ink100,
-      ),
-    );
-  }
-}
-
-/// Neutral (grey, shield) source chip; tap shows source and verification date.
+/// DS `SourceChip` look: `verified-tint` for a confirmed point, neutral
+/// `bg-200` for an unconfirmed one (never dressed as verified); tap shows
+/// source and verification date.
 class _SourceChip extends StatelessWidget {
   const _SourceChip({required this.point});
 
@@ -346,24 +328,27 @@ class _SourceChip extends StatelessWidget {
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: bz.minTouchTarget),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: bz.space2),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(LucideIcons.shield, size: 14, color: bz.ink200),
-                SizedBox(width: bz.space1),
-                Flexible(
-                  child: Text(
-                    sourceChipText(
-                      point.source,
-                      point.verifiedAt,
-                      confirmed: point.confirmed,
-                    ),
-                    style: bz.caption.copyWith(color: bz.ink200),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            widthFactor: 1,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: point.confirmed ? bz.verifiedTint : bz.bg200,
+                borderRadius: BorderRadius.circular(bz.radiusFull),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: bz.space3, vertical: bz.space1),
+                child: Text(
+                  sourceChipText(
+                    point.source,
+                    point.verifiedAt,
+                    confirmed: point.confirmed,
+                  ),
+                  style: bz.source.copyWith(
+                    color: point.confirmed ? bz.verified : bz.ink200,
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
