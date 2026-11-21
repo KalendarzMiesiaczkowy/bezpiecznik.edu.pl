@@ -1,5 +1,6 @@
 import 'package:bezpiecznik/main.dart';
 import 'package:bezpiecznik/mapa/map_screen.dart';
+import 'package:bezpiecznik/mapa/punkty/point_sheet.dart' show nearestButtonText;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -10,6 +11,10 @@ import 'support/harness.dart';
 /// Map E2E (gate h2): chat -> island map button -> map (first run copies the
 /// MBTiles, up to 30 s) -> attribution visible. Street labels in airplane mode
 /// are checked by the coordinator on the screenshot.
+/// Location is faked (granted, Szczecin 53.4285, 14.5528): the real permission
+/// dialog never gets answered under `flutter test` and would keep the screen on
+/// "Przygotowuję mapę…" (map_screen waits for `locationAccessProvider`).
+/// The MBTiles install stays real.
 /// Run: `flutter test integration_test/map_test.dart -d <device>`.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +23,7 @@ void main() {
     final profile = await onboardedProfileStore();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [profileStoreProvider.overrideWithValue(profile)],
+        overrides: [profileStoreProvider.overrideWithValue(profile), fakeLocationOverride],
         child: const BezpiecznikApp(),
       ),
     );
@@ -45,5 +50,6 @@ void main() {
     expect(find.text(preparingTitle), findsNothing);
     expect(attribution, findsOneWidget);
     expect(find.bySemanticsLabel('Wróć'), findsOneWidget);
+    expect(find.text(nearestButtonText), findsOneWidget);
   });
 }

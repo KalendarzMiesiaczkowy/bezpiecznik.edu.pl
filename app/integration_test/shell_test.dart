@@ -21,7 +21,7 @@ void main() {
     final profile = await onboardedProfileStore();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [profileStoreProvider.overrideWithValue(profile)],
+        overrides: [profileStoreProvider.overrideWithValue(profile), fakeLocationOverride],
         child: const BezpiecznikApp(),
       ),
     );
@@ -89,7 +89,10 @@ void main() {
     await tester.tap(sos);
     await settle(tester);
     expect(find.text('Kontakt ze służbami'), findsOneWidget);
-    await tester.binding.handlePopRoute();
+    // The observer must claim Back (true) while P2 is open; checked apart from
+    // the animation so a failure says which of the two broke.
+    expect(await tester.binding.handlePopRoute(), isTrue);
+    await settle(tester);
     await settle(tester);
     expect(find.text('Kontakt ze służbami'), findsNothing);
     expect(find.text('Co się dzieje?'), findsOneWidget);
