@@ -64,12 +64,13 @@ void main() {
     iceContacts: const [IceContact(name: 'Mama', phone: '+48600100200')],
   );
 
-  testWidgets('two buttons min 80 px (grow with text); nothing launched without a tap; More collapsed', (tester) async {
+  testWidgets('two buttons min 80 px (grow with text); nothing launched without a tap; emergency numbers visible, More collapsed', (tester) async {
     final launched = await _pump(tester, profile);
     expect(tester.getSize(find.byKey(const Key('call-112'))).height, greaterThanOrEqualTo(80));
     expect(tester.getSize(find.byKey(const Key('call-notify'))).height, greaterThanOrEqualTo(80));
     expect(launched, isEmpty);
-    expect(find.byKey(const Key('call-999')), findsNothing);
+    expect(find.byKey(const Key('call-999')), findsOneWidget);
+    expect(find.byKey(const Key('call-coords')), findsNothing);
     expect(find.text('Do: Mama'), findsOneWidget);
     expect(find.text('GPS ±12 m'), findsOneWidget);
   });
@@ -90,26 +91,24 @@ void main() {
     expect(body, contains('Dom: niemowle.'));
   });
 
-  testWidgets('profile switch off drops the profile line', (tester) async {
+  testWidgets('no switch/hints; SMS always includes profile data', (tester) async {
     final launched = await _pump(tester, profile);
-    expect(find.byKey(const Key('call-profile-preview')), findsOneWidget);
-    await tester.tap(find.byKey(const Key('call-profile-switch')));
-    await tester.pump();
-    expect(find.byKey(const Key('call-profile-preview')), findsNothing);
+    expect(find.byKey(const Key('call-profile-switch')), findsNothing);
+    expect(find.textContaining('Przygotuję SMS'), findsNothing);
     await tester.tap(find.byKey(const Key('call-notify')));
     await tester.pump();
     final body = launched.last.queryParameters['body']!;
-    expect(body, isNot(contains('Dom:')));
-    expect(body, isNot(contains('insulina')));
+    expect(body, contains('Dom: niemowle.'));
+    expect(body, contains('insulina'));
   });
 
-  testWidgets('More expands 999/998/997, coordinates, AML note; copy gives a toast', (tester) async {
+  testWidgets('999/998/997 tappable without More; More expands coordinates, AML note; copy gives a toast', (tester) async {
     final launched = await _pump(tester, profile);
-    await tester.tap(find.byKey(const Key('call-more')));
-    await tester.pump();
     expect(find.text('999 · Pogotowie'), findsOneWidget);
     expect(find.text('998 · Straż'), findsOneWidget);
     expect(find.text('997 · Policja'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('call-more')));
+    await tester.pump();
     expect(find.textContaining('52°13'), findsOneWidget);
     expect(find.text(callAmlNote), findsOneWidget);
     expect(find.text('Co powiedzieć dyspozytorowi'), findsOneWidget);
@@ -125,7 +124,7 @@ void main() {
 
   testWidgets('no ICE contacts: SMS still opens with empty recipient, add-contacts link shown', (tester) async {
     final launched = await _pump(tester, HouseholdProfile.empty);
-    expect(find.text('Nie masz kontaktów alarmowych.'), findsOneWidget);
+    expect(find.text('Nie masz kontaktów alarmowych.'), findsNothing);
     expect(find.text('Dodaj kontakty'), findsOneWidget);
     expect(find.byKey(const Key('call-profile-switch')), findsNothing);
     await tester.tap(find.byKey(const Key('call-notify')));

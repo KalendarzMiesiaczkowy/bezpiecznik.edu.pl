@@ -37,9 +37,6 @@ void main() {
     await tester.pump();
     expect(find.text(call112Label), findsOneWidget);
     expect(find.text(callSmsLabel), findsOneWidget);
-    await tester.ensureVisible(find.byKey(const Key('call-more')));
-    await tester.tap(find.byKey(const Key('call-more')));
-    await tester.pump();
     expect(find.byKey(const Key('call-997')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

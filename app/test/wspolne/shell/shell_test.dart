@@ -126,18 +126,17 @@ void main() {
 
   for (final path in [
     '/',
-    '/onboarding',
     '/mapa',
     '/ustawienia',
     '/ustawienia/profil',
     '/gallery',
   ]) {
-    testWidgets('SOS present on $path, >= 56x56, top-right', (tester) async {
+    testWidgets('SOS present on $path, >= 48x48, top-right', (tester) async {
       await pumpApp(tester, initial: path);
       expect(sos(), findsOneWidget);
       final size = tester.getSize(sos());
-      expect(size.width, greaterThanOrEqualTo(56));
-      expect(size.height, greaterThanOrEqualTo(56));
+      expect(size.width, greaterThanOrEqualTo(48));
+      expect(size.height, greaterThanOrEqualTo(48));
       expect(tester.getTopRight(sos()).dx, 800 - 16);
     });
   }
@@ -389,7 +388,7 @@ void main() {
     );
     expect(menu(), findsNothing);
     expect(back(), findsNothing);
-    expect(sos(), findsOneWidget);
+    expect(sos(), findsNothing);
   });
 
   group('CprIndicator', () {

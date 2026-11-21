@@ -79,7 +79,6 @@ class ContactCallPanel extends ConsumerStatefulWidget {
 class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
   bool _more = false;
   bool _signal = false;
-  bool _withProfile = true;
   bool _searchTimedOut = false;
   String? _notice;
   Timer? _noticeTimer;
@@ -144,7 +143,7 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
       situation: widget.situation == null
           ? null
           : clipSituation(widget.situation!),
-      profile: _withProfile && !facts.isEmpty ? facts : null,
+      profile: facts.isEmpty ? null : facts,
     );
   }
 
@@ -232,13 +231,7 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
           style: bz.caption.copyWith(color: bz.ink200),
         )
       else ...[
-        Text(
-          'Przygotuję SMS do bliskich. Wyślesz go sam.',
-          style: bz.caption.copyWith(color: bz.ink200),
-        ),
         if (recipients.isEmpty) ...[
-          const SizedBox(height: 4),
-          Text('Nie masz kontaktów alarmowych.', style: bz.caption),
           _LinkButton(label: 'Dodaj kontakty', onTap: _addContacts),
         ] else
           Row(
@@ -251,31 +244,6 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
               ),
               _LinkButton(label: 'Zmień', onTap: _addContacts),
             ],
-          ),
-      ],
-      if (!facts.isEmpty) ...[
-        const SizedBox(height: 4),
-        MergeSemantics(
-          child: Row(
-            children: [
-              Switch(
-                key: const Key('call-profile-switch'),
-                value: _withProfile,
-                onChanged: (v) => setState(() => _withProfile = v),
-              ),
-              const SizedBox(width: 8),
-              Expanded(child: Text('Dołącz dane z profilu', style: bz.chat)),
-            ],
-          ),
-        ),
-        if (_withProfile)
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 4),
-            child: Text(
-              'W SMS-ie: ${facts.preview}',
-              key: const Key('call-profile-preview'),
-              style: bz.caption.copyWith(color: bz.ink200),
-            ),
           ),
       ],
       const SizedBox(height: 4),
@@ -314,6 +282,29 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
             ),
           ),
         ),
+      const SizedBox(height: 12),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final (n, name) in const [
+            ('999', 'Pogotowie'),
+            ('998', 'Straż'),
+            ('997', 'Policja'),
+          ])
+            // Three per row when they fit, otherwise they wrap to the next line.
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 96),
+              child: IntrinsicWidth(
+                child: _SmallDial(
+                  key: Key('call-$n'),
+                  label: '$n · $name',
+                  onTap: () => _dial(n),
+                ),
+              ),
+            ),
+        ],
+      ),
       Divider(color: bz.line100, height: 24),
       InkWell(
         key: const Key('call-more'),
@@ -350,29 +341,6 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
   }
 
   List<Widget> _moreChildren(BzTokens bz, Position? pos) => [
-    const SizedBox(height: 8),
-    Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final (n, name) in const [
-          ('999', 'Pogotowie'),
-          ('998', 'Straż'),
-          ('997', 'Policja'),
-        ])
-          // Three per row when they fit, otherwise they wrap to the next line.
-          ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 96),
-            child: IntrinsicWidth(
-              child: _SmallDial(
-                key: Key('call-$n'),
-                label: '$n · $name',
-                onTap: () => _dial(n),
-              ),
-            ),
-          ),
-      ],
-    ),
     const SizedBox(height: 12),
     Text('Twoja pozycja', style: bz.label),
     if (pos == null)

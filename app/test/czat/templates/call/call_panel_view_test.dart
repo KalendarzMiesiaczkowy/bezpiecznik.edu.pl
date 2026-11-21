@@ -64,7 +64,7 @@ void main() {
     expect(tester.getSize(find.byKey(const Key('call-112'))).height, greaterThanOrEqualTo(80));
     expect(tester.getSize(find.byKey(const Key('call-notify'))).height, greaterThanOrEqualTo(80));
     expect(find.text('Więcej'), findsOneWidget);
-    expect(find.byKey(const Key('call-999')), findsNothing);
+    expect(find.byKey(const Key('call-999')), findsOneWidget);
     final material = tester.widget<Material>(
       find
           .descendant(
@@ -88,7 +88,7 @@ void main() {
       find.text('Brak sygnału GPS. Wyjdź na otwartą przestrzeń.'),
       findsOneWidget,
     );
-    expect(find.text('Nie masz kontaktów alarmowych.'), findsOneWidget);
+    expect(find.text('Nie masz kontaktów alarmowych.'), findsNothing);
     await tester.tap(find.text('Dodaj kontakty'));
     expect(added, 1);
   });
@@ -97,11 +97,9 @@ void main() {
     tester,
   ) async {
     await pump(tester, []);
-    final textLeft = tester
-        .getTopLeft(find.text('Nie masz kontaktów alarmowych.'))
-        .dx;
+    final textLeft = tester.getTopLeft(find.text(call112Label)).dx;
     final linkLeft = tester.getTopLeft(find.text('Dodaj kontakty')).dx;
-    expect(linkLeft, textLeft);
+    expect(linkLeft, lessThan(textLeft));
   });
 
   testWidgets('with contacts the recipients are listed', (tester) async {
@@ -130,11 +128,9 @@ void main() {
     expect(launched.last.scheme, 'sms');
   });
 
-  testWidgets('"Więcej" expands to 999 / 998 / 997', (tester) async {
+  testWidgets('999 / 998 / 997 are visible and dial without "Więcej"', (tester) async {
     final launched = <Uri>[];
     await pump(tester, launched);
-    await tester.tap(find.byKey(const Key('call-more')));
-    await tester.pump();
     await tester.tap(find.byKey(const Key('call-998')));
     await tester.pump();
     expect(launched.single.toString(), 'tel:998');

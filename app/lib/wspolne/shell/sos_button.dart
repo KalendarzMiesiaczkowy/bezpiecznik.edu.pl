@@ -45,7 +45,7 @@ class SosButton extends ConsumerStatefulWidget {
   final UriLauncher launcher;
   final Future<void> Function() vibrate;
 
-  static const double size = 56;
+  static const double size = 48;
 
   @override
   ConsumerState<SosButton> createState() => _SosButtonState();
@@ -167,7 +167,7 @@ class _SosButtonState extends ConsumerState<SosButton>
                     style: bz.label.copyWith(
                       color: bz.onSos,
                       fontWeight: FontWeight.w800,
-                      fontSize: 16,
+                      fontSize: 14,
                     ),
                   ),
                 ),
