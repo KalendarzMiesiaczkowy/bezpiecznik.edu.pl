@@ -83,4 +83,19 @@ void main() {
     expect(hitTest([a], 53.43, 14.55, 14), same(a));
     expect(hitTest([a], 53.5, 14.55, 14), isNull);
   });
+
+  testWidgets('direction is a rotated Lucide arrow, not a Unicode arrow (BG55)', (t) async {
+    // From a point due north-east of the shelter -> bearing ~225 deg (SW).
+    await t.pumpWidget(wrap(PointSheet(
+      point: pt(),
+      fromLat: 53.436,
+      fromLon: 14.56,
+      now: DateTime(2026, 11, 21),
+    )));
+    final arrow = t.widget<Transform>(find.byKey(const ValueKey('bearing-arrow')));
+    expect(arrow, isNotNull);
+    final texts = t.widgetList<Text>(find.byType(Text)).map((w) => w.data ?? '').join(' ');
+    expect(texts, contains('południowy zachód'));
+    expect(RegExp('[↑↗→↘↓↙←↖]').hasMatch(texts), isFalse);
+  });
 }

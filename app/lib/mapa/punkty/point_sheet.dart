@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../wspolne/theme/bz_theme.dart';
@@ -86,10 +89,11 @@ class PointSheet extends StatelessWidget {
         ? haversineM(fromLat!, fromLon!, point.lat, point.lon)
         : point.distanceM;
     String? distanceLine;
+    double? bearing;
     if (dist != null) {
       if (hasFrom) {
-        final b = bearingDeg(fromLat!, fromLon!, point.lat, point.lon);
-        distanceLine = '${formatDistance(dist)} · ${cardinalName(b)} ${arrowFor(b)}';
+        bearing = bearingDeg(fromLat!, fromLon!, point.lat, point.lon);
+        distanceLine = '${formatDistance(dist)} · ${cardinalName(bearing)}';
       } else {
         distanceLine = formatDistance(dist);
       }
@@ -108,7 +112,16 @@ class PointSheet extends StatelessWidget {
             Text(point.address!, style: bz.chat.copyWith(color: bz.ink200)),
           SizedBox(height: bz.space2),
           Text(availabilityText(point), style: bz.label),
-          if (distanceLine != null) Text(distanceLine, style: bz.label),
+          if (distanceLine != null)
+            Row(
+              children: [
+                Text(distanceLine, style: bz.label),
+                if (bearing != null) ...[
+                  SizedBox(width: bz.space2),
+                  BearingArrow(bearing: bearing, color: bz.ink100),
+                ],
+              ],
+            ),
           SizedBox(height: bz.space2),
           Text(
             point.confirmed ? pointConfirmedText : pointUnconfirmedText(point.source),
@@ -179,10 +192,10 @@ class NearestList extends StatelessWidget {
 
   Widget _row(BuildContext context, ShelterPoint p) {
     final bz = context.bz;
-    var trailing = formatDistance(p.distanceM ?? 0);
-    if (fromLat != null && fromLon != null) {
-      trailing += ' ${arrowFor(bearingDeg(fromLat!, fromLon!, p.lat, p.lon))}';
-    }
+    final trailing = formatDistance(p.distanceM ?? 0);
+    final bearing = fromLat != null && fromLon != null
+        ? bearingDeg(fromLat!, fromLon!, p.lat, p.lon)
+        : null;
     return InkWell(
       key: ValueKey('nearest-${p.id}'),
       onTap: () => onSelect(p),
@@ -206,6 +219,10 @@ class NearestList extends StatelessWidget {
               ),
             ),
             Text(trailing, style: bz.label),
+            if (bearing != null) ...[
+              SizedBox(width: bz.space2),
+              BearingArrow(bearing: bearing, color: bz.ink100),
+            ],
           ],
         ),
       ),
@@ -253,4 +270,21 @@ class ShelterLayerToggle extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Direction arrow: Lucide arrow-up rotated by the bearing. Unicode arrows
+/// (↙ …) fall back to the colour emoji font on Android.
+class BearingArrow extends StatelessWidget {
+  const BearingArrow({super.key, required this.bearing, required this.color, this.size = 20});
+
+  final double bearing;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Transform.rotate(
+        key: const ValueKey('bearing-arrow'),
+        angle: bearing * math.pi / 180,
+        child: Icon(LucideIcons.arrowUp, size: size, color: color),
+      );
 }
