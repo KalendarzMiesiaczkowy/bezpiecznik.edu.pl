@@ -239,4 +239,20 @@ void main() {
     ctl.ackSaveError();
     expect(c.read(chatControllerProvider).saveFailed, isFalse);
   });
+
+  test('insertAssistantAnswer: one assistant message, no user bubble, persisted', () async {
+    final service = ManualService();
+    final c = makeContainer(service, store);
+    c.read(chatControllerProvider.notifier).insertAssistantAnswer(answerOf('aed'));
+    await c.read(chatControllerProvider.notifier).flush();
+    final st = c.read(chatControllerProvider);
+    expect(st.messages, hasLength(1));
+    expect(st.messages.single.isUser, isFalse);
+    expect(st.messages.single.status, MessageStatus.done);
+    expect(st.chatId, isNotNull);
+    expect(service.calls, isEmpty);
+    final stored = await store.loadMessages(st.chatId!);
+    expect(stored, hasLength(1));
+    expect(stored.single.answer, isNotNull);
+  });
 }

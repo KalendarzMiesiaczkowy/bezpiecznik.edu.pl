@@ -1,3 +1,11 @@
+import 'dart:io';
+
+import 'package:bezpiecznik/czat/data/chat_store.dart';
+import 'package:bezpiecznik/czat/ui/chat_controller.dart';
+import 'package:bezpiecznik/ratunek/cards/rescue_card.dart' show RescueCardRepository, rescueCardIds;
+import 'package:bezpiecznik/ratunek/detect/risk_detector.dart';
+import 'package:bezpiecznik/ratunek/ui/rescue_answer.dart';
+import 'package:flutter/services.dart' show ByteData, CachingAssetBundle;
 import 'package:bezpiecznik/ustawienia/settings_store.dart' show voiceEnabledProvider;
 import 'package:bezpiecznik/czat/templates/panel_model.dart';
 import 'package:bezpiecznik/czat/templates/template_registry.dart';
@@ -13,12 +21,38 @@ import 'package:material_ui/material_ui.dart';
 
 import 'cpr_fakes.dart';
 
-AssistantAnswer cprAnswer() => AssistantAnswer(
-  panels: [ChatPanel.fromJson(rkoCprPanelJson())],
+AssistantAnswer cprAnswer({bool withAed = true}) => AssistantAnswer(
+  panels: [
+    ChatPanel.fromJson({
+      ...rkoCprPanelJson(),
+      if (!withAed) 'aed_card_id': null,
+    }),
+  ],
   origin: AnswerOrigin.rescueCard,
 );
 
-Future<(Rig, ProviderContainer)> pumpCard(WidgetTester tester, {bool inline = true, Widget? extra}) async {
+/// Reads assets straight from `assets/` on the host.
+class _FileBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async => ByteData.sublistView(await File(key).readAsBytes());
+}
+
+/// Rescue service with the shipped cards (including `aed`).
+Future<RescueAnswerService> loadService() async {
+  final bundle = _FileBundle();
+  return RescueAnswerService(
+    detector: await RiskDetector.load(bundle),
+    cards: await RescueCardRepository.load(bundle, ids: rescueCardIds),
+  );
+}
+
+Future<(Rig, ProviderContainer)> pumpCard(
+  WidgetTester tester, {
+  bool inline = true,
+  bool withAed = true,
+  Widget? extra,
+}) async {
+  final service = await tester.runAsync(loadService);
   final rig = Rig();
   final registry = TemplateRegistry.withDefaults();
   registerCprTemplate(registry, inlinePinned: inline);
@@ -26,10 +60,12 @@ Future<(Rig, ProviderContainer)> pumpCard(WidgetTester tester, {bool inline = tr
     overrides: [
       templateRegistryProvider.overrideWithValue(registry),
       cprSessionProvider.overrideWithValue(rig.session),
+      chatStoreProvider.overrideWithValue(ChatStore.inMemory()),
+      rescueAnswerServiceProvider.overrideWith((ref) async => service!),
     ],
   );
   addTearDown(container.dispose);
-  var answer = cprAnswer();
+  var answer = cprAnswer(withAed: withAed);
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
@@ -189,8 +225,7 @@ void main() {
     await tester.tap(find.text(cprStartLabel));
     await tester.pump();
     expect(find.text('Poproś kogoś o AED'), findsOneWidget);
-    // "Jak użyć AED" stays hidden: the card has no AED card file.
-    expect(find.text('Jak użyć AED'), findsNothing);
+    expect(find.text('Jak użyć AED'), findsOneWidget);
     await tester.tap(find.descendant(of: find.byKey(const ValueKey('cpr-aed-row')), matching: find.byType(BzButton)));
     await tester.pump();
     expect(find.text('Poproś kogoś o AED'), findsNothing);
@@ -282,5 +317,61 @@ void main() {
     session.stop();
     expect(container.read(cprActiveProvider), isFalse);
     expect(wake.on, isFalse);
+  });
+
+  testWidgets('"Jak użyć AED" is hidden without aed_card_id', (tester) async {
+    final (rig, _) = await pumpCard(tester, withAed: false);
+    await tester.tap(find.text(cprStartLabel));
+    await tester.pump();
+    expect(find.text('Poproś kogoś o AED'), findsOneWidget);
+    expect(find.text(cprAedHowLabel), findsNothing);
+    rig.session.stop();
+  });
+
+  testWidgets('"Jak użyć AED": target >= 48 dp, stays after the reminder tick', (tester) async {
+    final (rig, _) = await pumpCard(tester);
+    await tester.tap(find.text(cprStartLabel));
+    await tester.pump();
+    final size = tester.getSize(find.byKey(const ValueKey('cpr-aed-how')));
+    expect(size.height, greaterThanOrEqualTo(48));
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('cpr-aed-row')), matching: find.byType(BzButton)));
+    await tester.pump();
+    expect(find.text('Poproś kogoś o AED'), findsNothing);
+    expect(find.text(cprAedHowLabel), findsOneWidget);
+    rig.session.stop();
+  });
+
+  testWidgets('tap inserts the AED card (session variant), session keeps running', (tester) async {
+    final (rig, container) = await pumpCard(tester);
+    await tester.tap(find.text('Niemowlę'));
+    await tester.pump();
+    await tester.tap(find.text(cprStartLabel));
+    await tester.pump();
+    expect(rig.session.variant!.id, 'infant');
+    expect(container.read(chatControllerProvider).messages, isEmpty);
+
+    await tester.tap(find.text(cprAedHowLabel));
+    await tester.pump();
+    await tester.pump();
+
+    final messages = container.read(chatControllerProvider).messages;
+    expect(messages, hasLength(1));
+    final m = messages.single;
+    expect(m.role, ChatRole.assistant);
+    expect(m.status, MessageStatus.done);
+    final a = m.answer!;
+    expect(a.cardId, 'aed');
+    expect(a.origin, AnswerOrigin.rescueCard);
+    expect(a.verify, isTrue);
+    expect(a.selectedVariant, 'infant');
+    expect(a.panels.whereType<CallPanel>(), isEmpty);
+    expect(a.panels.whereType<CprPanel>(), isEmpty);
+    final steps = a.panels.whereType<StepsPanel>().single;
+    expect(steps.itemsFor('infant'), isNotEmpty);
+    expect(a.sources, isNotEmpty);
+
+    expect(rig.session.running, isTrue);
+    expect(find.byKey(const ValueKey('cpr-pinned')), findsOneWidget);
+    rig.session.stop();
   });
 }

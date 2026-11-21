@@ -42,16 +42,20 @@ class RescueAnswerService {
   /// Converts [c] into a chat answer: `call` first, then `cpr`, then the card panels with
   /// the selected variant, the source records they cite and the
   /// `verify` flag (drives the "Do weryfikacji" badge).
+  ///
+  /// With [includeCall] false the leading `call` panel is left out (used when
+  /// the card is inserted next to an already visible call panel).
   chat.AssistantAnswer buildAnswer(
     card.RescueCard c, {
     String? requestedVariant,
+    bool includeCall = true,
   }) {
     final variant = c.selectVariant(requestedVariant) ?? c.defaultVariant;
     // `call`, then the CPR instructor, then the remaining card panels: in a
     // cardiac arrest "Start" must not sit below 30+ steps (night decision,
     // BG26; ekran-1-czat.md "Karta RKO z przypiętym instruktorem").
     final panels = <Map<String, Object?>>[
-      {'type': 'call'},
+      if (includeCall) {'type': 'call'},
       for (final p in c.panels.whereType<card.CprPanel>()) ?_panelJson(p),
       for (final p in c.panels.where((p) => p is! card.CprPanel)) ?_panelJson(p),
     ];
@@ -68,6 +72,17 @@ class RescueAnswerService {
       'panels': panels,
       'sources': sources,
     });
+  }
+
+  /// Answer for card [cardId] opened from another panel (e.g. "Jak użyć AED"
+  /// in the CPR instructor): steps only, no second `call` panel. The variant
+  /// is [variant] when the card has it, else `adult`, else the card default.
+  /// Null when the card is not loaded.
+  chat.AssistantAnswer? answerForCard(String cardId, {String? variant}) {
+    final c = cards.card(cardId);
+    if (c == null) return null;
+    final chosen = c.selectVariant(variant) ?? c.selectVariant('adult');
+    return buildAnswer(c, requestedVariant: chosen, includeCall: false);
   }
 
   /// Returns [answer] with a `call` panel in front (unless it has one).

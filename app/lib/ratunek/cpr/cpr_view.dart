@@ -8,6 +8,8 @@ import '../../czat/templates/call/call_panel_view.dart' show callLauncherProvide
 import '../../czat/templates/panel_card.dart';
 import '../../czat/templates/panel_model.dart';
 import '../../czat/templates/template_registry.dart';
+import '../../czat/ui/chat_controller.dart';
+import '../ui/rescue_answer.dart';
 import '../../wspolne/shell/cpr_state.dart' show formatCprElapsed;
 import '../../wspolne/theme/bz_buttons.dart';
 import '../../wspolne/theme/bz_theme.dart';
@@ -26,6 +28,8 @@ const String cprResumeLabel = 'Wznów';
 const String cprStopLabel = 'Zakończ';
 const String cprBreathsDoneLabel = 'Dalej';
 const String cprAedReminderLabel = 'Poproś kogoś o AED';
+/// Opens the AED card in the chat (hidden without `aed_card_id`).
+const String cprAedHowLabel = 'Jak użyć AED';
 const String cprAedDoneLabel = 'Ukryj przypomnienie o AED';
 const String cprCompressLabel = 'UCISKAJ';
 
@@ -144,6 +148,19 @@ class CprPinned extends ConsumerWidget {
       await ref.read(callLauncherProvider)(Uri(scheme: 'tel', path: '112'));
     } on Object {
       // The chat call panel carries the fallback hint.
+    }
+  }
+
+  /// Inserts the AED card as a new assistant message; the session keeps
+  /// running and stays pinned.
+  Future<void> _insertAedCard(WidgetRef ref, String cardId) async {
+    try {
+      final service = await ref.read(rescueAnswerServiceProvider.future);
+      final answer = service.answerForCard(cardId, variant: session.variant?.id);
+      if (answer == null) return;
+      ref.read(chatControllerProvider.notifier).insertAssistantAnswer(answer);
+    } on Object {
+      // Card assets failed to load: the instructor keeps running untouched.
     }
   }
 
@@ -278,6 +295,20 @@ class CprPinned extends ConsumerWidget {
                     onPressed: session.dismissAedReminder,
                   ),
                 ],
+              ),
+            ],
+            if (cfg.aedCardId case final aedId?) ...[
+              // No extra gap: the 48 dp hit area already separates the rows
+              // (the pinned panel must fit 360 dp at 1.5x text).
+              Align(
+                alignment: Alignment.centerLeft,
+                child: BzButton(
+                  key: const ValueKey('cpr-aed-how'),
+                  label: cprAedHowLabel,
+                  variant: BzButtonVariant.ghost,
+                  size: BzButtonSize.lg,
+                  onPressed: () => unawaited(_insertAedCard(ref, aedId)),
+                ),
               ),
             ],
             SizedBox(height: t.space3),

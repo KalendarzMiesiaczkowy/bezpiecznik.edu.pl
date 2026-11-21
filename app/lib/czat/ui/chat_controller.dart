@@ -228,6 +228,21 @@ class ChatController extends Notifier<ChatState> {
     }
   }
 
+  /// Appends a finished assistant message holding [answer] without a user
+  /// bubble and without touching a running generation (e.g. the AED card
+  /// inserted from the CPR instructor). Persisted like any other message.
+  void insertAssistantAnswer(AssistantAnswer answer) {
+    final chatId = state.chatId ?? newChatId();
+    final message = ChatMessage(
+      id: newChatId(),
+      role: ChatRole.assistant,
+      createdAt: DateTime.now(),
+      answer: answer,
+    );
+    state = state.copyWith(chatId: chatId, messages: [...state.messages, message]);
+    _persist(chatId, message);
+  }
+
   /// Stores a changed answer (variant switch, checked step) of [messageId].
   void updateAnswer(String messageId, AssistantAnswer answer) {
     _update(messageId, (m) => m.copyWith(answer: answer), persistChatId: state.chatId);

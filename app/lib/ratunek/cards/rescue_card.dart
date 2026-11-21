@@ -18,6 +18,7 @@ const List<String> rescueCardIds = <String>[
   'choking',
   'bleeding',
   'unconscious',
+  'aed',
 ];
 
 final RegExp _idPattern = RegExp(r'^[a-z_]+$');

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bezpiecznik/czat/templates/panel_model.dart';
 import 'package:bezpiecznik/czat/ui/answer_service.dart';
+import 'package:bezpiecznik/ratunek/cards/rescue_card.dart' show RescueCardRepository, rescueCardIds;
 import 'package:bezpiecznik/ratunek/ui/rescue_answer.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -148,5 +149,21 @@ void main() {
     // ignore: avoid_print
     print('tryAnswer: ${sw.elapsedMicroseconds} us');
     expect(sw.elapsedMilliseconds, lessThan(50));
+  });
+
+  test('answerForCard: steps only, requested variant, adult fallback, unknown card', () async {
+    final aedRepo = await RescueCardRepository.load(_FileBundle(), ids: rescueCardIds);
+    final withAed = RescueAnswerService(
+      detector: service.detector,
+      cards: aedRepo,
+    );
+    final child = withAed.answerForCard('aed', variant: 'child')!;
+    expect(child.cardId, 'aed');
+    expect(child.selectedVariant, 'child');
+    expect(child.panels.whereType<CallPanel>(), isEmpty);
+    expect(child.panels.whereType<StepsPanel>(), hasLength(1));
+    expect(withAed.answerForCard('aed', variant: 'nonsense')!.selectedVariant, 'adult');
+    expect(withAed.answerForCard('aed')!.selectedVariant, 'adult');
+    expect(withAed.answerForCard('no-such-card'), isNull);
   });
 }
