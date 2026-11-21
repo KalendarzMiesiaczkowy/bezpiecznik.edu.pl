@@ -27,7 +27,7 @@ enum BzButtonVariant {
 /// least [BzTokens.minTouchTarget] (48 dp), also for the small visuals.
 enum BzButtonSize {
   sm(32, 12, 13, 16, 4),
-  md(36, 14, 14, 20, 8),
+  md(36, 14, 14, 20, 6),
   lg(44, 18, 15, 20, 8),
   xl(56, 20, 16, 20, 10);
 
@@ -154,11 +154,7 @@ class _BzButtonState extends State<BzButton> {
 
     Widget leading() {
       if (widget.loading) {
-        return SizedBox(
-          width: sz.iconSize,
-          height: sz.iconSize,
-          child: CircularProgressIndicator(strokeWidth: 2, color: fg),
-        );
+        return BzSpinner(color: fg);
       }
       return Icon(widget.icon, size: sz.iconSize, color: fg);
     }
@@ -282,4 +278,67 @@ class _BzButtonState extends State<BzButton> {
       ),
     );
   }
+}
+
+/// DS `.bz-spinner`: 16 px ring, 2 px stroke, a fixed 270° arc rotating
+/// linearly once every 0.7 s (never collapses to a dot like Material's).
+class BzSpinner extends StatefulWidget {
+  const BzSpinner({super.key, required this.color, this.size = 16});
+
+  final Color color;
+  final double size;
+
+  @override
+  State<BzSpinner> createState() => _BzSpinnerState();
+}
+
+class _BzSpinnerState extends State<BzSpinner>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 700),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RotationTransition(
+      turns: _c,
+      child: CustomPaint(
+        size: Size.square(widget.size),
+        painter: _ArcPainter(widget.color),
+      ),
+    );
+  }
+}
+
+class _ArcPainter extends CustomPainter {
+  _ArcPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    final rect = Offset.zero & size;
+    // 270° arc, right quarter transparent.
+    canvas.drawArc(
+      rect.deflate(1),
+      -0.25 * 3.14159265,
+      1.5 * 3.14159265,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ArcPainter old) => old.color != color;
 }
