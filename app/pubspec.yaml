@@ -73,6 +73,9 @@ dev_dependencies:
 flutter:
   assets:
     - assets/generated/
+    - assets/map/
+    - assets/map/glyphs/AtkinsonHyperlegibleNext-Regular/
+    - assets/map/glyphs/AtkinsonHyperlegibleNext-Bold/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
