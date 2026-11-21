@@ -275,6 +275,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           _title('Gotowe'),
           _statusRow('SOS i karty ratunkowe', done: true),
           const SizedBox(height: 12),
+          // Bundled in the APK, so always ready (no packages step in MVP).
+          _statusRow('Baza wiedzy', done: true),
+          const SizedBox(height: 12),
           _statusRow(
             _profileSaved ? 'Profil domu' : 'Profil domu: pominięto',
             done: _profileSaved,

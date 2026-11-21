@@ -125,7 +125,7 @@ void main() {
     await tester.tap(find.byKey(const Key('onb-profile-save')));
     await tester.pumpAndSettle();
     expect(find.text('Profil domu'), findsOneWidget);
-    expect(find.byKey(const Key('onb-status-done')), findsNWidgets(2));
+    expect(find.byKey(const Key('onb-status-done')), findsNWidgets(3));
     final saved = (await store.loadProfile())!;
     expect(saved.members.length, 1);
     expect(saved.medications.single.name, 'Insulina');
@@ -223,7 +223,8 @@ void onboardingVisualTests() {
     final a = tester.getTopLeft(find.text('SOS i karty ratunkowe')).dx;
     final b = tester.getTopLeft(find.text('Profil domu: pominięto')).dx;
     expect(a, b);
-    expect(find.byKey(const Key('onb-status-done')), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Baza wiedzy')).dx, a);
+    expect(find.byKey(const Key('onb-status-done')), findsNWidgets(2));
     expect(find.byKey(const Key('onb-status-skipped')), findsOneWidget);
   });
 }
