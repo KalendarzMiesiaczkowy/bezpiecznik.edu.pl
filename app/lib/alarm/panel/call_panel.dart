@@ -9,14 +9,17 @@ import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_router.dart' show profileRoutePath;
+import '../../czat/templates/call/call_panel_view.dart' show callLauncherProvider;
 import '../../mapa/position_provider.dart';
 import '../../profil/profile_model.dart';
 import '../../profil/profile_store.dart';
 import '../../wspolne/shell/shell_panels.dart';
-import '../../wspolne/shell/sos_button.dart' show UriLauncher;
 import '../../wspolne/theme/bz_theme.dart';
 import 'call_gps.dart';
 import 'sms_body.dart';
+
+/// One launcher seam shared with the chat `call` template (D03).
+export '../../czat/templates/call/call_panel_view.dart' show callLauncherProvider;
 
 /// User-facing texts (spec "Teksty").
 const callPanelTitle = 'Kontakt ze służbami';
@@ -30,9 +33,6 @@ const callSaySection = 'Co powiedzieć dyspozytorowi';
 const callSay = 'Powiedz: co się stało, gdzie jesteś, ile osób potrzebuje pomocy, czy są przytomne.';
 
 enum ContactPanelVariant { sheet, inline }
-
-/// Launches `tel:` / `sms:` URIs; faked in tests.
-final callLauncherProvider = Provider<UriLauncher>((ref) => (uri) => launchUrl(uri));
 
 /// Whether the device can handle `sms:` (needs the `<queries>` entry on Android 11+).
 final canSendSmsProvider = FutureProvider<bool>((ref) async {
