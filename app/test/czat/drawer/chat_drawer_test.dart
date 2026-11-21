@@ -90,6 +90,15 @@ void main() {
     expect(tester.getSize(find.bySemanticsLabel(drawerSettings)).height, 44);
   });
 
+  testWidgets('logo ignores the text scaler (BG71)', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await _pump(tester, ChatStore.inMemory());
+    final ctx = tester.element(find.descendant(of: find.byKey(const Key('drawer-logo')), matching: find.byType(CustomPaint)));
+    expect(MediaQuery.textScalerOf(ctx), TextScaler.noScaling);
+    expect(tester.getSize(find.byKey(const Key('drawer-logo'))), const Size(36, 36));
+  });
+
   testWidgets('lists chats by day, title only, newest first; current is selected', (tester) async {
     final store = ChatStore.inMemory();
     final c = await _pump(tester, store);

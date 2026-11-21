@@ -6,6 +6,7 @@ import 'package:bezpiecznik/ustawienia/app_text_scale.dart';
 import 'package:bezpiecznik/ustawienia/settings_screen.dart';
 import 'package:bezpiecznik/ustawienia/settings_store.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
+import 'package:bezpiecznik/wspolne/theme/top_fade.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -125,6 +126,11 @@ void main() {
         expect(para.size.height, single, reason: '${o.label} must be one line');
         expect(tester.getSize(find.ancestor(of: f, matching: find.byType(Container)).first).height, greaterThanOrEqualTo(48));
       }
+    });
+
+    testWidgets('top fade sits above the list (BG72)', (tester) async {
+      await pump(tester);
+      expect(find.byType(TopFade), findsOneWidget);
     });
 
     testWidgets('shows MVP rows, hides theme row', (tester) async {

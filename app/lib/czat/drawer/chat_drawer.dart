@@ -182,21 +182,21 @@ class ChatDrawer extends ConsumerWidget {
                   key: const Key('drawer-logo'),
                   width: 36,
                   height: 36,
-                  child: Semantics(
-                    label: 'Bezpiecznik',
-                    image: true,
-                    child: ExcludeSemantics(
-                      child: CustomPaint(painter: _LogoPainter(letter: bz.ink100, cross: bz.signal)),
+                  child: MediaQuery.withNoTextScaling(
+                    child: Semantics(
+                      label: 'Bezpiecznik',
+                      image: true,
+                      child: ExcludeSemantics(
+                        child: CustomPaint(
+                          painter: _LogoPainter(letter: bz.ink100, cross: bz.signal),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-            _Row(
-              label: drawerNewChat,
-              icon: LucideIcons.squarePen,
-              onTap: () => _newChat(ref),
-            ),
+            _Row(label: drawerNewChat, icon: LucideIcons.squarePen, onTap: () => _newChat(ref)),
             Expanded(child: list),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
