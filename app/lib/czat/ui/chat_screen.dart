@@ -176,7 +176,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ],
             ),
           ),
-          // Soft fade under the floating island and SOS.
+          // Fade under the floating island and SOS (spec E1: content scrolls
+          // under them over a soft background gradient). Solid behind the
+          // status bar and most of the island so scrolled text never collides
+          // with the clock or the island (BG16), then a short fade.
           Positioned(
             left: 0,
             right: 0,
@@ -188,7 +191,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [t.bg000, t.bg000.withValues(alpha: 0)],
+                    colors: [t.bg000, t.bg000, t.bg000.withValues(alpha: 0)],
+                    stops: [
+                      0,
+                      (topInset + 36) / (topInset + 48 + t.space4),
+                      1,
+                    ],
                   ),
                 ),
               ),
