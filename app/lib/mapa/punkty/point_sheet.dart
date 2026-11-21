@@ -22,8 +22,11 @@ String formatPointDate(String isoDate) {
   String two(int n) => n.toString().padLeft(2, '0');
   return '${two(d.day)}.${two(d.month)}.${d.year}';
 }
-const pointStaleText = 'Dane sprawdzono ponad rok temu. Mogą być nieaktualne.'; // map.point.stale
-const pointAvailabilityUnknownText = 'Dostępność: brak danych'; // map.point.availabilityUnknown
+
+const pointStaleText =
+    'Dane sprawdzono ponad rok temu. Mogą być nieaktualne.'; // map.point.stale
+const pointAvailabilityUnknownText =
+    'Dostępność: brak danych'; // map.point.availabilityUnknown
 const pointGuideText = 'Prowadź'; // map.point.guide
 const pointCompassText = 'Kompas'; // map.point.compass
 const nearestTitleText = 'Najbliższe schronienie'; // map.nearest.title
@@ -31,7 +34,8 @@ const nearestButtonText = 'Najbliższy schron'; // map.nearest.button
 const unconfirmedShortText = 'niepotwierdzony'; // spec: nearest row label
 const layerShelterLabel = 'Schrony i ukrycia'; // map.layers.shelters
 const emptyViewText = 'Brak punktów w tym widoku.'; // map.empty.view
-const noDataText = 'Nie mam danych o punktach w tej okolicy. Pobierz mapę województwa.'; // map.empty.noData
+const noDataText =
+    'Nie mam danych o punktach w tej okolicy. Pobierz mapę województwa.'; // map.empty.noData
 
 // Drafted (verify:true; source: ekran-2-mapa.md names the kinds, no copy for
 // an unnamed point or "24 h" wording beyond the "Całodobowo" example).
@@ -111,60 +115,73 @@ class PointSheet extends StatelessWidget {
     final btn = Size(bz.minTouchTarget, bz.minTouchTarget);
     return SafeArea(
       top: false,
-      child: Padding(
-      padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(kindLabel(point.kind), style: bz.caption.copyWith(color: bz.ink200)),
-          Text(pointTitle(point), style: bz.title),
-          if (point.address != null && pointTitle(point) != point.address)
-            Text(point.address!, style: bz.chat.copyWith(color: bz.ink200)),
-          SizedBox(height: bz.space2),
-          Text(availabilityText(point), style: bz.label),
-          if (distanceLine != null)
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              kindLabel(point.kind),
+              style: bz.caption.copyWith(color: bz.ink200),
+            ),
+            Text(pointTitle(point), style: bz.title),
+            if (point.address != null && pointTitle(point) != point.address)
+              Text(point.address!, style: bz.chat.copyWith(color: bz.ink200)),
+            SizedBox(height: bz.space2),
+            Text(availabilityText(point), style: bz.label),
+            if (distanceLine != null)
+              Row(
+                children: [
+                  Flexible(child: Text(distanceLine, style: bz.label)),
+                  if (bearing != null) ...[
+                    SizedBox(width: bz.space2),
+                    BearingArrow(bearing: bearing, color: bz.ink100),
+                  ],
+                ],
+              ),
+            SizedBox(height: bz.space2),
+            Text(
+              point.confirmed
+                  ? pointConfirmedText
+                  : pointUnconfirmedText(point.source),
+              style: bz.label.copyWith(
+                color: point.confirmed ? bz.verified : bz.ink100,
+              ),
+            ),
+            Text(
+              pointSourceText(point.source, point.verifiedAt),
+              style: bz.caption.copyWith(color: bz.ink200),
+            ),
+            if (stale)
+              Text(
+                pointStaleText,
+                style: bz.caption.copyWith(color: bz.highlight),
+              ),
+            SizedBox(height: bz.space4),
             Row(
               children: [
-                Text(distanceLine, style: bz.label),
-                if (bearing != null) ...[
-                  SizedBox(width: bz.space2),
-                  BearingArrow(bearing: bearing, color: bz.ink100),
-                ],
+                Expanded(
+                  child: FilledButton(
+                    onPressed: onGuide,
+                    style: FilledButton.styleFrom(minimumSize: btn),
+                    child: const Text(pointGuideText),
+                  ),
+                ),
+                SizedBox(width: bz.space3),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onCompass,
+                    style: OutlinedButton.styleFrom(minimumSize: btn),
+                    child: const Text(pointCompassText),
+                  ),
+                ),
               ],
             ),
-          SizedBox(height: bz.space2),
-          Text(
-            point.confirmed ? pointConfirmedText : pointUnconfirmedText(point.source),
-            style: bz.label.copyWith(color: point.confirmed ? bz.verified : bz.ink100),
-          ),
-          Text(pointSourceText(point.source, point.verifiedAt),
-              style: bz.caption.copyWith(color: bz.ink200)),
-          if (stale)
-            Text(pointStaleText, style: bz.caption.copyWith(color: bz.highlight)),
-          SizedBox(height: bz.space4),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton(
-                  onPressed: onGuide,
-                  style: FilledButton.styleFrom(minimumSize: btn),
-                  child: const Text(pointGuideText),
-                ),
-              ),
-              SizedBox(width: bz.space3),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onCompass,
-                  style: OutlinedButton.styleFrom(minimumSize: btn),
-                  child: const Text(pointCompassText),
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 }
 
@@ -197,7 +214,8 @@ class NearestList extends StatelessWidget {
         children: [
           Text(nearestTitleText, style: bz.title),
           SizedBox(height: bz.space2),
-          if (points.isEmpty) Text(outside ? outsideRegionText : noDataText, style: bz.chat),
+          if (points.isEmpty)
+            Text(outside ? outsideRegionText : noDataText, style: bz.chat),
           for (final p in points) _row(context, p),
         ],
       ),
@@ -228,7 +246,10 @@ class NearestList extends StatelessWidget {
                 children: [
                   Text(pointTitle(p), style: bz.label),
                   if (!p.confirmed)
-                    Text(unconfirmedShortText, style: bz.caption.copyWith(color: bz.ink200)),
+                    Text(
+                      unconfirmedShortText,
+                      style: bz.caption.copyWith(color: bz.ink200),
+                    ),
                 ],
               ),
             ),
@@ -246,7 +267,11 @@ class NearestList extends StatelessWidget {
 
 /// Layer row (DS ListRow + Switch), >= 48 dp, label `map.layers.shelters`.
 class ShelterLayerToggle extends StatelessWidget {
-  const ShelterLayerToggle({super.key, required this.on, required this.onChanged});
+  const ShelterLayerToggle({
+    super.key,
+    required this.on,
+    required this.onChanged,
+  });
 
   final bool on;
   final ValueChanged<bool> onChanged;
@@ -267,7 +292,9 @@ class ShelterLayerToggle extends StatelessWidget {
           child: Row(
             children: [
               Expanded(child: Text(layerShelterLabel, style: bz.label)),
-              ExcludeSemantics(child: Switch(value: on, onChanged: onChanged)),
+              ExcludeSemantics(
+                child: Switch(value: on, onChanged: onChanged),
+              ),
             ],
           ),
         ),
@@ -279,7 +306,12 @@ class ShelterLayerToggle extends StatelessWidget {
 /// Direction arrow: Lucide arrow-up rotated by the bearing. Unicode arrows
 /// (↙ …) fall back to the colour emoji font on Android.
 class BearingArrow extends StatelessWidget {
-  const BearingArrow({super.key, required this.bearing, required this.color, this.size = 20});
+  const BearingArrow({
+    super.key,
+    required this.bearing,
+    required this.color,
+    this.size = 20,
+  });
 
   final double bearing;
   final Color color;
@@ -287,8 +319,8 @@ class BearingArrow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Transform.rotate(
-        key: const ValueKey('bearing-arrow'),
-        angle: bearing * math.pi / 180,
-        child: Icon(LucideIcons.arrowUp, size: size, color: color),
-      );
+    key: const ValueKey('bearing-arrow'),
+    angle: bearing * math.pi / 180,
+    child: Icon(LucideIcons.arrowUp, size: size, color: color),
+  );
 }

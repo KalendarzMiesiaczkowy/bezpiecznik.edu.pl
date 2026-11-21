@@ -356,6 +356,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final pos = ref.read(positionProvider).value;
     await showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: context.bz.bg100,
       builder: (sheetContext) => PointSheet(
         point: p,

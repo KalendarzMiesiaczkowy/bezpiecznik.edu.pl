@@ -111,6 +111,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     switch (_step) {
       case OnboardingStep.intro:
         return [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
           _title('Bezpiecznik'),
           Text(
             'Podpowiada, co zrobić w sytuacji kryzysowej, według oficjalnych poradników. Działa bez internetu. Prowadzi do najbliższego schronu.',
@@ -142,7 +147,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ],
             ),
           ),
-          const Spacer(),
+                ],
+              ),
+            ),
+          ),
           BzButton(
             key: const Key('onb-next'),
             label: 'Dalej',

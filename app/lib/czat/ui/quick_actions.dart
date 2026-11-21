@@ -107,9 +107,15 @@ class _TileState extends State<_Tile> {
             children: [
               Icon(a.icon, size: 22, color: a.urgent ? t.sosText : t.ink200),
               SizedBox(height: t.space3),
-              Text(
-                a.label,
-                style: t.chat.copyWith(fontSize: 16, height: 22 / 16, fontWeight: FontWeight.w700),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  a.label,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: t.chat.copyWith(fontSize: 16, height: 22 / 16, fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),

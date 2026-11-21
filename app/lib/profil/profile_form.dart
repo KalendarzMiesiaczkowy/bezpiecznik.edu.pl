@@ -201,8 +201,8 @@ class _ProfileFormState extends State<ProfileForm> {
       children: [
         _section('Kto mieszka w domu?'),
         for (final g in AgeGroup.values)
-          SizedBox(
-            height: 48,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
             child: Row(
               children: [
                 Expanded(child: Text(g.label, style: context.bz.chat)),
@@ -421,12 +421,17 @@ class BzChip extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: fg,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          color: fg,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ],
