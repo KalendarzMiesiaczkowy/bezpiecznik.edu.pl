@@ -75,6 +75,7 @@ flutter:
     - assets/generated/
     - assets/map/
     - assets/phrases/
+    - assets/cards/
     - assets/map/glyphs/AtkinsonHyperlegibleNext-Regular/
     - assets/map/glyphs/AtkinsonHyperlegibleNext-Bold/
 

@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "id": "bleeding",
+  "name": "Krwotok",
+  "priority": 3,
+  "verify": true,
+  "verify_note": "Parafraza wytycznych pierwszej pomocy ERC 2025 do sprawdzenia przez ratownika medycznego lub instruktora PRC przed publikacją.",
+  "phrases": [
+    "krwawi",
+    "krwawia",
+    "krwawienie",
+    "krwotok",
+    "=krew leci",
+    "=krew tryska",
+    "bardzo krwawi",
+    "mocno krwawi",
+    "zakrwawiony",
+    "broczy krwia",
+    "uciskac rane",
+    "tamowanie krwotoku"
+  ],
+  "panels": [
+    {
+      "type": "call"
+    },
+    {
+      "type": "steps",
+      "title": "Tamowanie krwawienia",
+      "read_aloud": true,
+      "items": [
+        {
+          "text": "Na krwawiące miejsce zastosuj silny, bezpośredni ucisk ręką.",
+          "source_id": "erc-2025-pierwsza-pomoc-s12-f1"
+        },
+        {
+          "text": "Przyłóż standardowy opatrunek lub opatrunek hemostatyczny bezpośrednio na krwawiące miejsce, a następnie zastosuj silny, bezpośredni ucisk ręką.",
+          "source_id": "erc-2025-pierwsza-pomoc-s12-f2"
+        },
+        {
+          "text": "Po opanowaniu krwawienia załóż opatrunek uciskowy.",
+          "source_id": "erc-2025-pierwsza-pomoc-s13-f1"
+        },
+        {
+          "text": "Jeśli krwawienie z kończyny zagraża życiu i nie zostało opanowane bezpośrednim uciskiem ręką, jak najszybciej załóż opaskę uciskową.",
+          "source_id": "erc-2025-pierwsza-pomoc-s13-f2"
+        },
+        {
+          "text": "Zanotuj czas założenia opaski uciskowej.",
+          "source_id": "erc-2025-pierwsza-pomoc-s13-f3"
+        }
+      ]
+    }
+  ],
+  "source_ids": [
+    "erc-2025-pierwsza-pomoc-s12-f1",
+    "erc-2025-pierwsza-pomoc-s12-f2",
+    "erc-2025-pierwsza-pomoc-s13-f1",
+    "erc-2025-pierwsza-pomoc-s13-f2",
+    "erc-2025-pierwsza-pomoc-s13-f3"
+  ]
+}

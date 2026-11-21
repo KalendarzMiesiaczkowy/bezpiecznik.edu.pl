@@ -1,0 +1,386 @@
+{
+  "version": 1,
+  "id": "rko",
+  "name": "RKO",
+  "priority": 1,
+  "verify": true,
+  "verify_note": "Parafraza wytycznych ERC/PRC 2025 do sprawdzenia przez ratownika medycznego lub instruktora PRC przed publikacją.",
+  "phrases": [
+    "nie oddycha",
+    "nie oddychaja",
+    "brak oddechu",
+    "nie ma oddechu",
+    "bez oddechu",
+    "przestal oddychac",
+    "przestala oddychac",
+    "przestalo oddychac",
+    "nieprzytomny i nie oddycha",
+    "nieprzytomna i nie oddycha",
+    "zatrzymanie krazenia",
+    "zatrzymanie akcji serca",
+    "potrzebne rko",
+    "robic rko",
+    "reanimacja"
+  ],
+  "variant_words": {
+    "child": [
+      "dziecko",
+      "dziecka",
+      "dziecku",
+      "dzieciak",
+      "dzieciaka",
+      "syn",
+      "syna",
+      "synek",
+      "synka",
+      "corka",
+      "corke",
+      "corki",
+      "coreczka",
+      "coreczke",
+      "kilkulatek",
+      "kilkulatka",
+      "dwulatek",
+      "trzylatek",
+      "czterolatek",
+      "pieciolatek",
+      "szesciolatek",
+      "chlopiec",
+      "dziewczynka",
+      "maluch",
+      "malucha",
+      "chlopczyk"
+    ],
+    "infant": [
+      "niemowle",
+      "niemowlaka",
+      "niemowlak",
+      "niemowlecia",
+      "bobas",
+      "bobasa",
+      "noworodek",
+      "noworodka",
+      "maluszek",
+      "maluszka",
+      "dzidzius",
+      "dzidziusia"
+    ]
+  },
+  "panels": [
+    {
+      "type": "call"
+    },
+    {
+      "type": "steps",
+      "title": "RKO",
+      "read_aloud": true,
+      "variants": [
+        {
+          "id": "adult",
+          "label": "Dorosły",
+          "items": [
+            {
+              "text": "Upewnij się, że Ty, poszkodowany i świadkowie jesteście bezpieczni.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f1"
+            },
+            {
+              "text": "Delikatnie potrząśnij poszkodowanym za ramiona i głośno zapytaj: „Czy wszystko w porządku?”",
+              "source_id": "erc-2025-bls-algorytmy-s3-f2"
+            },
+            {
+              "text": "Jeśli nie reaguje, poproś kogoś o wezwanie służb ratunkowych albo zrób to sam. Włącz tryb głośnomówiący. Jeśli to możliwe, zostań z poszkodowanym.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f3"
+            },
+            {
+              "text": "Połóż poszkodowanego na plecach. Jedną rękę połóż na jego czole, opuszki palców drugiej pod brodą. Delikatnie odegnij głowę do tyłu i unieś brodę.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f4"
+            },
+            {
+              "text": "Przez nie dłużej niż 10 sekund patrz, słuchaj i wyczuwaj, czy oddycha. Prawie brak oddechu albo nieregularne, powolne i głośne westchnienia oznaczają brak prawidłowego oddechu.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f5"
+            },
+            {
+              "text": "Wyślij kogoś po AED, jeśli jest dostępne. Jeśli jesteś sam, idź po AED tylko wtedy, gdy przyniesiesz je i uruchomisz w ciągu jednej minuty. W przeciwnym razie od razu rozpocznij RKO.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f6"
+            },
+            {
+              "text": "Uklęknij obok poszkodowanego. Nasadę jednej dłoni połóż na środku klatki piersiowej, na dolnej połowie mostka. Drugą dłoń połóż na pierwszej i spleć palce. Trzymaj ramiona wyprostowane.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f7"
+            },
+            {
+              "text": "Uciskaj mostek na głębokość co najmniej 5 cm, ale nie więcej niż 6 cm, w tempie 100–120 uciśnięć na minutę. Po każdym uciśnięciu zwolnij ucisk, nie tracąc kontaktu dłoni z klatką piersiową.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f8"
+            },
+            {
+              "text": "Bez przeszkolenia albo gdy nie potrafisz wykonać oddechów ratowniczych: uciskaj klatkę piersiową bez przerw, w tempie 100–120 na minutę.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f9"
+            },
+            {
+              "text": "Z przeszkoleniem: po 30 uciśnięciach ponownie udrożnij drogi oddechowe (odegnij głowę, unieś brodę).",
+              "source_id": "erc-2025-bls-algorytmy-s3-f10"
+            },
+            {
+              "text": "Zaciśnij skrzydełka nosa, szczelnie obejmij ustami usta poszkodowanego i wdmuchuj powietrze około 1 sekundę, obserwując, czy klatka piersiowa się unosi.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f11"
+            },
+            {
+              "text": "Wykonaj 2 oddechy ratownicze, przerywając uciśnięcia nie dłużej niż 10 sekund, i bez opóźnienia wróć do 30 uciśnięć. Kontynuuj w stosunku 30:2.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f12"
+            },
+            {
+              "text": "Gdy będzie AED, włącz je i przyklej elektrody na odsłoniętą klatkę piersiową. Jeśli jest więcej niż jeden ratownik, kontynuuj RKO podczas przyklejania elektrod.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f13"
+            },
+            {
+              "text": "Postępuj zgodnie z instrukcjami głosowymi i wizualnymi AED. Gdy AED zaleca defibrylację, upewnij się, że nikt nie dotyka poszkodowanego, i naciśnij przycisk. Potem od razu wróć do RKO zgodnie z poleceniami AED.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f14"
+            },
+            {
+              "text": "Nie przerywaj resuscytacji, aż pracownik ochrony zdrowia powie, żebyś przestał, albo poszkodowany oczywiście odzyska przytomność, poruszy się, otworzy oczy i zacznie prawidłowo oddychać, albo będziesz zbyt zmęczony, żeby kontynuować.",
+              "source_id": "erc-2025-bls-algorytmy-s3-f15"
+            }
+          ]
+        },
+        {
+          "id": "child",
+          "label": "Dziecko",
+          "items": [
+            {
+              "text": "Zapewnij bezpieczeństwo sobie i dziecku. Sprawdź, czy dziecko reaguje na bodźce niebólowe.",
+              "source_id": "erc-2025-podsumowanie-s67-f1"
+            },
+            {
+              "text": "Jeśli dziecko nie reaguje, natychmiast zadzwoń po pogotowie ratunkowe i postępuj według wskazówek dyspozytora.",
+              "source_id": "erc-2025-podsumowanie-s67-f2"
+            },
+            {
+              "text": "Użyj funkcji głośnomówiącej w telefonie, a jeśli to możliwe, także transmisji wideo. Dyspozytor może pomóc ocenić, czy trzeba rozpocząć RKO.",
+              "source_id": "erc-2025-podsumowanie-s67-f5"
+            },
+            {
+              "text": "Bez przeszkolenia: rozpocznij RKO według instrukcji dyspozytora. Dyspozytor poprowadzi RKO w stosunku 30:2 po początkowych pięciu oddechach ratowniczych.",
+              "source_id": "erc-2025-podsumowanie-s67-f3"
+            },
+            {
+              "text": "Jeśli masz przeszkolenie PBLS: udrożnij drogi oddechowe odgięciem głowy i uniesieniem bródki i oceń oddech oraz oznaki życia maksymalnie przez 10 sekund.",
+              "source_id": "erc-2025-podsumowanie-s67-f6"
+            },
+            {
+              "text": "Wykonaj 5 oddechów ratowniczych. Natychmiast przejdź do 15 uciśnięć klatki piersiowej. Z przeszkoleniem (kurs PBLS ERC lub równoważny) kontynuuj w stosunku 15:2, w przeciwnym razie 30:2.",
+              "source_id": "erc-2025-podsumowanie-s67-f7"
+            },
+            {
+              "text": "Oddech ratowniczy: upewnij się, że drogi oddechowe są drożne, i wdmuchuj powietrze do ust dziecka przez około 1 sekundę, aż klatka piersiowa się uniesie. Pozwól jej biernie opaść, gdy nabierasz powietrza do kolejnego oddechu.",
+              "source_id": "erc-2025-podsumowanie-s68-f5"
+            },
+            {
+              "text": "Uciskaj klatkę piersiową w dolnej połowie mostka.",
+              "source_id": "erc-2025-podsumowanie-s68-f6"
+            },
+            {
+              "text": "U dziecka powyżej 1. roku życia stosuj technikę uciskania jedną lub dwiema rękami.",
+              "source_id": "erc-2025-podsumowanie-s68-f7"
+            },
+            {
+              "text": "Uciskaj w tempie 100–120 na minutę, na głębokość co najmniej 1/3 przednio-tylnego wymiaru klatki piersiowej, nie więcej niż 6 cm niezależnie od wieku dziecka.",
+              "source_id": "erc-2025-podsumowanie-s68-f8"
+            },
+            {
+              "text": "Nie opieraj się na klatce piersiowej. Całkowicie zwalniaj ucisk między uciśnięciami, aby klatka wróciła do wyjściowej pozycji.",
+              "source_id": "erc-2025-podsumowanie-s68-f9"
+            },
+            {
+              "text": "Nie przerywaj uciśnięć poza momentami oddechów ratowniczych lub poleceniem AED. Minimalizuj przerwy.",
+              "source_id": "erc-2025-podsumowanie-s68-f10"
+            },
+            {
+              "text": "Jeśli nie chcesz lub nie możesz wykonywać oddechów ratowniczych, prowadź RKO wyłącznie z uciskaniem klatki piersiowej.",
+              "source_id": "erc-2025-podsumowanie-s67-f4"
+            },
+            {
+              "text": "Jeśli jest drugi ratownik: niech wezwie pogotowie, a potem jak najszybciej przyniesie i podłączy AED. Po włączeniu AED postępuj zgodnie z jego instrukcjami.",
+              "source_id": "erc-2025-podsumowanie-s68-f1"
+            },
+            {
+              "text": "Jeśli jesteś sam, priorytetem jest wezwanie pogotowia i rozpoczęcie RKO, a nie przynoszenie i podłączanie AED.",
+              "source_id": "erc-2025-podsumowanie-s68-f2"
+            },
+            {
+              "text": "Niemowlętom i dzieciom poniżej 25 kg (do około 8. roku życia) włącz w AED tryb pediatryczny, jeśli jest dostępny. Większym dzieciom i nastolatkom stosuj tryb dla dorosłych. Bez trybu pediatrycznego użyj trybu dla dorosłych.",
+              "source_id": "erc-2025-podsumowanie-s68-f11"
+            },
+            {
+              "text": "Nie dotykaj dziecka, gdy AED analizuje rytm. Po defibrylacji natychmiast wznów uciśnięcia.",
+              "source_id": "erc-2025-podsumowanie-s68-f12"
+            },
+            {
+              "text": "Nie przerywaj RKO, chyba że pojawią się wyraźne oznaki życia albo AED wyda takie polecenie.",
+              "source_id": "erc-2025-podsumowanie-s68-f3"
+            }
+          ]
+        },
+        {
+          "id": "infant",
+          "label": "Niemowlę",
+          "items": [
+            {
+              "text": "Zapewnij bezpieczeństwo sobie i dziecku. Sprawdź, czy dziecko reaguje na bodźce niebólowe.",
+              "source_id": "erc-2025-podsumowanie-s67-f1"
+            },
+            {
+              "text": "Jeśli dziecko nie reaguje, natychmiast zadzwoń po pogotowie ratunkowe i postępuj według wskazówek dyspozytora.",
+              "source_id": "erc-2025-podsumowanie-s67-f2"
+            },
+            {
+              "text": "Użyj funkcji głośnomówiącej w telefonie, a jeśli to możliwe, także transmisji wideo. Dyspozytor może pomóc ocenić, czy trzeba rozpocząć RKO.",
+              "source_id": "erc-2025-podsumowanie-s67-f5"
+            },
+            {
+              "text": "Bez przeszkolenia: rozpocznij RKO według instrukcji dyspozytora. Dyspozytor poprowadzi RKO w stosunku 30:2 po początkowych pięciu oddechach ratowniczych.",
+              "source_id": "erc-2025-podsumowanie-s67-f3"
+            },
+            {
+              "text": "Jeśli masz przeszkolenie PBLS: udrożnij drogi oddechowe odgięciem głowy i uniesieniem bródki i oceń oddech oraz oznaki życia maksymalnie przez 10 sekund.",
+              "source_id": "erc-2025-podsumowanie-s67-f6"
+            },
+            {
+              "text": "U niemowlęcia trzymaj głowę w pozycji neutralnej, lekko ją odginając. Unieś bródkę dwoma palcami ułożonymi na elementach kostnych, unikając uciskania tkanek miękkich.",
+              "source_id": "erc-2025-podsumowanie-s68-f4"
+            },
+            {
+              "text": "Wykonaj 5 oddechów ratowniczych. Natychmiast przejdź do 15 uciśnięć klatki piersiowej. Z przeszkoleniem (kurs PBLS ERC lub równoważny) kontynuuj w stosunku 15:2, w przeciwnym razie 30:2.",
+              "source_id": "erc-2025-podsumowanie-s67-f7"
+            },
+            {
+              "text": "Oddech ratowniczy: upewnij się, że drogi oddechowe są drożne, i wdmuchuj powietrze do ust i nosa niemowlęcia przez około 1 sekundę, aż klatka piersiowa się uniesie. Pozwól jej biernie opaść, gdy nabierasz powietrza do kolejnego oddechu.",
+              "source_id": "erc-2025-podsumowanie-s68-f5"
+            },
+            {
+              "text": "Uciskaj klatkę piersiową w dolnej połowie mostka. U niemowlęcia stosuj technikę uciskania dwoma kciukami, obejmując dłońmi klatkę piersiową.",
+              "source_id": "erc-2025-podsumowanie-s68-f6"
+            },
+            {
+              "text": "Uciskaj w tempie 100–120 na minutę, na głębokość co najmniej 1/3 przednio-tylnego wymiaru klatki piersiowej, nie więcej niż 6 cm niezależnie od wieku dziecka.",
+              "source_id": "erc-2025-podsumowanie-s68-f8"
+            },
+            {
+              "text": "Nie opieraj się na klatce piersiowej. Całkowicie zwalniaj ucisk między uciśnięciami, aby klatka wróciła do wyjściowej pozycji.",
+              "source_id": "erc-2025-podsumowanie-s68-f9"
+            },
+            {
+              "text": "Nie przerywaj uciśnięć poza momentami oddechów ratowniczych lub poleceniem AED. Minimalizuj przerwy.",
+              "source_id": "erc-2025-podsumowanie-s68-f10"
+            },
+            {
+              "text": "Jeśli nie chcesz lub nie możesz wykonywać oddechów ratowniczych, prowadź RKO wyłącznie z uciskaniem klatki piersiowej.",
+              "source_id": "erc-2025-podsumowanie-s67-f4"
+            },
+            {
+              "text": "Jeśli jest drugi ratownik: niech wezwie pogotowie, a potem jak najszybciej przyniesie i podłączy AED. Po włączeniu AED postępuj zgodnie z jego instrukcjami.",
+              "source_id": "erc-2025-podsumowanie-s68-f1"
+            },
+            {
+              "text": "Jeśli jesteś sam, priorytetem jest wezwanie pogotowia i rozpoczęcie RKO, a nie przynoszenie i podłączanie AED.",
+              "source_id": "erc-2025-podsumowanie-s68-f2"
+            },
+            {
+              "text": "Niemowlętom i dzieciom poniżej 25 kg (do około 8. roku życia) włącz w AED tryb pediatryczny, jeśli jest dostępny. Większym dzieciom i nastolatkom stosuj tryb dla dorosłych. Bez trybu pediatrycznego użyj trybu dla dorosłych.",
+              "source_id": "erc-2025-podsumowanie-s68-f11"
+            },
+            {
+              "text": "Nie dotykaj dziecka, gdy AED analizuje rytm. Po defibrylacji natychmiast wznów uciśnięcia.",
+              "source_id": "erc-2025-podsumowanie-s68-f12"
+            },
+            {
+              "text": "Nie przerywaj RKO, chyba że pojawią się wyraźne oznaki życia albo AED wyda takie polecenie.",
+              "source_id": "erc-2025-podsumowanie-s68-f3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "cpr",
+      "source_id": "erc-2025-bls-algorytmy-s3-f12",
+      "rate_bpm": null,
+      "rate_bpm_min": 100,
+      "rate_bpm_max": 120,
+      "rate_source_id": "erc-2025-bls-algorytmy-s3-f8",
+      "rescuer_change_s": null,
+      "variants": [
+        {
+          "id": "adult",
+          "label": "Dorosły",
+          "source_id": "erc-2025-bls-algorytmy-s3-f12",
+          "compressions": 30,
+          "breaths": 2,
+          "initial_breaths": 0,
+          "breath_phase_s": 10
+        },
+        {
+          "id": "child",
+          "label": "Dziecko",
+          "source_id": "erc-2025-podsumowanie-s67-f7",
+          "compressions": 30,
+          "compressions_pbls_trained": 15,
+          "breaths": 2,
+          "initial_breaths": 5,
+          "breath_phase_s": null
+        },
+        {
+          "id": "infant",
+          "label": "Niemowlę",
+          "source_id": "erc-2025-podsumowanie-s67-f7",
+          "compressions": 30,
+          "compressions_pbls_trained": 15,
+          "breaths": 2,
+          "initial_breaths": 5,
+          "breath_phase_s": null
+        }
+      ],
+      "voice": {
+        "compress": "Uciskaj",
+        "breaths": "Dwa oddechy",
+        "aed": "Niech ktoś przyniesie AED",
+        "change": null
+      },
+      "aed_card_id": "aed"
+    }
+  ],
+  "source_ids": [
+    "erc-2025-bls-algorytmy-s3-f1",
+    "erc-2025-bls-algorytmy-s3-f2",
+    "erc-2025-bls-algorytmy-s3-f3",
+    "erc-2025-bls-algorytmy-s3-f4",
+    "erc-2025-bls-algorytmy-s3-f5",
+    "erc-2025-bls-algorytmy-s3-f6",
+    "erc-2025-bls-algorytmy-s3-f7",
+    "erc-2025-bls-algorytmy-s3-f8",
+    "erc-2025-bls-algorytmy-s3-f9",
+    "erc-2025-bls-algorytmy-s3-f10",
+    "erc-2025-bls-algorytmy-s3-f11",
+    "erc-2025-bls-algorytmy-s3-f12",
+    "erc-2025-bls-algorytmy-s3-f13",
+    "erc-2025-bls-algorytmy-s3-f14",
+    "erc-2025-bls-algorytmy-s3-f15",
+    "erc-2025-podsumowanie-s67-f1",
+    "erc-2025-podsumowanie-s67-f2",
+    "erc-2025-podsumowanie-s67-f5",
+    "erc-2025-podsumowanie-s67-f3",
+    "erc-2025-podsumowanie-s67-f6",
+    "erc-2025-podsumowanie-s67-f7",
+    "erc-2025-podsumowanie-s68-f5",
+    "erc-2025-podsumowanie-s68-f6",
+    "erc-2025-podsumowanie-s68-f7",
+    "erc-2025-podsumowanie-s68-f8",
+    "erc-2025-podsumowanie-s68-f9",
+    "erc-2025-podsumowanie-s68-f10",
+    "erc-2025-podsumowanie-s67-f4",
+    "erc-2025-podsumowanie-s68-f1",
+    "erc-2025-podsumowanie-s68-f2",
+    "erc-2025-podsumowanie-s68-f11",
+    "erc-2025-podsumowanie-s68-f12",
+    "erc-2025-podsumowanie-s68-f3",
+    "erc-2025-podsumowanie-s68-f4"
+  ]
+}

@@ -1,0 +1,286 @@
+{
+  "version": 1,
+  "id": "choking",
+  "name": "Zadławienie",
+  "priority": 2,
+  "verify": true,
+  "verify_note": "Parafraza wytycznych ERC/PRC 2025 do sprawdzenia przez ratownika medycznego lub instruktora PRC przed publikacją.",
+  "phrases": [
+    "zadlawil",
+    "zadlawic",
+    "dlawi sie",
+    "sie dlawi",
+    "sie dusi",
+    "udlawil",
+    "zakrztusil",
+    "zakrztusila",
+    "dusi sie",
+    "udusil sie",
+    "cos utknelo w gardle",
+    "utknelo w gardle"
+  ],
+  "variant_words": {
+    "child": [
+      "dziecko",
+      "dziecka",
+      "dziecku",
+      "dzieciak",
+      "dzieciaka",
+      "syn",
+      "syna",
+      "synek",
+      "synka",
+      "corka",
+      "corke",
+      "corki",
+      "coreczka",
+      "coreczke",
+      "kilkulatek",
+      "kilkulatka",
+      "dwulatek",
+      "trzylatek",
+      "czterolatek",
+      "pieciolatek",
+      "szesciolatek",
+      "chlopiec",
+      "dziewczynka",
+      "maluch",
+      "malucha",
+      "chlopczyk"
+    ],
+    "infant": [
+      "niemowle",
+      "niemowlaka",
+      "niemowlak",
+      "niemowlecia",
+      "bobas",
+      "bobasa",
+      "noworodek",
+      "noworodka",
+      "maluszek",
+      "maluszka",
+      "dzidzius",
+      "dzidziusia"
+    ]
+  },
+  "panels": [
+    {
+      "type": "call"
+    },
+    {
+      "type": "steps",
+      "title": "Zadławienie",
+      "read_aloud": true,
+      "variants": [
+        {
+          "id": "adult",
+          "label": "Dorosły",
+          "items": [
+            {
+              "text": "Podejrzewaj zadławienie, gdy osoba nagle nie może mówić, zwłaszcza podczas jedzenia. Zapytaj: „Czy się zadławiłeś?” Zachęć poszkodowanego do kaszlu.",
+              "source_id": "erc-2025-podsumowanie-s93-f1"
+            },
+            {
+              "text": "Jeśli nie może kaszleć albo kaszel staje się nieskuteczny, wykonaj do 5 uderzeń w okolicę międzyłopatkową.",
+              "source_id": "erc-2025-podsumowanie-s93-f2"
+            },
+            {
+              "text": "Uderzenia: stań za poszkodowanym i nasadą dłoni uderzaj go między łopatkami, na środku pleców.",
+              "source_id": "erc-2025-pierwsza-pomoc-s21-f1"
+            },
+            {
+              "text": "Jeśli uderzenia są nieskuteczne, wykonaj do 5 uciśnięć nadbrzusza.",
+              "source_id": "erc-2025-podsumowanie-s93-f3"
+            },
+            {
+              "text": "Uciśnięcia nadbrzusza: stań za poszkodowanym i obiema rękami obejmij go w górnej części brzucha. Pochyl go do przodu. Zaciśniętą pięść umieść między pępkiem a dolnym brzegiem klatki piersiowej, obejmij ją drugą dłonią i mocno pociągnij obie dłonie do siebie i do góry.",
+              "source_id": "erc-2025-pierwsza-pomoc-s21-f2"
+            },
+            {
+              "text": "Jeśli niedrożność nie ustąpi po 5 uciśnięciach nadbrzusza, kontynuuj naprzemiennie 5 uderzeń w okolicę międzyłopatkową i 5 uciśnięć nadbrzusza, do usunięcia ciała obcego lub utraty przytomności przez poszkodowanego.",
+              "source_id": "erc-2025-podsumowanie-s93-f4"
+            },
+            {
+              "text": "Zadzwoń pod numer ratunkowy 112/999. Nie próbuj usunąć ciała obcego z jamy ustnej ani dróg oddechowych palcem „na ślepo”.",
+              "source_id": "erc-2025-podsumowanie-s93-f5"
+            },
+            {
+              "text": "Każda osoba, której usunięto ciało obce uciśnięciami nadbrzusza lub klatki piersiowej, powinna zostać oceniona przez pracownika ochrony zdrowia, bo mogło dojść do powikłań lub urazu.",
+              "source_id": "erc-2025-podsumowanie-s93-f7"
+            }
+          ]
+        },
+        {
+          "id": "child",
+          "label": "Dziecko",
+          "items": [
+            {
+              "text": "Podejrzewaj zadławienie ciałem obcym, gdy dziecko nie może mówić (dzieci i młodzież) albo głośno płakać (niemowlęta i młodsze dzieci), zwłaszcza podczas jedzenia lub gdy bawiło się bez nadzoru.",
+              "source_id": "erc-2025-podsumowanie-s69-f1"
+            },
+            {
+              "text": "Jak najszybciej wezwij pogotowie ratunkowe albo poproś o to kogoś. Starsze dziecko lub nastolatka zachęcaj do kaszlu.",
+              "source_id": "erc-2025-podsumowanie-s69-f2"
+            },
+            {
+              "text": "Jeśli dziecko nie może kaszleć albo kaszel staje się nieskuteczny, wykonaj do 5 uderzeń w okolicę międzyłopatkową.",
+              "source_id": "erc-2025-podsumowanie-s69-f3"
+            },
+            {
+              "text": "Starsze dziecko pochyl do przodu i uderz w plecy, w okolicę międzyłopatkową. Powtórz do 5 razy.",
+              "source_id": "erc-2025-podsumowanie-s69-f5"
+            },
+            {
+              "text": "Jeśli uderzenia w okolicę międzyłopatkową są nieskuteczne, wykonaj do 5 uciśnięć nadbrzusza.",
+              "source_id": "erc-2025-podsumowanie-s69-f6"
+            },
+            {
+              "text": "Stań za dzieckiem i obejmij je ramionami wokół górnej części brzucha. Pochyl dziecko do przodu. Zaciśnij pięść i umieść ją między pępkiem a wyrostkiem mieczykowatym mostka.",
+              "source_id": "erc-2025-podsumowanie-s69-f8"
+            },
+            {
+              "text": "Chwyć pięść drugą ręką i gwałtownie pociągnij dłonie do siebie i do góry. Powtórz do 5 razy, chyba że wcześniej usuniesz przeszkodę.",
+              "source_id": "erc-2025-podsumowanie-s69-f9"
+            },
+            {
+              "text": "Jeśli dziecko nadal jest przytomne, powtarzaj na przemian uderzenia w okolicę międzyłopatkową (do 5 razy) i uciśnięcia nadbrzusza (do 5 razy).",
+              "source_id": "erc-2025-podsumowanie-s69-f10"
+            },
+            {
+              "text": "Natychmiast przerwij uderzenia lub uciśnięcia, gdy pojawią się oznaki usunięcia przeszkody: kaszel, głośny oddech lub płacz.",
+              "source_id": "erc-2025-podsumowanie-s69-f11"
+            },
+            {
+              "text": "Nie próbuj usuwać ciała obcego z jamy ustnej „na ślepo”. Pojedynczą próbę usunięcia przeszkody wykonaj tylko wtedy, gdy jest wyraźnie widoczna.",
+              "source_id": "erc-2025-podsumowanie-s69-f12"
+            }
+          ]
+        },
+        {
+          "id": "infant",
+          "label": "Niemowlę",
+          "items": [
+            {
+              "text": "Podejrzewaj zadławienie ciałem obcym, gdy dziecko nie może mówić (dzieci i młodzież) albo głośno płakać (niemowlęta i młodsze dzieci), zwłaszcza podczas jedzenia lub gdy bawiło się bez nadzoru.",
+              "source_id": "erc-2025-podsumowanie-s69-f1"
+            },
+            {
+              "text": "Jak najszybciej wezwij pogotowie ratunkowe albo poproś o to kogoś.",
+              "source_id": "erc-2025-podsumowanie-s69-f2"
+            },
+            {
+              "text": "Jeśli dziecko nie może kaszleć albo kaszel staje się nieskuteczny, wykonaj do 5 uderzeń w okolicę międzyłopatkową.",
+              "source_id": "erc-2025-podsumowanie-s69-f3"
+            },
+            {
+              "text": "Obróć niemowlę twarzą w dół na swoim przedramieniu, a przedramię oprzyj na nodze. Podtrzymuj głowę niemowlęcia dłonią, poniżej poziomu klatki piersiowej. Wykonaj energiczne uderzenie w okolicę między łopatkami. Powtórz do 5 razy lub do usunięcia ciała obcego.",
+              "source_id": "erc-2025-podsumowanie-s69-f4"
+            },
+            {
+              "text": "Jeśli uderzenia w okolicę międzyłopatkową są nieskuteczne, wykonaj do 5 uciśnięć klatki piersiowej.",
+              "source_id": "erc-2025-podsumowanie-s69-f6"
+            },
+            {
+              "text": "Obróć niemowlę na plecy i połóż je na swoich kolanach. Uciskaj klatkę piersiową techniką dwóch kciuków i dłoni obejmujących klatkę, jak podczas resuscytacji, ale z większą siłą. Powtórz do 5 razy lub do udrożnienia dróg oddechowych.",
+              "source_id": "erc-2025-podsumowanie-s69-f7"
+            },
+            {
+              "text": "Jeśli niemowlę nadal jest przytomne, powtarzaj na przemian uderzenia w okolicę międzyłopatkową (do 5 razy) i uciśnięcia klatki piersiowej (do 5 razy).",
+              "source_id": "erc-2025-podsumowanie-s69-f10"
+            },
+            {
+              "text": "Natychmiast przerwij uderzenia lub uciśnięcia, gdy pojawią się oznaki usunięcia przeszkody: kaszel, głośny oddech lub płacz.",
+              "source_id": "erc-2025-podsumowanie-s69-f11"
+            },
+            {
+              "text": "Nie próbuj usuwać ciała obcego z jamy ustnej „na ślepo”. Pojedynczą próbę usunięcia przeszkody wykonaj tylko wtedy, gdy jest wyraźnie widoczna.",
+              "source_id": "erc-2025-podsumowanie-s69-f12"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "steps",
+      "title": "Gdy straci przytomność",
+      "read_aloud": true,
+      "variants": [
+        {
+          "id": "adult",
+          "label": "Dorosły",
+          "items": [
+            {
+              "text": "Gdy poszkodowany straci przytomność, rozpocznij RKO.",
+              "source_id": "erc-2025-podsumowanie-s93-f6",
+              "card_link": {
+                "label": "RKO",
+                "card_id": "rko"
+              }
+            }
+          ]
+        },
+        {
+          "id": "child",
+          "label": "Dziecko",
+          "items": [
+            {
+              "text": "Wezwij pomoc i zadzwoń po pogotowie, jeśli jeszcze tego nie zrobiono, najpóźniej gdy dziecko straci przytomność.",
+              "source_id": "erc-2025-podsumowanie-s69-f13"
+            },
+            {
+              "text": "Gdy dziecko straci przytomność, natychmiast rozpocznij RKO, zaczynając od pięciu oddechów ratowniczych.",
+              "source_id": "erc-2025-podsumowanie-s69-f14",
+              "card_link": {
+                "label": "RKO",
+                "card_id": "rko"
+              }
+            }
+          ]
+        },
+        {
+          "id": "infant",
+          "label": "Niemowlę",
+          "items": [
+            {
+              "text": "Wezwij pomoc i zadzwoń po pogotowie, jeśli jeszcze tego nie zrobiono, najpóźniej gdy niemowlę straci przytomność.",
+              "source_id": "erc-2025-podsumowanie-s69-f13"
+            },
+            {
+              "text": "Gdy niemowlę straci przytomność, natychmiast rozpocznij RKO, zaczynając od pięciu oddechów ratowniczych.",
+              "source_id": "erc-2025-podsumowanie-s69-f14",
+              "card_link": {
+                "label": "RKO",
+                "card_id": "rko"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "source_ids": [
+    "erc-2025-podsumowanie-s93-f1",
+    "erc-2025-podsumowanie-s93-f2",
+    "erc-2025-pierwsza-pomoc-s21-f1",
+    "erc-2025-podsumowanie-s93-f3",
+    "erc-2025-pierwsza-pomoc-s21-f2",
+    "erc-2025-podsumowanie-s93-f4",
+    "erc-2025-podsumowanie-s93-f5",
+    "erc-2025-podsumowanie-s93-f7",
+    "erc-2025-podsumowanie-s69-f1",
+    "erc-2025-podsumowanie-s69-f2",
+    "erc-2025-podsumowanie-s69-f3",
+    "erc-2025-podsumowanie-s69-f5",
+    "erc-2025-podsumowanie-s69-f6",
+    "erc-2025-podsumowanie-s69-f8",
+    "erc-2025-podsumowanie-s69-f9",
+    "erc-2025-podsumowanie-s69-f10",
+    "erc-2025-podsumowanie-s69-f11",
+    "erc-2025-podsumowanie-s69-f12",
+    "erc-2025-podsumowanie-s69-f4",
+    "erc-2025-podsumowanie-s69-f7",
+    "erc-2025-podsumowanie-s93-f6",
+    "erc-2025-podsumowanie-s69-f13",
+    "erc-2025-podsumowanie-s69-f14"
+  ]
+}
