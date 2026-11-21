@@ -57,7 +57,10 @@ class MapCardView extends ConsumerWidget {
             Text(mapLoadingText, style: bz.chat.copyWith(color: bz.ink200)),
         error: (_, _) => Text(mapNoPointsText, style: bz.chat),
         data: (points) => points.isEmpty
-            ? Text(outside ? outsideRegionText : mapNoPointsText, style: bz.chat)
+            ? Text(
+                outside ? outsideRegionText : mapNoPointsText,
+                style: bz.chat,
+              )
             : _Points(
                 points: points,
                 fromLat: pos?.latitude,
@@ -101,11 +104,18 @@ int? monthsSince(String verifiedAt, DateTime now) {
   return math.max(0, m);
 }
 
-/// Source chip label: "OSM · zweryf. 03.2026" (DS example "KG PSP · zweryf. 03.2026").
-String sourceChipText(String source, String verifiedAt) {
+/// Source chip label: "KG PSP · zweryf. 03.2026" (DS example) for confirmed
+/// points. An unconfirmed point (e.g. OSM) is never called verified (the card
+/// already carries the "niepotwierdzony" label): "OSM · dane z 03.2026".
+String sourceChipText(
+  String source,
+  String verifiedAt, {
+  bool confirmed = true,
+}) {
   final d = DateTime.tryParse(verifiedAt);
   if (d == null) return source;
   final mm = d.month.toString().padLeft(2, '0');
+  if (!confirmed) return '$source · dane z $mm.${d.year}'; // verify:true
   return '$source · zweryf. $mm.${d.year}';
 }
 
@@ -154,6 +164,7 @@ class _Points extends StatelessWidget {
       FocusManager.instance.primaryFocus?.unfocus();
       context.push(mapPointLocation(point.id));
     }
+
     final label = [
       title,
       if (subtitle.isNotEmpty) subtitle,
@@ -344,7 +355,11 @@ class _SourceChip extends StatelessWidget {
                 SizedBox(width: bz.space1),
                 Flexible(
                   child: Text(
-                    sourceChipText(point.source, point.verifiedAt),
+                    sourceChipText(
+                      point.source,
+                      point.verifiedAt,
+                      confirmed: point.confirmed,
+                    ),
                     style: bz.caption.copyWith(color: bz.ink200),
                   ),
                 ),

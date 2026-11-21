@@ -12,7 +12,16 @@ const pointConfirmedText = '✓ Potwierdzony'; // map.point.confirmed
 String pointUnconfirmedText(String source) =>
     '? Niepotwierdzony. Dane z $source, niesprawdzone przez PSP.'; // map.point.unconfirmed
 String pointSourceText(String source, String verifiedAt) =>
-    'Źródło: $source, $verifiedAt'; // map.point.source
+    'Źródło: $source, ${formatPointDate(verifiedAt)}'; // map.point.source
+
+/// Spec date format "DD.MM.RRRR" (ekran-2-mapa.md, Formaty); unparsable
+/// values are shown as they are.
+String formatPointDate(String isoDate) {
+  final d = DateTime.tryParse(isoDate);
+  if (d == null) return isoDate;
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${two(d.day)}.${two(d.month)}.${d.year}';
+}
 const pointStaleText = 'Dane sprawdzono ponad rok temu. Mogą być nieaktualne.'; // map.point.stale
 const pointAvailabilityUnknownText = 'Dostępność: brak danych'; // map.point.availabilityUnknown
 const pointGuideText = 'Prowadź'; // map.point.guide

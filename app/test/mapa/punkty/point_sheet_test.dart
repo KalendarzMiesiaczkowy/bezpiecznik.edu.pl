@@ -29,7 +29,7 @@ void main() {
     await t.pumpWidget(wrap(PointSheet(point: pt(address: 'ul. Polna 2'), now: DateTime(2026, 11, 21))));
     expect(find.text('ul. Polna 2'), findsOneWidget);
     expect(find.text('? Niepotwierdzony. Dane z OpenStreetMap, niesprawdzone przez PSP.'), findsOneWidget);
-    expect(find.text('Źródło: OpenStreetMap, 2026-11-19'), findsOneWidget);
+    expect(find.text('Źródło: OpenStreetMap, 19.11.2026'), findsOneWidget);
     expect(find.text('Dostępność: brak danych'), findsOneWidget);
     expect(find.text('450 m'), findsOneWidget);
     expect(find.text('Prowadź'), findsOneWidget);

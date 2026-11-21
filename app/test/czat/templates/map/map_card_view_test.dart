@@ -84,7 +84,9 @@ Future<List<String>> pump(
 }
 
 void main() {
-  testWidgets('empty result outside the region shows the honest notice', (tester) async {
+  testWidgets('empty result outside the region shows the honest notice', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -121,7 +123,8 @@ void main() {
         find.textContaining('w linii prostej · ok. 15 min'),
         findsOneWidget,
       );
-      expect(find.text('OSM · zweryf. 03.2026'), findsOneWidget);
+      expect(find.text('OSM · dane z 03.2026'), findsOneWidget);
+      expect(find.textContaining('zweryf.'), findsNothing);
       expect(find.text('niepotwierdzony'), findsOneWidget);
       expect(find.byKey(const ValueKey('map-card-bearing-1')), findsOneWidget);
       expect(find.byKey(const ValueKey('map-card-minimap')), findsOneWidget);
@@ -173,7 +176,7 @@ void main() {
     await pump(tester, nearest: () async => three, position: pos());
     await tester.tap(find.byKey(const ValueKey('map-card-source')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Źródło: OSM, 2026-03-01'), findsOneWidget);
+    expect(find.textContaining('Źródło: OSM, 01.03.2026'), findsOneWidget);
     expect(find.textContaining('niesprawdzone przez PSP'), findsOneWidget);
   });
 
@@ -229,6 +232,10 @@ void main() {
   test('sourceChipText / monthsSince', () {
     expect(sourceChipText('OSM', '2026-03-01'), 'OSM · zweryf. 03.2026');
     expect(sourceChipText('OSM', 'x'), 'OSM');
+    expect(
+      sourceChipText('OSM', '2026-03-01', confirmed: false),
+      'OSM · dane z 03.2026',
+    );
     expect(monthsSince('2025-11-21', DateTime(2026, 11, 21)), 12);
     expect(monthsSince('2025-11-22', DateTime(2026, 11, 21)), 11);
     expect(monthsSince('x', DateTime(2026)), isNull);
