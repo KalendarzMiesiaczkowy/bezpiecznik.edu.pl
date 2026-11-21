@@ -261,10 +261,16 @@ class _StepRow extends StatelessWidget {
                       ],
                     ),
                   ),
-                  BzCheck(
-                    value: done,
-                    onChanged: onChanged,
-                    label: 'Krok $number: ${item.text}',
+                  // The 48 dp hit area is taller than the 28 dp first line;
+                  // lift it so the 24 dp visual box centres on that line
+                  // (hit testing follows the transform).
+                  Transform.translate(
+                    offset: Offset(0, -(t.minTouchTarget - 28) / 2),
+                    child: BzCheck(
+                      value: done,
+                      onChanged: onChanged,
+                      label: 'Krok $number: ${item.text}',
+                    ),
                   ),
                 ],
               ),
