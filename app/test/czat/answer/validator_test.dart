@@ -35,6 +35,33 @@ void main() {
     expect(check('Zapakuj wodę, latarkę i apteczkę.', bag), isNull);
   });
 
+  test('merges a split panel ({type,title} then {items}) and still validates items', () {
+    final r = v.validate({
+      'panels': [
+        {'type': 'steps', 'title': 'Teraz'},
+        {
+          'items': [
+            {'text': 'Zapakuj wodę i latarkę.', 'source_id': 'c3'},
+            {'text': 'Zapakuj generator.', 'source_id': 'c3'},
+          ],
+        },
+      ],
+    }, [bag]);
+    expect(r.panels, hasLength(1));
+    expect(r.panels.single['type'], 'steps');
+    expect((r.panels.single['items'] as List), hasLength(1));
+    expect(r.rejected, hasLength(1));
+  });
+
+  test('untyped items panel without a preceding typed panel is dropped', () {
+    final r = v.validate({
+      'panels': [
+        {'items': [{'text': 'Zapakuj wodę.', 'source_id': 'c3'}]},
+      ],
+    }, [bag]);
+    expect(r.hasContent, isFalse);
+  });
+
   test('invented number', () {
     expect(check('Uciskaj klatkę piersiową 15 razy.', cpr), RejectReason.invalidNumber);
     expect(check('Wykonaj 3 oddechy ratownicze.', cpr), RejectReason.invalidNumber);

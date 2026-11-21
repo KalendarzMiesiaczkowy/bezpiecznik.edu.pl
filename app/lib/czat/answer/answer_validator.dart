@@ -127,6 +127,25 @@ class _ChunkFacts {
   late final Set<String> words;
 }
 
+/// Small models sometimes split one panel into two sibling objects:
+/// `{"type":"steps","title":"X"}, {"items":[...]}`. An untyped object that
+/// carries `items` directly after a typed panel without `items` is merged into
+/// it. Every item is still validated against its cited chunk afterwards.
+List<Object?> _mergeSplitPanels(List<Object?> raw) {
+  final out = <Object?>[];
+  for (final p in raw) {
+    if (p is Map && p['type'] == null && p['items'] is List && out.isNotEmpty) {
+      final prev = out.last;
+      if (prev is Map && prev['type'] is String && prev['items'] == null) {
+        out[out.length - 1] = {...prev, 'items': p['items']};
+        continue;
+      }
+    }
+    out.add(p);
+  }
+  return out;
+}
+
 class AnswerValidator {
   AnswerValidator({Set<String>? stopwords})
     : _stop = stopwords ?? {for (final w in fallbackStopwords) normalizePl(w)};
@@ -199,8 +218,9 @@ class AnswerValidator {
     final out = <Map<String, Object?>>[];
     final quoted = <String>{};
 
-    final rawPanels = json['panels'];
-    if (rawPanels is! List) return ValidatedAnswer(panels: out, rejected: rejected);
+    final rawJson = json['panels'];
+    if (rawJson is! List) return ValidatedAnswer(panels: out, rejected: rejected);
+    final rawPanels = _mergeSplitPanels(rawJson);
 
     for (final p in rawPanels) {
       if (p is! Map) continue;

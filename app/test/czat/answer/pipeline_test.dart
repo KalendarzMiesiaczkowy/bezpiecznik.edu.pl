@@ -143,6 +143,28 @@ void main() {
     expect(logs.where((l) => l.startsWith('rejected')).length, 3);
   });
 
+  test('parsed but structurally empty answer is retried once, then recovers', () async {
+    final e = FakeEngine([
+      ['{"panels":[{"type":"steps","title":"x"},"items:[{"]}'],
+      [
+        jsonEncode({
+          'panels': [
+            {
+              'type': 'steps',
+              'title': 'x',
+              'items': [
+                {'text': 'Nie wchodź do windy.', 'source_id': 'c1'},
+              ],
+            },
+          ],
+        }),
+      ],
+    ]);
+    final a = ready(await run(svc(e)));
+    expect(e.requests.length, 2);
+    expect(types(a), contains('steps'));
+  });
+
   test('partially valid answer keeps only covered items', () async {
     final e = FakeEngine([
       [

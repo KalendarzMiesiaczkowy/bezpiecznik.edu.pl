@@ -197,6 +197,12 @@ class PipelineAnswerService implements AnswerService {
         onLog?.call('rejected $r');
       }
       if (!v.hasContent) {
+        // Parsed but no item was even checked (garbled structure): one retry.
+        // Items rejected by the validator are a real verdict: no retry.
+        if (attempt == 0 && v.rejected.isEmpty) {
+          onLog?.call('no usable panels (attempt 1), retrying');
+          continue;
+        }
         return buildQuoteFallback(prompted, risk: risk, modelOff: false);
       }
       return buildModelAnswer(v.panels, prompted, risk: risk);
