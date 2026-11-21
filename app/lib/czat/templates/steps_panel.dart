@@ -208,89 +208,101 @@ class _StepRow extends StatelessWidget {
     final numFg = done ? t.verified : (current ? t.signalInk : t.ink200);
     return Padding(
       padding: EdgeInsets.only(bottom: t.space1),
+      // Reference czat-odpowiedz.png: the number sits on the title's left
+      // edge and the current-step tint and bar bleed `space-2` into the
+      // card padding (painted outside the row, layout unchanged).
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: current ? t.overlayHover : null,
-              borderRadius: BorderRadius.circular(t.radiusMd),
+          Positioned(
+            left: -t.space2,
+            right: -t.space2,
+            top: 0,
+            bottom: 0,
+            child: AnimatedContainer(
+              duration: t.durationBase,
+              curve: t.easeInOut,
+              decoration: BoxDecoration(
+                color: current
+                    ? t.overlayHover
+                    : t.overlayHover.withValues(alpha: 0),
+                borderRadius: BorderRadius.circular(t.radiusMd),
+              ),
             ),
-            child: Padding(
-              padding: EdgeInsets.only(left: t.space3, top: 10, bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: numBg,
-                      shape: BoxShape.circle,
-                    ),
-                    child: done
-                        ? Icon(LucideIcons.check, size: 16, color: numFg)
-                        : Text(
-                            '$number',
-                            style: t.label.copyWith(
-                              color: numFg,
-                              height: 1,
-                              fontWeight: FontWeight.w700,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: t.space3, bottom: t.space1),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: numBg,
+                    shape: BoxShape.circle,
                   ),
-                  SizedBox(width: t.space3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.text,
-                          style: t.chat.copyWith(
-                            height: 28 / 17,
-                            fontWeight: current
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            color: done ? t.ink300 : t.ink100,
+                  child: done
+                      ? Icon(LucideIcons.check, size: 16, color: numFg)
+                      : Text(
+                          '$number',
+                          style: t.label.copyWith(
+                            color: numFg,
+                            height: 1,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
-                        if (source != null)
-                          SourceChip(
-                            source: source!,
-                            onTap: () => onOpenSource(source!),
-                          ),
-                        if (item.cardLinkLabel != null && item.cardLinkId != null)
-                          CardLinkButton(
-                            label: item.cardLinkLabel!,
-                            cardId: item.cardLinkId!,
-                            variant: variant,
-                          ),
-                      ],
-                    ),
+                ),
+                SizedBox(width: t.space3),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.text,
+                        style: t.chat.copyWith(
+                          height: 28 / 17,
+                          fontWeight: current
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: done ? t.ink300 : t.ink100,
+                        ),
+                      ),
+                      if (source != null)
+                        SourceChip(
+                          source: source!,
+                          onTap: () => onOpenSource(source!),
+                        ),
+                      if (item.cardLinkLabel != null && item.cardLinkId != null)
+                        CardLinkButton(
+                          label: item.cardLinkLabel!,
+                          cardId: item.cardLinkId!,
+                          variant: variant,
+                        ),
+                    ],
                   ),
-                  // The 48 dp hit area is taller than the 28 dp first line;
-                  // lift it so the 24 dp visual box centres on that line
-                  // (hit testing follows the transform).
-                  Transform.translate(
-                    offset: Offset(0, -(t.minTouchTarget - 28) / 2),
-                    child: BzCheck(
-                      value: done,
-                      onChanged: onChanged,
-                      label: 'Krok $number: ${item.text}',
-                    ),
+                ),
+                // The 48 dp hit area is taller than the 28 dp first line;
+                // lift it so the 24 dp visual box centres on that line
+                // (hit testing follows the transform).
+                Transform.translate(
+                  offset: Offset(0, -(t.minTouchTarget - 28) / 2),
+                  child: BzCheck(
+                    value: done,
+                    onChanged: onChanged,
+                    label: 'Krok $number: ${item.text}',
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           if (current)
             Positioned(
-              left: 0,
-              top: 10,
-              bottom: 10,
+              left: -t.space2,
+              top: t.space3,
+              bottom: t.space3,
               width: 3,
               child: DecoratedBox(
                 decoration: BoxDecoration(

@@ -6,7 +6,6 @@ import '../../../alarm/panel/call_panel.dart'
 import '../../../ratunek/ui/rescue_situation.dart';
 import '../../../wspolne/shell/sos_button.dart'
     show UriLauncher, defaultSosLauncher;
-import '../panel_card.dart';
 import '../template_registry.dart';
 
 export '../../../alarm/panel/call_panel.dart' show call112Label;
@@ -19,7 +18,7 @@ const String callTitle = 'Wezwij pomoc';
 final callLauncherProvider = Provider<UriLauncher>((ref) => defaultSosLauncher);
 
 /// `call` template (DS `CallPanel`, `inline`): the same component as Panel 2
-/// (`ContactCallPanel`) inside a `PanelCard`, so the buttons, the GPS line, the
+/// (`ContactCallPanel`) in its red "Wezwij pomoc" group, so the buttons, the GPS line, the
 /// contacts state ("Nie masz kontaktów alarmowych" / "Dodaj kontakty") and the
 /// "Więcej" row behave identically.
 class CallPanelView extends ConsumerWidget {
@@ -36,13 +35,11 @@ class CallPanelView extends ConsumerWidget {
   final VoidCallback? onAddContacts;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => PanelCard(
+  Widget build(BuildContext context, WidgetRef ref) => ContactCallPanel(
     title: callTitle,
-    child: ContactCallPanel(
-      variant: ContactPanelVariant.inline,
-      situation: situation ?? ref.watch(rescueCardNameProvider(cardId)),
-      onAddContacts: onAddContacts,
-    ),
+    variant: ContactPanelVariant.inline,
+    situation: situation ?? ref.watch(rescueCardNameProvider(cardId)),
+    onAddContacts: onAddContacts,
   );
 }
 

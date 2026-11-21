@@ -38,7 +38,11 @@ class ShellPanels extends Notifier<ShellPanelsState> {
   @override
   ShellPanelsState build() => const ShellPanelsState();
 
-  void openDrawer() => state = state.copyWith(drawerOpen: true);
+  void openDrawer() {
+    // The drawer covers the composer: close the keyboard with it.
+    FocusManager.instance.primaryFocus?.unfocus();
+    state = state.copyWith(drawerOpen: true);
+  }
   void closeDrawer() => state = state.copyWith(drawerOpen: false);
   void openContactPanel() => state = state.copyWith(contactOpen: true);
   void closeContactPanel() => state = state.copyWith(contactOpen: false);

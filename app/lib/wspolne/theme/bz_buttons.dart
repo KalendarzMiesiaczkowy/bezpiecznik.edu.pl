@@ -133,7 +133,7 @@ class _BzButtonState extends State<BzButton> {
         fg = t.danger;
         border = t.line150;
       case BzButtonVariant.dangerSolid:
-        fill = t.danger;
+        fill = active ? Color.alphaBlend(t.overlayPress, t.danger) : t.danger;
         fg = t.bg000;
       case BzButtonVariant.sos:
         fill = _pressed
@@ -146,8 +146,11 @@ class _BzButtonState extends State<BzButton> {
 
     final iconOnly = widget.label == null;
     final stacked = widget.sub != null;
+    // DS: the stacked xl label ("Zadzwoń 112") is 20 px extra bold.
+    final bigStack = stacked && sz == BzButtonSize.xl;
     final labelStyle = t.label.copyWith(
-      fontSize: sz.fontSize,
+      fontSize: bigStack ? t.step.fontSize : sz.fontSize,
+      fontWeight: bigStack ? FontWeight.w800 : null,
       height: stacked ? 1.15 : null,
       color: fg,
     );
@@ -211,19 +214,16 @@ class _BzButtonState extends State<BzButton> {
     Widget visual = AnimatedContainer(
       duration: t.durationFast,
       curve: t.easeInOut,
-      height: visualHeight,
-      width: iconOnly ? visualHeight : null,
+      // Minimum, not fixed: the pill grows with the system font scale instead
+      // of clipping its label.
+      constraints: BoxConstraints(
+        minHeight: visualHeight,
+        minWidth: iconOnly ? visualHeight : 0,
+      ),
       padding: iconOnly
           ? EdgeInsets.zero
           : EdgeInsets.symmetric(horizontal: sz.hPadding),
       decoration: decoration,
-      foregroundDecoration: _focused
-          ? ShapeDecoration(
-              shape: iconOnly
-                  ? CircleBorder(side: BorderSide(color: t.signal, width: 2))
-                  : StadiumBorder(side: BorderSide(color: t.signal, width: 2)),
-            )
-          : null,
       child: Row(
         mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -235,6 +235,30 @@ class _BzButtonState extends State<BzButton> {
       opacity: _enabled || widget.loading ? 1 : 0.38,
       child: visual,
     );
+
+    // DS focus: 2 px `signal` ring with a 2 px gap, so it reads on any fill.
+    if (_focused) {
+      final ring = BorderSide(color: t.signal, width: 2);
+      visual = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          visual,
+          Positioned(
+            left: -4,
+            top: -4,
+            right: -4,
+            bottom: -4,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: ShapeDecoration(
+                  shape: iconOnly ? CircleBorder(side: ring) : StadiumBorder(side: ring),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
 
     // The hit area is padded up to the minimum touch target around the visual.
     final hit = ConstrainedBox(

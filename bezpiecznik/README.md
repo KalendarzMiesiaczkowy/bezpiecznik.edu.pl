@@ -48,6 +48,9 @@ Ten folder to **przepis na aplikację**: jedyne źródło prawdy dla budującego
 **8. Design system**
 - [Przegląd i zasady](08-design-system/README.md) · [Mapa komponentów i odstępstwa od specyfikacji](08-design-system/komponenty.md) · [Tokeny](08-design-system/api/tokens.md) (`tokens.json`, `tokens.css`) · [Ruch](08-design-system/motion.md)
 
+**9. Landing**
+- [Plan strony do pobrania aplikacji](09-landing/README.md): hasło, sekcje, ekrany aplikacji, blokery, decyzje
+
 ## Priorytety w skrócie
 
 | Priorytet | Znaczenie |

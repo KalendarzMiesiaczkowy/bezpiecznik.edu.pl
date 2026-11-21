@@ -8,6 +8,7 @@ import 'package:bezpiecznik/mapa/map_pack_pending.dart';
 import 'package:bezpiecznik/mapa/position_provider.dart';
 import 'package:bezpiecznik/paczki/pack.dart';
 import 'package:bezpiecznik/paczki/pack_controller.dart';
+import 'package:bezpiecznik/wspolne/theme/bz_buttons.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -190,7 +191,7 @@ void main() {
     addTearDown(controller.close);
     await pump(tester, LocationAccess.granted, stream: controller.stream);
     final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
-    final nearest = find.ancestor(of: find.text('Najbliższy schron'), matching: find.byType(FilledButton));
+    final nearest = find.ancestor(of: find.text('Najbliższy schron'), matching: find.byType(BzButton));
     expect(nearest, findsOneWidget);
     final rect = tester.getRect(nearest);
     expect(rect.width, screenWidth - 32);

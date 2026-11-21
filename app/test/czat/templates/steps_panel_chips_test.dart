@@ -48,15 +48,15 @@ Future<void> _pump(WidgetTester tester, List<String> ids) async {
 void main() {
   testWidgets('same source on 3 steps -> one chip (first step)', (tester) async {
     await _pump(tester, ['a', 'a', 'a']);
-    expect(find.text('▸ ERC, s. 67'), findsOneWidget);
+    expect(find.text('ERC, s.\u00A067'), findsOneWidget);
   });
 
   testWidgets('A, A, B -> two chips; A, B, A -> three', (tester) async {
     await _pump(tester, ['a', 'a', 'b']);
-    expect(find.text('▸ ERC, s. 67'), findsOneWidget);
-    expect(find.text('▸ ERC, s. 70'), findsOneWidget);
+    expect(find.text('ERC, s.\u00A067'), findsOneWidget);
+    expect(find.text('ERC, s.\u00A070'), findsOneWidget);
     await _pump(tester, ['a', 'b', 'a']);
-    expect(find.text('▸ ERC, s. 67'), findsNWidgets(2));
+    expect(find.text('ERC, s.\u00A067'), findsNWidgets(2));
   });
 
   testWidgets('checkbox visual box centre aligns with number circle centre', (tester) async {

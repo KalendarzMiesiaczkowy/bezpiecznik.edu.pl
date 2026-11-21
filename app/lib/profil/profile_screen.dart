@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../wspolne/theme/bz_buttons.dart';
 import '../wspolne/theme/bz_theme.dart';
 import '../wspolne/theme/top_fade.dart';
 import 'profile_form.dart';
@@ -67,28 +68,40 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         children: [
           SafeArea(
             child: profile.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => const Center(
-                child: Text(
-                  'Nie mogę odczytać profilu. Możesz utworzyć go od nowa.',
+              loading: () =>
+                  Center(child: BzSpinner(color: bz.ink200, size: 24)),
+              error: (_, _) => Center(
+                child: Padding(
+                  padding: EdgeInsets.all(bz.space4),
+                  child: Text(
+                    'Nie mogę odczytać profilu. Możesz utworzyć go od nowa.',
+                    textAlign: TextAlign.center,
+                    style: bz.chat.copyWith(color: bz.ink200),
+                  ),
                 ),
               ),
               data: (p) => ListView(
-                padding: const EdgeInsets.fromLTRB(16, 96, 16, 32),
+                padding: EdgeInsets.fromLTRB(
+                  bz.space4,
+                  96,
+                  bz.space4,
+                  bz.space6,
+                ),
                 children: [
                   Text('Profil domu', style: bz.title),
-                  const SizedBox(height: 8),
+                  SizedBox(height: bz.space2),
                   Text(
                     'Zostaje w telefonie. Wysyłasz go tylko ty, np. SMS-em do bliskich. Nie ma konta ani serwera.',
-                    style: bz.caption,
+                    style: bz.caption.copyWith(color: bz.ink200),
                   ),
                   if (p.isEmpty) ...[
-                    const SizedBox(height: 8),
+                    SizedBox(height: bz.space2),
                     Text(
                       'Profil jest pusty. Uzupełnij go, żeby odpowiedzi dotyczyły twojej rodziny.',
-                      style: bz.chat,
+                      style: bz.caption.copyWith(color: bz.ink200),
                     ),
                   ],
+                  SizedBox(height: bz.space2),
                   ProfileForm(initial: p, onChanged: _onChanged),
                 ],
               ),

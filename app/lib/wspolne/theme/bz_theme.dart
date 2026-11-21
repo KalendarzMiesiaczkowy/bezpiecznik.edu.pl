@@ -167,6 +167,9 @@ ThemeData buildBzTheme({BzTokens tokens = BzTokens.dark}) {
           baseButton(
             bg: disabledAware(t.action, t.actionPress),
             fg: disabledAware(t.onAction),
+            side: WidgetStateProperty.resolveWith(
+              (s) => s.contains(WidgetState.focused) ? focusRing : BorderSide.none,
+            ),
           ).copyWith(
             // Primary hover is a solid colour (action-press), not an overlay.
             overlayColor: WidgetStateProperty.all(Colors.transparent),
@@ -224,10 +227,11 @@ ThemeData buildBzTheme({BzTokens tokens = BzTokens.dark}) {
       filled: true,
       fillColor: t.bg100,
       constraints: BoxConstraints(minHeight: t.minTouchTarget),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      contentPadding: EdgeInsets.symmetric(horizontal: t.space4, vertical: t.space3),
       labelStyle: t.label.copyWith(color: t.ink200),
       floatingLabelStyle: t.label.copyWith(color: t.ink200),
-      hintStyle: t.chat.copyWith(fontSize: 16, color: t.ink300),
+      // Same size as the typed text (bodyLarge = chat), so nothing jumps.
+      hintStyle: t.chat.copyWith(color: t.ink300),
       helperStyle: t.caption.copyWith(color: t.ink300),
       errorStyle: t.caption.copyWith(color: t.danger),
       border: fieldBorder,

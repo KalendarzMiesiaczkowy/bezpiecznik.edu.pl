@@ -262,17 +262,37 @@ void main() {
     },
   );
 
-  testWidgets('SOS is hit-testable above an open drawer and above P2', (
+  testWidgets('open drawer covers SOS: a tap there closes the drawer, no P2', (
     tester,
   ) async {
     final h = await pumpApp(tester);
     h.panels.openDrawer();
     await tester.pumpAndSettle();
+    await tester.tap(sos(), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(h.container.read(shellPanelsProvider).contactOpen, isFalse);
+  });
+
+  testWidgets('SOS is hit-testable above P2', (tester) async {
+    final h = await pumpApp(tester);
+    h.panels.openContactPanel();
+    await tester.pumpAndSettle();
     await tester.tap(sos());
     await tester.pumpAndSettle();
     expect(h.container.read(shellPanelsProvider).contactOpen, isTrue);
-    // P2 above P1: the SOS tap must not have been swallowed by the scrim.
-    expect(h.container.read(shellPanelsProvider).drawerOpen, isTrue);
+  });
+
+  testWidgets('opening the drawer closes the keyboard', (tester) async {
+    final h = await pumpApp(tester);
+    final node = FocusNode();
+    addTearDown(node.dispose);
+    await tester.pumpWidget(Focus(focusNode: node, child: const SizedBox()));
+    node.requestFocus();
+    await tester.pump();
+    expect(node.hasFocus, isTrue);
+    h.panels.openDrawer();
+    await tester.pump();
+    expect(node.hasFocus, isFalse);
   });
 
   testWidgets('system back closes P2, then the drawer, then pops the screen', (

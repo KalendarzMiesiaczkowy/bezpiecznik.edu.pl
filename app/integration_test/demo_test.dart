@@ -107,7 +107,7 @@ void main() {
     mark('answer');
     await linger(tester, 1.5);
     await typeAndSend(tester, 'Co spakować do plecaka ewakuacyjnego?');
-    final ok = await pumpUntil(tester, find.textContaining('▸ '), timeout: const Duration(seconds: 40));
+    final ok = await pumpUntil(tester, find.textContaining(', s.\u00A0'), timeout: const Duration(seconds: 40));
     expect(ok, isTrue);
     await linger(tester, 5);
     await typeAndSend(tester, 'przepis na pierogi');

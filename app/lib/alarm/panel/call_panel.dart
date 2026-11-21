@@ -51,6 +51,7 @@ final canSendSmsProvider = FutureProvider<bool>((ref) async {
 class ContactCallPanel extends ConsumerStatefulWidget {
   const ContactCallPanel({
     super.key,
+    this.title,
     this.variant = ContactPanelVariant.sheet,
     this.situation,
     this.signalBuilder,
@@ -59,6 +60,9 @@ class ContactCallPanel extends ConsumerStatefulWidget {
   });
 
   final ContactPanelVariant variant;
+
+  /// Title of the red "Wezwij pomoc" group (`inline` only).
+  final String? title;
 
   /// SMS `{opis}`: rescue card name or last user message.
   final String? situation;
@@ -196,61 +200,30 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
     final pos = gps?.position;
     final sheet = widget.variant == ContactPanelVariant.sheet;
 
-    final children = <Widget>[
-      if (sheet)
-        Row(
-          children: [
-            _IconTap(icon: LucideIcons.x, label: 'Zamknij', onTap: _close),
-            const SizedBox(width: 8),
-            Expanded(child: Text(callPanelTitle, style: bz.title)),
-          ],
-        ),
-      if (sheet) const SizedBox(height: 12),
-      _BigButton(
-        key: const Key('call-112'),
-        label: call112Label,
-        sub: call112Sub,
-        semantics: call112Semantics,
-        icon: LucideIcons.phone,
-        filled: true,
-        onTap: () => _dial('112'),
-      ),
-      const SizedBox(height: 12),
-      _BigButton(
-        key: const Key('call-notify'),
-        label: callSmsLabel,
-        sub: callSmsSub,
-        icon: LucideIcons.messageSquare,
-        filled: false,
-        onTap: canSms ? () => _notify(recipients, gps, facts) : null,
-      ),
-      const SizedBox(height: 8),
+    final contacts = <Widget>[
       if (!canSms)
-        Text(
-          'Ten telefon nie wysyła SMS-ów.',
-          style: bz.caption.copyWith(color: bz.ink200),
-        )
-      else ...[
-        if (recipients.isEmpty) ...[
-          _LinkButton(label: 'Dodaj kontakty', onTap: _addContacts),
-        ] else
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Do: ${names.isEmpty ? recipients.join(', ') : names.join(', ')}',
-                  style: bz.caption,
-                ),
-              ),
-              _LinkButton(label: 'Zmień', onTap: _addContacts),
-            ],
+        Padding(
+          padding: EdgeInsets.only(top: bz.space2),
+          child: Text(
+            'Ten telefon nie wysyła SMS-ów.',
+            style: bz.caption.copyWith(color: bz.ink200),
           ),
-      ],
-      const SizedBox(height: 4),
-      Text(
-        _gpsLine(gps),
-        key: const Key('call-gps'),
-        style: bz.caption.copyWith(color: bz.ink200),
+        )
+      else if (recipients.isEmpty)
+        _LinkButton(label: 'Dodaj kontakty', onTap: _addContacts),
+      // GPS state and the quiet "Zmień" (recipients) share one row.
+      Row(
+        children: [
+          Expanded(
+            child: Text(
+              _gpsLine(gps),
+              key: const Key('call-gps'),
+              style: bz.caption.copyWith(color: bz.ink200),
+            ),
+          ),
+          if (canSms && recipients.isNotEmpty)
+            _LinkButton(label: 'Zmień', onTap: _addContacts),
+        ],
       ),
       if (noPermission)
         _LinkButton(
@@ -267,62 +240,128 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
         ),
       if (_notice != null)
         Padding(
-          padding: const EdgeInsets.only(top: 8),
+          padding: EdgeInsets.only(top: bz.space2),
           child: Semantics(
             liveRegion: true,
             child: Container(
               key: const Key('call-notice'),
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(bz.space3),
               decoration: BoxDecoration(
                 color: bz.bg300,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(bz.radiusMd),
               ),
               child: Text(_notice!, style: bz.chat),
             ),
           ),
         ),
-      const SizedBox(height: 12),
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          for (final (n, name) in const [
-            ('999', 'Pogotowie'),
-            ('998', 'Straż'),
-            ('997', 'Policja'),
-          ])
-            // Three per row when they fit, otherwise they wrap to the next line.
-            ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 96),
-              child: IntrinsicWidth(
-                child: _SmallDial(
-                  key: Key('call-$n'),
-                  label: '$n · $name',
-                  onTap: () => _dial(n),
-                ),
-              ),
-            ),
-        ],
+    ];
+
+    final buttons = <Widget>[
+      _BigButton(
+        key: const Key('call-112'),
+        label: call112Label,
+        sub: call112Sub,
+        semantics: call112Semantics,
+        icon: LucideIcons.phone,
+        filled: true,
+        onTap: () => _dial('112'),
       ),
-      Divider(color: bz.line100, height: 24),
-      InkWell(
-        key: const Key('call-more'),
-        onTap: () => setState(() => _more = !_more),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
+      SizedBox(height: bz.space3),
+      _BigButton(
+        key: const Key('call-notify'),
+        label: callSmsLabel,
+        // Recipients live in the subtitle (DS CallPanel): "SMS z lokalizacją do: Mama".
+        sub: canSms && recipients.isNotEmpty
+            ? '$callSmsSub do: ${names.isEmpty ? recipients.join(', ') : names.join(', ')}'
+            : callSmsSub,
+        icon: LucideIcons.users,
+        filled: false,
+        onTap: canSms ? () => _notify(recipients, gps, facts) : null,
+      ),
+      ...contacts,
+    ];
+
+    final more = _MoreToggle(
+      key: const Key('call-more'),
+      expand: sheet,
+      open: _more,
+      onTap: () => setState(() => _more = !_more),
+    );
+    final dials = Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: bz.space4,
+      children: [
+        for (final (n, name) in const [
+          ('999', 'Pogotowie'),
+          ('998', 'Straż'),
+          ('997', 'Policja'),
+        ])
+          _SmallDial(
+            key: Key('call-$n'),
+            number: n,
+            name: name,
+            onTap: () => _dial(n),
+          ),
+      ],
+    );
+
+    final children = <Widget>[
+      if (sheet) ...[
+        Row(
+          children: [
+            _IconTap(icon: LucideIcons.x, label: 'Zamknij', onTap: _close),
+            SizedBox(width: bz.space2),
+            Expanded(child: Text(callPanelTitle, style: bz.step)),
+          ],
+        ),
+        SizedBox(height: bz.space3),
+        ...buttons,
+        SizedBox(height: bz.space2),
+        dials,
+        Divider(color: bz.line100, height: bz.space5),
+        more,
+      ] else ...[
+        // "Wezwij pomoc" group: the only red-outlined block (DS `.bz-panel--sos`).
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: bz.sosTint,
+            border: Border.all(color: bz.sos),
+            borderRadius: BorderRadius.circular(bz.radiusLg),
+          ),
+          child: Padding(
+            // The GPS / "Zmień" row already carries a 48 dp target: less bottom pad.
+            padding: EdgeInsets.fromLTRB(bz.space4, bz.space4, bz.space4, bz.space2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (widget.title != null) ...[
+                  Text(
+                    widget.title!,
+                    style: bz.label.copyWith(
+                      fontSize: 16,
+                      height: 22 / 16,
+                      fontWeight: FontWeight.w700,
+                      color: bz.sosText,
+                    ),
+                  ),
+                  SizedBox(height: bz.space3),
+                ],
+                ...buttons,
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: bz.space1),
           child: Row(
             children: [
-              Expanded(child: Text('Więcej', style: bz.label)),
-              Icon(
-                _more ? LucideIcons.chevronUp : LucideIcons.chevronDown,
-                size: 20,
-                color: bz.ink200,
-              ),
+              Expanded(child: dials),
+              more,
             ],
           ),
         ),
-      ),
+      ],
       if (_more) ..._moreChildren(bz, pos),
     ];
 
@@ -334,15 +373,15 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
     return SafeArea(
       top: false,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(bz.space4),
         child: column,
       ),
     );
   }
 
   List<Widget> _moreChildren(BzTokens bz, Position? pos) => [
-    const SizedBox(height: 12),
-    Text('Twoja pozycja', style: bz.label),
+    SizedBox(height: bz.space3),
+    Text('Twoja pozycja', style: bz.label.copyWith(color: bz.ink200)),
     if (pos == null)
       Text('Brak pozycji.', style: bz.caption.copyWith(color: bz.ink200))
     else
@@ -355,17 +394,19 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
             alignment: Alignment.centerLeft,
             child: Text(
               '${pos.latitude.toStringAsFixed(5)}, ${pos.longitude.toStringAsFixed(5)}\n${formatDms(pos.latitude, pos.longitude)}',
-              style: bz.readout,
+              style: bz.step.copyWith(
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ),
       ),
-    const SizedBox(height: 8),
+    SizedBox(height: bz.space2),
     Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(LucideIcons.info, size: 16, color: bz.ink200),
-        const SizedBox(width: 8),
+        SizedBox(width: bz.space2),
         Expanded(
           child: Text(
             callAmlNote,
@@ -374,28 +415,18 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
         ),
       ],
     ),
-    const SizedBox(height: 12),
-    Text(callSaySection, style: bz.label),
-    const SizedBox(height: 4),
+    SizedBox(height: bz.space3),
+    Text(callSaySection, style: bz.label.copyWith(color: bz.ink200)),
+    SizedBox(height: bz.space1),
     Text(callSay, style: bz.chat),
     if (widget.signalBuilder != null) ...[
-      const SizedBox(height: 8),
-      InkWell(
+      SizedBox(height: bz.space2),
+      _MoreToggle(
         key: const Key('call-signal'),
+        label: 'Sygnał ratunkowy',
+        open: _signal,
+        expand: true,
         onTap: () => setState(() => _signal = !_signal),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 48),
-          child: Row(
-            children: [
-              Expanded(child: Text('Sygnał ratunkowy', style: bz.label)),
-              Icon(
-                _signal ? LucideIcons.chevronUp : LucideIcons.chevronDown,
-                size: 20,
-                color: bz.ink200,
-              ),
-            ],
-          ),
-        ),
       ),
       if (_signal) Builder(builder: widget.signalBuilder!),
     ],
@@ -435,26 +466,25 @@ class _BigButton extends StatelessWidget {
         child: Material(
           color: filled ? bz.sos : Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(bz.radiusFull),
-            side: filled ? BorderSide.none : BorderSide(color: bz.line150),
+            borderRadius: BorderRadius.circular(bz.radiusLg),
+            side: filled ? BorderSide.none : BorderSide(color: bz.line200),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(bz.radiusFull),
+            borderRadius: BorderRadius.circular(bz.radiusLg),
+            highlightColor: bz.overlayPress,
+            splashColor: Colors.transparent,
             onTap: onTap,
             // Grows with text scale: min 80, labels wrap instead of clipping.
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 80),
+              // DS `.bz-call__btn`: left-aligned stack, 12 x 20 padding, 16 gap.
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: bz.space3),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(icon, size: 24, color: fg),
-                    const SizedBox(width: 12),
-                    Flexible(
+                    SizedBox(width: bz.space4),
+                    Expanded(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,12 +492,18 @@ class _BigButton extends StatelessWidget {
                           Text(
                             label,
                             softWrap: true,
-                            style: bz.label.copyWith(fontSize: 18, color: fg),
+                            style: bz.step.copyWith(
+                              height: 26 / 20,
+                              fontWeight: FontWeight.w800,
+                              color: fg,
+                            ),
                           ),
                           Text(
                             sub,
                             softWrap: true,
-                            style: bz.caption.copyWith(
+                            style: bz.label.copyWith(
+                              height: 18 / 14,
+                              fontWeight: FontWeight.w500,
                               color: fg.withValues(alpha: 0.85),
                             ),
                           ),
@@ -485,9 +521,16 @@ class _BigButton extends StatelessWidget {
   }
 }
 
+/// Quiet text dial ("999 Pogotowie"): no frame, 48 dp hit area.
 class _SmallDial extends StatelessWidget {
-  const _SmallDial({super.key, required this.label, required this.onTap});
-  final String label;
+  const _SmallDial({
+    super.key,
+    required this.number,
+    required this.name,
+    required this.onTap,
+  });
+  final String number;
+  final String name;
   final VoidCallback onTap;
 
   @override
@@ -495,31 +538,79 @@ class _SmallDial extends StatelessWidget {
     final bz = context.bz;
     return Semantics(
       button: true,
-      label: 'Zadzwoń: $label',
+      label: 'Zadzwoń: $number $name',
       excludeSemantics: true,
-      child: Material(
-        color: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: bz.line150),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 56),
-            child: Center(
-              widthFactor: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: bz.caption.copyWith(color: bz.ink100),
-                ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(bz.radiusSm),
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: bz.minTouchTarget),
+          child: Center(
+            widthFactor: 1,
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: number,
+                    style: bz.label.copyWith(
+                      color: bz.ink200,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' $name',
+                    style: bz.label.copyWith(
+                      color: bz.ink300,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Collapsible row toggle ("Więcej", "Sygnał ratunkowy"): label + chevron.
+class _MoreToggle extends StatelessWidget {
+  const _MoreToggle({
+    super.key,
+    this.label = 'Więcej',
+    required this.open,
+    required this.onTap,
+    this.expand = false,
+  });
+  final String label;
+  final bool open;
+  final VoidCallback onTap;
+
+  /// Full-width row (sheet) instead of a compact trailing toggle (inline).
+  final bool expand;
+
+  @override
+  Widget build(BuildContext context) {
+    final bz = context.bz;
+    final text = Text(label, style: bz.label.copyWith(color: bz.ink100));
+    return InkWell(
+      borderRadius: BorderRadius.circular(bz.radiusSm),
+      onTap: onTap,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: bz.minTouchTarget),
+        child: Row(
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            if (expand) Expanded(child: text) else text,
+            SizedBox(width: bz.space1),
+            Icon(
+              open ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+              size: 20,
+              color: bz.ink200,
+            ),
+          ],
         ),
       ),
     );
