@@ -1,0 +1,83 @@
+/// Builds [AssistantAnswer]s (panels + source records) for the pipeline.
+library;
+
+import '../retrieval/retriever.dart';
+import '../templates/panel_model.dart';
+
+/// How many chunks the quote fallback shows.
+const int kFallbackQuotes = 3;
+
+Map<String, Object?> _sourceJson(KbChunk c) => {
+  'source_id': c.id,
+  'doc_id': c.docId,
+  'doc_title': c.title,
+  'doc_short': c.docShort,
+  'publisher': c.publisher,
+  'page_label': c.pageLabel,
+  'pdf_page': c.pdfPage,
+  'text': c.text,
+};
+
+const Map<String, Object?> _callPanel = {'type': 'call'};
+
+List<Map<String, Object?>> _withCall(
+  List<Map<String, Object?>> panels,
+  bool risk,
+) => [if (risk) _callPanel, ...panels];
+
+/// Answer from validated model panels. `call` goes first when [risk].
+AssistantAnswer buildModelAnswer(
+  List<Map<String, Object?>> panels,
+  List<KbChunk> chunks, {
+  required bool risk,
+}) {
+  final used = <String>{};
+  for (final p in panels) {
+    final id = p['source_id'];
+    if (id is String) used.add(id);
+    final items = p['items'];
+    if (items is List) {
+      for (final e in items) {
+        if (e is Map && e['source_id'] is String) used.add(e['source_id'] as String);
+      }
+    }
+  }
+  return AssistantAnswer.fromJson({
+    'origin': 'ai',
+    'panels': _withCall(panels, risk),
+    'sources': {
+      for (final c in chunks)
+        if (used.contains(c.id)) c.id: _sourceJson(c),
+    },
+  });
+}
+
+/// Quote panels of the best chunks (sourced, no model text). [modelOff] marks
+/// the "no AI" origin (engine unavailable); validation failures stay `ai`.
+AssistantAnswer buildQuoteFallback(
+  List<KbChunk> chunks, {
+  required bool risk,
+  required bool modelOff,
+}) {
+  final top = chunks.take(kFallbackQuotes).toList();
+  return AssistantAnswer.fromJson({
+    'origin': modelOff ? 'no_ai' : 'ai',
+    'panels': _withCall([
+      for (final c in top) {'type': 'quote', 'source_id': c.id},
+    ], risk),
+    'sources': {for (final c in top) c.id: _sourceJson(c)},
+  });
+}
+
+/// The two calm refusals. Never carries a `call` panel except for a risk
+/// phrase in a `noSource` case (spec: "Gdy wiadomość zawiera frazę ryzyka,
+/// aplikacja dodaje szablon call"). Off-topic never gets 112.
+AssistantAnswer buildRefusal(NoSourceKind kind, {bool risk = false}) {
+  final callAllowed = risk && kind == NoSourceKind.noSource;
+  return AssistantAnswer.fromJson({
+    'origin': 'refusal',
+    'panels': _withCall([
+      {'type': 'no_source', 'kind': kind.jsonValue},
+    ], callAllowed),
+  });
+}
