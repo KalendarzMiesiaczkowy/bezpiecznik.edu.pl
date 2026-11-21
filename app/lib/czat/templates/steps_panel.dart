@@ -54,7 +54,7 @@ class StepsPanelView extends StatelessWidget {
               number: i + 1,
               item: items[i],
               source: _chipSource(scope, items, i),
-              variant: scope.variant,
+              variant: scope.variant ?? scope.answer.selectedVariant,
               done: done.contains(i),
               current: i == current,
               onChanged: (v) => scope.onDoneChanged(i, v),

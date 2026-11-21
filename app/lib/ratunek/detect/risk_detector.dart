@@ -117,6 +117,19 @@ class RiskDetector {
     );
   }
 
+  /// `infant` / `child` when [userMessage] names an age group, else null.
+  /// For cards without variants whose links lead to an aged card (RKO).
+  String? ageVariant(String userMessage) {
+    final tokens = _tokenize(userMessage);
+    if (tokens.isEmpty) return null;
+    final v = _variant(tokens, const ['infant', 'child']);
+    return _hasAge(tokens, v) ? v : null;
+  }
+
+  bool _hasAge(List<String> tokens, String v) => tokens.any(
+    (w) => _variantWordsOf(v).any((t) => _tokenMatches(t, w)),
+  );
+
   /// True when [userMessage] should get the `call` template: a risk phrase or
   /// any rescue-card phrase matches.
   bool isRisk(String userMessage) {

@@ -36,7 +36,12 @@ class RescueAnswerService {
     if (hit == null) return null;
     final c = cards.card(hit.cardId);
     if (c == null) return null;
-    return buildAnswer(c, requestedVariant: hit.variant);
+    final answer = buildAnswer(c, requestedVariant: hit.variant);
+    // A card without variants (unconscious) still carries the age from the
+    // text, so its links (-> RKO) open the right variant (BG102).
+    if (answer.selectedVariant != null || hit.variant != null) return answer;
+    final age = detector.ageVariant(question);
+    return age == null ? answer : answer.copyWith(selectedVariant: age);
   }
 
   /// Converts [c] into a chat answer: `call` first, then `cpr`, then the card panels with
@@ -57,7 +62,8 @@ class RescueAnswerService {
     final panels = <Map<String, Object?>>[
       if (includeCall) {'type': 'call'},
       for (final p in c.panels.whereType<card.CprPanel>()) ?_panelJson(p),
-      for (final p in c.panels.where((p) => p is! card.CprPanel)) ?_panelJson(p),
+      for (final p in c.panels.where((p) => p is! card.CprPanel))
+        ?_panelJson(p),
     ];
     final sources = <String, Object?>{};
     for (final id in <String>{...c.citedSourceIds, ...c.sourceIds}) {

@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:bezpiecznik/czat/templates/panel_model.dart';
 import 'package:bezpiecznik/czat/ui/answer_service.dart';
-import 'package:bezpiecznik/ratunek/cards/rescue_card.dart' show RescueCardRepository, rescueCardIds;
+import 'package:bezpiecznik/ratunek/cards/rescue_card.dart'
+    show RescueCardRepository, rescueCardIds;
 import 'package:bezpiecznik/ratunek/ui/rescue_answer.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -152,7 +153,10 @@ void main() {
   });
 
   test('answerForCard: steps only, requested variant, adult fallback, unknown card', () async {
-    final aedRepo = await RescueCardRepository.load(_FileBundle(), ids: rescueCardIds);
+    final aedRepo = await RescueCardRepository.load(
+      _FileBundle(),
+      ids: rescueCardIds,
+    );
     final withAed = RescueAnswerService(
       detector: service.detector,
       cards: aedRepo,
@@ -162,8 +166,37 @@ void main() {
     expect(child.selectedVariant, 'child');
     expect(child.panels.whereType<CallPanel>(), isEmpty);
     expect(child.panels.whereType<StepsPanel>(), hasLength(1));
-    expect(withAed.answerForCard('aed', variant: 'nonsense')!.selectedVariant, 'adult');
+    expect(
+      withAed.answerForCard('aed', variant: 'nonsense')!.selectedVariant,
+      'adult',
+    );
     expect(withAed.answerForCard('aed')!.selectedVariant, 'adult');
     expect(withAed.answerForCard('no-such-card'), isNull);
+  });
+
+  test('BG102: age in text survives the variant-less unconscious card into its RKO link', () async {
+    for (final (text, age) in [
+      ('dziecko stracilo przytomnosc ale oddycha', 'child'),
+      ('niemowle stracilo przytomnosc ale oddycha', 'infant'),
+    ]) {
+      final a = (await service.tryAnswer(text))!;
+      expect(a.cardId, 'unconscious');
+      expect(a.selectedVariant, age);
+      expect(
+        service
+            .answerForCard('rko', variant: a.selectedVariant)!
+            .selectedVariant,
+        age,
+      );
+    }
+    final adult = (await service.tryAnswer('stracil przytomnosc ale oddycha'))!;
+    expect(adult.cardId, 'unconscious');
+    expect(adult.selectedVariant, isNull);
+    expect(
+      service
+          .answerForCard('rko', variant: adult.selectedVariant)!
+          .selectedVariant,
+      'adult',
+    );
   });
 }
