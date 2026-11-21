@@ -78,6 +78,9 @@ class _ComposerState extends State<Composer> {
             _RoundAction(
               key: const Key('composer-stop'),
               icon: LucideIcons.square,
+              // DS stop icon is a filled square, not an outline that reads
+              // like the step checkboxes (final QA B10).
+              filledSquare: true,
               label: composerStopLabel,
               onTap: widget.onStop,
               fill: t.bg300,
@@ -156,8 +159,10 @@ class _RoundAction extends StatelessWidget {
     required this.onTap,
     required this.fill,
     required this.color,
+    this.filledSquare = false,
   });
 
+  final bool filledSquare;
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
@@ -186,7 +191,18 @@ class _RoundAction extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
-                child: Icon(icon, size: 20, color: color),
+                child: filledSquare
+                    ? Center(
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      )
+                    : Icon(icon, size: 20, color: color),
               ),
             ),
           ),

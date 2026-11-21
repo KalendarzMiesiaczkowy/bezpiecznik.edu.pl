@@ -156,7 +156,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // 48 dp high.
     final statusBar = MediaQuery.paddingOf(context).top;
     final topInset = statusBar + 8 > 48 ? statusBar + 8 : 48.0;
-    final listTop = topInset + 48 + t.space2;
+    // SOS (56 dp) is taller than the island (48 dp): clear the taller one so
+    // the first bubble never touches SOS (final QA B16).
+    final listTop = topInset + 56 + t.space2;
     _listTop = listTop;
 
     return Scaffold(
