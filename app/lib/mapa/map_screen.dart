@@ -39,6 +39,7 @@ const layersButtonText = 'Warstwy'; // spec: przycisk Warstwy (ekran-2-mapa.md)
 const preparingTitle = 'Przygotowuję mapę…'; // verify:true
 const preparingBody = 'Kopiuję mapę na telefon. Dzieje się to tylko raz. Potem mapa działa bez internetu.'; // verify:true
 const installErrorText = 'Nie mogę przygotować mapy.'; // verify:true
+const installNoSpaceText = 'Za mało miejsca w telefonie. Mapa potrzebuje ok. 110 MB. Zwolnij miejsce i spróbuj ponownie.';
 const retryText = 'Spróbuj ponownie'; // verify:true
 
 /// What the map widget needs; lets tests replace `MapLibreMap` (a platform
@@ -183,8 +184,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   void _startInstall() {
     _assets = () async {
-      final installer = await ref.read(mapInstallerProvider.future);
-      return installer.install(onProgress: (f) => _progress.value = f);
+      try {
+        final installer = await ref.read(mapInstallerProvider.future);
+        return await installer.install(onProgress: (f) => _progress.value = f);
+      } catch (e, st) {
+        // Release builds show only installErrorText; this is the only trace.
+        debugPrint('map install failed: $e\n$st');
+        rethrow;
+      }
     }();
   }
 
@@ -474,6 +481,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             builder: (context, snap) {
               if (snap.hasError) {
                 return _InstallError(
+                  noSpace: '${snap.error}'.contains('No space left') || '${snap.error}'.contains('errno = 28'),
                   onRetry: () => setState(_startInstall),
                 );
               }
@@ -834,9 +842,10 @@ class _Preparing extends StatelessWidget {
 }
 
 class _InstallError extends StatelessWidget {
-  const _InstallError({required this.onRetry});
+  const _InstallError({required this.onRetry, this.noSpace = false});
 
   final VoidCallback onRetry;
+  final bool noSpace;
 
   @override
   Widget build(BuildContext context) {
@@ -846,6 +855,10 @@ class _InstallError extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(installErrorText, style: bz.title, textAlign: TextAlign.center),
+          if (noSpace) ...[
+            SizedBox(height: bz.space2),
+            Text(installNoSpaceText, style: bz.chat, textAlign: TextAlign.center),
+          ],
           SizedBox(height: bz.space3),
           BzButtonLike(label: retryText, onPressed: onRetry),
         ],
