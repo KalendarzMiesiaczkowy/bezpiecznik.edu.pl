@@ -14,7 +14,10 @@ void main() {
     );
     expect(find.text('Do weryfikacji'), findsOneWidget);
     final text = tester.widget<Text>(find.text('Do weryfikacji'));
-    expect(text.style?.color, BzTokens.dark.signal);
+    expect(text.style?.color, BzTokens.dark.ink100);
+    // The amber warning colour stays on the icon.
+    final icon = tester.widget<Icon>(find.byType(Icon));
+    expect(icon.color, BzTokens.dark.signal);
   });
 
   testWidgets('renders in a bare MaterialApp without the token extension', (

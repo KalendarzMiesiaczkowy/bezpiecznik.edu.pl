@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../wspolne/theme/bz_buttons.dart';
 import '../../wspolne/theme/bz_theme.dart';
 import 'geo.dart';
 import 'points_db.dart';
+import 'shelter_layer.dart' show markerStyleFor;
 
 // Spec: ekran-2-mapa.md, texts table.
 const pointConfirmedText = '✓ Potwierdzony'; // map.point.confirmed
@@ -112,15 +114,32 @@ class PointSheet extends StatelessWidget {
       }
     }
     final stale = isStale(point.verifiedAt, now ?? DateTime.now());
-    final btn = Size(bz.minTouchTarget, bz.minTouchTarget);
+    const tabular = [FontFeature.tabularFigures()];
+    final guide = BzButton(
+      label: pointGuideText,
+      onPressed: onGuide,
+      variant: BzButtonVariant.primary,
+      size: BzButtonSize.lg,
+      fullWidth: true,
+    );
+    final compass = BzButton(
+      label: pointCompassText,
+      icon: LucideIcons.compass,
+      onPressed: onCompass,
+      size: BzButtonSize.lg,
+      fullWidth: true,
+    );
+    // Labels never ellipsize: stack the buttons at large text.
+    final stack = MediaQuery.textScalerOf(context).scale(1) > 1.15;
     return SafeArea(
       top: false,
       child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, 24),
+        padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, bz.space5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Identity.
             Text(
               kindLabel(point.kind),
               style: bz.caption.copyWith(color: bz.ink200),
@@ -128,27 +147,36 @@ class PointSheet extends StatelessWidget {
             Text(pointTitle(point), style: bz.title),
             if (point.address != null && pointTitle(point) != point.address)
               Text(point.address!, style: bz.chat.copyWith(color: bz.ink200)),
-            SizedBox(height: bz.space2),
-            Text(availabilityText(point), style: bz.label),
-            if (distanceLine != null)
+            // Getting there.
+            if (distanceLine != null) ...[
+              SizedBox(height: bz.space4),
               Row(
                 children: [
-                  Flexible(child: Text(distanceLine, style: bz.label)),
+                  Flexible(
+                    child: Text(
+                      distanceLine,
+                      style: bz.step.copyWith(fontFeatures: tabular),
+                    ),
+                  ),
                   if (bearing != null) ...[
                     SizedBox(width: bz.space2),
                     BearingArrow(bearing: bearing, color: bz.ink100),
                   ],
                 ],
               ),
-            SizedBox(height: bz.space2),
-            Text(
-              point.confirmed
-                  ? pointConfirmedText
-                  : pointUnconfirmedText(point.source),
-              style: bz.label.copyWith(
-                color: point.confirmed ? bz.verified : bz.ink100,
+            ],
+            SizedBox(height: distanceLine == null ? bz.space4 : bz.space1),
+            Text(availabilityText(point), style: bz.label.copyWith(color: bz.ink200)),
+            // Provenance.
+            SizedBox(height: bz.space4),
+            if (point.confirmed)
+              _StatusChip(text: pointConfirmedText)
+            else
+              Text(
+                pointUnconfirmedText(point.source),
+                style: bz.label.copyWith(color: bz.ink100),
               ),
-            ),
+            SizedBox(height: bz.space1),
             Text(
               pointSourceText(point.source, point.verifiedAt),
               style: bz.caption.copyWith(color: bz.ink200),
@@ -156,29 +184,77 @@ class PointSheet extends StatelessWidget {
             if (stale)
               Text(
                 pointStaleText,
-                style: bz.caption.copyWith(color: bz.highlight),
+                style: bz.caption.copyWith(color: bz.signal),
               ),
-            SizedBox(height: bz.space4),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton(
-                    onPressed: onGuide,
-                    style: FilledButton.styleFrom(minimumSize: btn),
-                    child: const Text(pointGuideText),
-                  ),
-                ),
-                SizedBox(width: bz.space3),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: onCompass,
-                    style: OutlinedButton.styleFrom(minimumSize: btn),
-                    child: const Text(pointCompassText),
-                  ),
-                ),
-              ],
-            ),
+            SizedBox(height: bz.space5),
+            if (stack)
+              Column(children: [guide, SizedBox(height: bz.space3), compass])
+            else
+              Row(
+                children: [
+                  Expanded(child: guide),
+                  SizedBox(width: bz.space3),
+                  Expanded(child: compass),
+                ],
+              ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "✓ Potwierdzony" on `verified-tint`, same look as the DS source chip.
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final bz = context.bz;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: bz.verifiedTint,
+        borderRadius: BorderRadius.circular(bz.radiusFull),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: bz.space3, vertical: bz.space1),
+        child: Text(text, style: bz.source.copyWith(color: bz.verified)),
+      ),
+    );
+  }
+}
+
+/// Small point symbol in the map marker language (`shelter_layer.dart`):
+/// confirmed = `verified` disc with the kind letter, unconfirmed = hollow
+/// ring with "?".
+class PointMarker extends StatelessWidget {
+  const PointMarker({super.key, required this.point, this.size = 32});
+
+  final ShelterPoint point;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final bz = context.bz;
+    final c = point.confirmed;
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: c ? bz.verified : null,
+        border: c ? null : Border.all(color: bz.ink300, width: 2),
+      ),
+      child: Text(
+        markerStyleFor(point).glyph,
+        textScaler: TextScaler.noScaling, // a symbol, not reading text
+        style: bz.label.copyWith(
+          color: c ? bz.bg000 : bz.ink200,
+          fontWeight: FontWeight.w800,
+          height: 1,
         ),
       ),
     );
@@ -206,18 +282,27 @@ class NearestList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bz = context.bz;
-    return Padding(
-      padding: EdgeInsets.all(bz.space4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(nearestTitleText, style: bz.title),
-          SizedBox(height: bz.space2),
-          if (points.isEmpty)
-            Text(outside ? outsideRegionText : noDataText, style: bz.chat),
-          for (final p in points) _row(context, p),
-        ],
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, bz.space5),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(nearestTitleText, style: bz.title),
+            SizedBox(height: bz.space3),
+            if (points.isEmpty)
+              Text(
+                outside ? outsideRegionText : noDataText,
+                style: bz.chat.copyWith(color: bz.ink200),
+              ),
+            for (final (i, p) in points.indexed) ...[
+              if (i > 0) Divider(height: 1, thickness: 1, color: bz.line100),
+              _row(context, p),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -231,14 +316,14 @@ class NearestList extends StatelessWidget {
     return InkWell(
       key: ValueKey('nearest-${p.id}'),
       onTap: () => onSelect(p),
+      borderRadius: BorderRadius.circular(bz.radiusMd),
+      highlightColor: bz.overlayPress,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 56),
         child: Row(
           children: [
-            SizedBox(
-              width: 32,
-              child: Text(p.confirmed ? 'S' : 's?', style: bz.label),
-            ),
+            PointMarker(point: p),
+            SizedBox(width: bz.space3),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,10 +338,14 @@ class NearestList extends StatelessWidget {
                 ],
               ),
             ),
-            Text(trailing, style: bz.label),
+            SizedBox(width: bz.space2),
+            Text(
+              trailing,
+              style: bz.label.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+            ),
             if (bearing != null) ...[
               SizedBox(width: bz.space2),
-              BearingArrow(bearing: bearing, color: bz.ink100),
+              BearingArrow(bearing: bearing, color: bz.ink200),
             ],
           ],
         ),

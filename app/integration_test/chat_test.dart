@@ -41,7 +41,7 @@ void main() {
     await pumpUntil(tester, find.text('Przykładowy krok pierwszy'));
     expect(find.text('Przykładowy krok pierwszy'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('▸ Przykład, s. 14'), findsWidgets);
+    expect(find.text('Przykład, s.\u00A014'), findsWidgets);
     expect((await store.listChats()).single.title, 'Jak przechować insulinę bez prądu?');
   });
 

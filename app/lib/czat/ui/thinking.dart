@@ -18,14 +18,12 @@ class Thinking extends StatefulWidget {
 }
 
 class _ThinkingState extends State<Thinking> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1200),
-  );
+  late final AnimationController _c = AnimationController(vsync: this);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _c.duration = context.bz.durationPulse;
     final reduce = MediaQuery.disableAnimationsOf(context);
     if (reduce) {
       _c.stop();
@@ -76,7 +74,7 @@ class _ThinkingState extends State<Thinking> with SingleTickerProviderStateMixin
             Text(partial, key: const Key('thinking-partial'), style: t.chat.copyWith(color: t.ink200))
           else ...[
             _Line(widthFactor: 1, c: _c),
-            SizedBox(height: 10),
+            SizedBox(height: t.space2),
             _Line(widthFactor: 0.6, c: _c),
           ],
         ],

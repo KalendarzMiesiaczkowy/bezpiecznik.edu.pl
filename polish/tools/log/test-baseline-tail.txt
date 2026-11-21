@@ -1,0 +1,2 @@
+0:18 +767 ~2: /home/weak/Dokumenty/bezpiecznik/Bezpiecznik-polish-shared/app/test/czat/drawer/chat_drawer_test.dart: settings row closes the drawer and opens settings
+00:18 +768 ~2: All tests passed!

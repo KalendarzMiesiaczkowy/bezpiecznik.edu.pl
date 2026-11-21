@@ -119,10 +119,31 @@ class _PanelHostState extends State<PanelHost> with SingleTickerProviderStateMix
                               size.height - MediaQuery.paddingOf(context).top - 72,
                             ),
                           ),
+                          // DS `.bz-sheet`: bg-100, 1 px line-150 edge, radius-xl, grab handle.
                           child: Material(
                             color: bz.bg100,
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(bz.radiusXl)),
-                            child: SafeArea(top: false, child: widget.child),
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(color: bz.line150),
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(bz.radiusXl)),
+                            ),
+                            child: SafeArea(
+                              top: false,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 5,
+                                    margin: EdgeInsets.only(top: bz.space2, bottom: bz.space1),
+                                    decoration: BoxDecoration(
+                                      color: bz.line200,
+                                      borderRadius: BorderRadius.circular(bz.radiusFull),
+                                    ),
+                                  ),
+                                  Flexible(child: widget.child),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),

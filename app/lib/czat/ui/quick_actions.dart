@@ -4,24 +4,22 @@ import 'package:material_ui/material_ui.dart';
 import '../../wspolne/theme/bz_theme.dart';
 
 class QuickAction {
-  const QuickAction(this.label, this.icon, {this.urgent = false});
+  const QuickAction(this.label, this.icon);
 
   final String label;
   final IconData icon;
-
-  /// Only "Ktoś nie oddycha" (icon in `sos-text`).
-  final bool urgent;
 }
 
 /// Default set (spec ekran-1-czat.md "Szybkie przyciski"; "do potwierdzenia").
 const List<QuickAction> defaultQuickActions = [
-  QuickAction('Ktoś nie oddycha', LucideIcons.heartPulse, urgent: true),
-  QuickAction('Brak prądu', LucideIcons.zapOff),
+  QuickAction('Ktoś nie oddycha', LucideIcons.heartPulse),
+  QuickAction('Brak prądu', LucideIcons.zap),
   QuickAction('Alarm / schron', LucideIcons.siren),
-  QuickAction('Ewakuacja', LucideIcons.backpack),
+  QuickAction('Ewakuacja', LucideIcons.footprints),
 ];
 
-/// DS `QuickActions`: 2 x 2 grid, tiles at least 88 dp high (spec: >= 64 dp).
+/// DS `QuickActions`: 2 x 2 grid of filled tiles, at least 88 dp high (spec:
+/// >= 64 dp), icon top left, label below.
 /// A tap sends the label as the user's message.
 class QuickActions extends StatelessWidget {
   const QuickActions({
@@ -45,7 +43,12 @@ class QuickActions extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(child: _Tile(action: actions[i], onTap: () => onSend(actions[i].label))),
+                Expanded(
+                  child: _Tile(
+                    action: actions[i],
+                    onTap: () => onSend(actions[i].label),
+                  ),
+                ),
                 SizedBox(width: t.space2),
                 Expanded(
                   child: i + 1 < actions.length
@@ -93,19 +96,21 @@ class _TileState extends State<_Tile> {
         onTapCancel: () => setState(() => _pressed = false),
         onTapUp: (_) => setState(() => _pressed = false),
         onTap: widget.onTap,
-        child: Container(
+        // Filled `bg-100` tile without a frame (reference start.png); a press
+        // lifts it to `bg-200`.
+        child: AnimatedContainer(
+          duration: t.durationFast,
           constraints: const BoxConstraints(minHeight: 88),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.all(t.space4),
           decoration: BoxDecoration(
-            color: _pressed ? t.overlayPress : null,
-            border: Border.all(color: t.line150),
+            color: _pressed ? t.bg200 : t.bg100,
             borderRadius: BorderRadius.circular(t.radiusLg),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(a.icon, size: 22, color: a.urgent ? t.sosText : t.ink200),
+              Icon(a.icon, size: 22, color: t.ink200),
               SizedBox(height: t.space3),
               FittedBox(
                 fit: BoxFit.scaleDown,
@@ -114,7 +119,11 @@ class _TileState extends State<_Tile> {
                   a.label,
                   maxLines: 1,
                   softWrap: false,
-                  style: t.chat.copyWith(fontSize: 16, height: 22 / 16, fontWeight: FontWeight.w700),
+                  style: t.chat.copyWith(
+                    fontSize: 16,
+                    height: 22 / 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
