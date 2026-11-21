@@ -140,7 +140,7 @@ void main() {
     reachable(t, find.byKey(const Key('onb-profile-later')));
     await step('onb-profile-fill', 'onb-profile-save');
     reachable(t, find.byKey(const Key('onb-profile-skip')));
-    await step('onb-profile-skip', 'onb-start');
+    // No 'Gotowe' step any more (testers 08:21): skip finishes onboarding.
   });
 
   testWidgets('compass: full "Pokaż mapę" label, no exception', (t) async {

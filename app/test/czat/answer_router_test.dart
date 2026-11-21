@@ -77,11 +77,11 @@ void main() {
     expect(engine.requests, isNotEmpty);
   });
 
-  test('off-topic -> refusal without the model', () async {
+  test('off-topic -> one small-talk request; empty reply -> refusal', () async {
     final engine = FakeEngine([]);
     final e = await last(container(engine), 'przepis na pierogi');
     expect((e as AnswerReady).answer.origin, AnswerOrigin.refusal);
-    expect(engine.requests, isEmpty);
+    expect(engine.requests.single.systemPrompt, kChatSystemPrompt);
   });
 
   test('pipeline provider exists for KB questions', () async {

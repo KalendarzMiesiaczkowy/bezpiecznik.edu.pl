@@ -61,6 +61,21 @@ const Set<String> kStateWords = {
   'topielec',
 };
 
+/// Core resuscitation words: never "generic" ([Retriever.kGenericDocSpread]).
+/// The KB's ERC documents (three of them one-chunk summaries) plus the RCB
+/// guide all mention RKO, so the doc-spread rule refused "rko" and
+/// "resuscytacja" as if they were "przy". Normalised.
+// ponytail: explicit list; replace the doc-spread rule if more topics hit it.
+const Set<String> kCoreTopicWords = {
+  'rko',
+  'resuscytacja',
+  'resuscytacji',
+  'resuscytacje',
+  'reanimacja',
+  'reanimacji',
+  'reanimowac',
+};
+
 enum RetrievalDecision { found, noSource, offTopic }
 
 /// One knowledge chunk with its document metadata.
@@ -448,6 +463,7 @@ class Retriever {
   final Map<String, bool> _genericCache = {};
 
   bool _isGeneric(String token) => _genericCache.putIfAbsent(token, () {
+    if (kCoreTopicWords.contains(token)) return false;
     final m = _builder.build(token);
     if (m == null) return false;
     final rows = _kb.db.select(

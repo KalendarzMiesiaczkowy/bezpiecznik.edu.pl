@@ -272,7 +272,44 @@ void main() {
       expect(ev.whereType<AnswerThinking>().length, 1);
     });
 
-    test('offTopic without a risk phrase: refusal, no call panel', () async {
+    test('offTopic small talk: conversational chat_text, no sources, no 112', () async {
+      final e = FakeEngine([
+        ['Rozumiem, ', 'że to stresujące. Weź spokojny oddech.'],
+      ]);
+      final a = ready(await run(
+        svc(e, result: const RetrievalResult(decision: RetrievalDecision.offTopic, chunks: [])),
+        'boję się, pogadaj ze mną',
+      ));
+      expect(types(a), ['chat_text']);
+      expect((a.panels.single as ChatTextPanel).text, 'Rozumiem, że to stresujące. Weź spokojny oddech.');
+      expect(a.sources, isEmpty);
+      expect(e.requests.single.systemPrompt, kChatSystemPrompt);
+      expect(e.requests.single.jsonMode, isFalse);
+    });
+
+    test('offTopic small talk, engine error: off-topic refusal', () async {
+      final a = ready(await run(
+        svc(FakeEngine([const LlmUnavailable('down')]),
+            result: const RetrievalResult(decision: RetrievalDecision.offTopic, chunks: [])),
+        'jak się masz?',
+      ));
+      expect(types(a), ['no_source']);
+      expect((a.panels.single as NoSourcePanel).kind, NoSourceKind.offTopic);
+    });
+
+    test('offTopic with a risk phrase: no conversation, 112', () async {
+      final e = FakeEngine([
+        ['hej'],
+      ]);
+      final a = ready(await run(
+        svc(e, risk: true, result: const RetrievalResult(decision: RetrievalDecision.offTopic, chunks: [])),
+        'pazar',
+      ));
+      expect(types(a), ['call', 'no_source']);
+      expect(e.requests, isEmpty);
+    });
+
+    test('offTopic, empty model reply: refusal, no call panel', () async {
       final a = ready(await run(
         svc(FakeEngine([]), result: const RetrievalResult(decision: RetrievalDecision.offTopic, chunks: [])),
         'przepis na pierogi',

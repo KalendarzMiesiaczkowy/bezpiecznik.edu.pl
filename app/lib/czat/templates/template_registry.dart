@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'app_templates.dart';
 import 'bullets_panel.dart';
+import 'chat_text.dart';
 import 'no_source.dart';
 import 'panel_model.dart';
 import 'placeholder_panel.dart';
@@ -65,6 +66,7 @@ class TemplateRegistry {
       'bullets': (c, s) => BulletsPanelView(scope: s),
       'quote': (c, s) => QuotePanelView(scope: s),
       'no_source': (c, s) => NoSourceView(kind: (s.panel as NoSourcePanel).kind),
+      'chat_text': (c, s) => ChatTextView(text: (s.panel as ChatTextPanel).text),
       for (final t in const ['call', 'cpr', 'map', 'signal', 'animation'])
         t: (c, s) => PlaceholderPanelView(type: t),
     });

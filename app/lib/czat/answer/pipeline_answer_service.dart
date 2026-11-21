@@ -26,6 +26,18 @@ import 'answer_validator.dart';
 
 typedef SearchFn = Future<RetrievalResult> Function(String question);
 
+/// System prompt for off-topic small talk (no sources, no facts).
+const String kChatSystemPrompt =
+    'Jesteś spokojnym, życzliwym rozmówcą w aplikacji Bezpiecznik. '
+    'Odpowiadaj po polsku, ciepło i krótko: 1–3 zdania. '
+    'Możesz porozmawiać o drobiazgach i pomóc się uspokoić (np. zachęcić do '
+    'spokojnego oddechu). Nie podawaj faktów, liczb, instrukcji ani porad '
+    'medycznych, prawnych czy dotyczących bezpieczeństwa. Gdy pytanie wymaga '
+    'wiedzy, powiedz, że tego nie wiesz. Nigdy nie mów, że jesteś człowiekiem '
+    'ani lekarzem. Jeśli ktoś wspomina o zagrożeniu, przemocy albo o '
+    'zrobieniu sobie krzywdy, napisz, żeby od razu zadzwonił pod 112 albo pod '
+    '116 123 (telefon zaufania dla dorosłych).';
+
 /// Retrieval / prompt query for the "Alarm / schron" quick action.
 const String kAlarmQuery = 'sygnały alarmowe syreny alarm schron';
 
@@ -113,6 +125,17 @@ class PipelineAnswerService implements AnswerService {
         final kind = result.decision == RetrievalDecision.offTopic && !risk
             ? NoSourceKind.offTopic
             : NoSourceKind.noSource;
+        // Owner 08:33: off-topic small talk gets a short warm reply (no facts),
+        // labelled as not from the guides. Any failure: the off-topic refusal.
+        if (kind == NoSourceKind.offTopic && !alarm) {
+          emit(const AnswerThinking(ThinkingPhase.composing));
+          final talk = await _chat(question, run);
+          if (run.cancelled) return;
+          if (talk != null) {
+            emit(AnswerReady(talk));
+            return;
+          }
+        }
         final refusal = buildRefusal(kind, risk: risk);
         emit(AnswerReady(alarm ? _withShelterMap(refusal) : refusal));
         return;
@@ -159,6 +182,33 @@ class PipelineAnswerService implements AnswerService {
       return await profileContext?.call() ?? '';
     } catch (_) {
       return '';
+    }
+  }
+
+  /// Conversational reply for off-topic small talk, or null (model error,
+  /// timeout, empty output, cancelled).
+  Future<AssistantAnswer?> _chat(String question, _Run run) async {
+    try {
+      final text = (await run
+              .collect(LlmRequest(
+                systemPrompt: kChatSystemPrompt,
+                messages: [LlmMessage.user(question)],
+                maxTokens: 160,
+                temperature: 0.6,
+              ))
+              .timeout(const Duration(seconds: 30)))
+          .trim();
+      if (text.isEmpty || run.cancelled) return null;
+      return AssistantAnswer.fromJson({
+        'origin': 'ai',
+        'panels': [
+          {'type': 'chat_text', 'text': text},
+        ],
+      });
+    } catch (e) {
+      onLog?.call('chat reply unavailable: $e');
+      if (e is TimeoutException) unawaited(run.engine.cancel());
+      return null;
     }
   }
 

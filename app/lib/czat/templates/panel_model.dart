@@ -155,6 +155,10 @@ sealed class ChatPanel {
           return NoSourcePanel(NoSourceKind.parse(_str(map['kind'])), map);
         case 'call':
           return CallPanel(map);
+        case 'chat_text':
+          final text = _str(map['text']);
+          if (text == null || text.trim().isEmpty) return UnknownPanel(type, map);
+          return ChatTextPanel(text, map);
         case 'cpr':
           return CprPanel._parse(map);
         case 'map':
@@ -298,6 +302,17 @@ class NoSourcePanel extends ChatPanel {
 
   @override
   String get type => 'no_source';
+}
+
+/// `chat_text`: small talk / calming reply, not from the guides.
+/// JSON: `{"type":"chat_text","text":"..."}`.
+class ChatTextPanel extends ChatPanel {
+  const ChatTextPanel(this.text, [Map<String, Object?> raw = const {}]) : super(raw);
+
+  final String text;
+
+  @override
+  String get type => 'chat_text';
 }
 
 /// `call`: no fields from the model (D03 builds the widget).
