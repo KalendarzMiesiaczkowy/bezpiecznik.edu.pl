@@ -9,3 +9,6 @@ app/assets/generated/*
 dist/
 __pycache__/
 .venv/
+polish/tools/emu-*.log
+polish/tools/prof-*
+polish/tools/*-sheet*.png
