@@ -54,6 +54,9 @@ class _ComposerState extends State<Composer> {
     if (!_canSend) return;
     final text = _controller.text;
     _controller.clear();
+    // Hide the keyboard so the answer (rescue card, CPR start, map card) is
+    // visible right away; the user taps the field to type again (QA C5/D17).
+    _focus.unfocus();
     widget.onSend(text);
   }
 
