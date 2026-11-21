@@ -17,8 +17,10 @@ import '../paczki/pack.dart' show mapPackId;
 import '../paczki/pack_controller.dart';
 import 'map_assets.dart';
 import 'map_pack_pending.dart';
+import 'route_guidance.dart';
 import 'position_provider.dart';
 import 'punkty/clusters.dart';
+import 'punkty/geo.dart';
 import 'punkty/point_sheet.dart';
 import 'punkty/points_db.dart';
 import 'punkty/shelter_layer.dart';
@@ -144,6 +146,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   bool _focusDone = false;
   bool _styleReady = false;
   bool _markerLayersAdded = false;
+
+  /// Guidance target ("Prowadź"); null in the browse state.
+  ShelterPoint? _route;
+  bool _routeLayerAdded = false;
   Timer? _ageTimer;
   DateTime? _lastTrackedFix;
 
@@ -388,10 +394,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         point: p,
         fromLat: pos?.latitude,
         fromLon: pos?.longitude,
-        // Routing is post-MVP: Prowadź falls back to the straight-line compass.
+        // Prowadź: guidance on the map (line to the point, distance, time).
         onGuide: () {
           Navigator.of(sheetContext).pop();
-          _openCompass(p);
+          _startRoute(p);
         },
         onCompass: () {
           Navigator.of(sheetContext).pop();
@@ -399,6 +405,84 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         },
       ),
     );
+  }
+
+  /// Device position for guidance: the live fix, else the last known one.
+  Position? _routeFrom() => ref.read(positionProvider).value ?? ref.read(gpsFixProvider).lastKnown;
+
+  /// Starts guidance to [p]: draws the line and frames both ends.
+  Future<void> _startRoute(ShelterPoint p) async {
+    setState(() {
+      _route = p;
+      _tracking = false; // the camera frames the route, not the user
+    });
+    await _syncRoute(fit: true);
+  }
+
+  Future<void> _endRoute() async {
+    setState(() => _route = null);
+    await _syncRoute();
+  }
+
+  /// Keeps the guidance line between the user and the target (cleared when
+  /// there is no target). With [fit] the camera frames the whole line.
+  Future<void> _syncRoute({bool fit = false}) async {
+    final c = _controller;
+    if (c == null || !_styleReady || !mounted) return;
+    final target = _route;
+    final from = _routeFrom();
+    final lineColor = _hex(context.bz.signal);
+    final data = routeLineGeoJson(
+      fromLat: from?.latitude,
+      fromLon: from?.longitude,
+      toLat: target?.lat,
+      toLon: target?.lon,
+    );
+    try {
+      if (!_routeLayerAdded) {
+        if (target == null) return; // nothing to draw yet
+        _routeLayerAdded = true;
+        await c.addGeoJsonSource(_routeSourceId, data);
+        await c.addLineLayer(
+          _routeSourceId,
+          _routeLayerId,
+          LineLayerProperties(
+            lineColor: lineColor,
+            lineWidth: 4,
+            lineCap: 'round',
+            lineDasharray: [2, 1.5],
+          ),
+          // Under the user dot, so the dot stays readable.
+          belowLayerId: _markerLayersAdded ? _userHaloLayerId : null,
+          enableInteraction: false,
+        );
+      } else {
+        await c.setGeoJsonSource(_routeSourceId, data);
+      }
+      if (fit && target != null) {
+        final to = LatLng(target.lat, target.lon);
+        if (from == null) {
+          await c.animateCamera(CameraUpdate.newLatLng(to));
+        } else {
+          final a = LatLng(from.latitude, from.longitude);
+          await c.animateCamera(
+            CameraUpdate.newLatLngBounds(
+              LatLngBounds(
+                southwest: LatLng(math.min(a.latitude, to.latitude), math.min(a.longitude, to.longitude)),
+                northeast: LatLng(math.max(a.latitude, to.latitude), math.max(a.longitude, to.longitude)),
+              ),
+              // Room for Back/SOS on top and the route bar below.
+              left: 64,
+              top: 180,
+              right: 64,
+              bottom: 380,
+            ),
+          );
+        }
+      }
+    } on Object {
+      // The line is best effort: the bar still shows distance and time.
+    }
   }
 
   /// B05: compass to the point (straight-line direction and distance).
@@ -481,7 +565,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final access = ref.watch(locationAccessProvider);
     final position = ref.watch(positionProvider).value;
     final fix = ref.watch(gpsFixProvider);
-    ref.listen(positionProvider, (_, _) => _syncUserMarker());
+    ref.listen(positionProvider, (_, _) {
+      _syncUserMarker();
+      _syncRoute();
+    });
     ref.listen(gpsFixProvider, (_, _) => _syncUserMarker());
     // The map pack finished downloading while this screen was open.
     ref.listen(packsProvider.select((s) => s.byId(mapPackId)?.phase), (_, next) {
@@ -530,7 +617,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   onStyleLoaded: () async {
                     _styleReady = true;
                     _markerLayersAdded = false;
+                    _routeLayerAdded = false;
                     await _syncUserMarker();
+                    await _syncRoute();
                     await _refreshShelters();
                     await _applyFocus();
                   },
@@ -585,15 +674,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   ),
                 ),
                 SizedBox(height: bz.space2),
-                _detailIndicator(),
-                SizedBox(height: bz.space2),
-                ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: bz.minTouchTarget),
-                  child: FilledButton(
-                    onPressed: _showNearest,
-                    child: const Text(nearestButtonText),
+                if (_route case final target?)
+                  RouteBar(
+                    target: target,
+                    distanceM: startAt == null
+                        ? null
+                        : haversineM(startAt.latitude, startAt.longitude, target.lat, target.lon),
+                    onCompass: () => _openCompass(target),
+                    onEnd: _endRoute,
+                  )
+                else ...[
+                  _detailIndicator(),
+                  SizedBox(height: bz.space2),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: bz.minTouchTarget),
+                    child: FilledButton(
+                      onPressed: _showNearest,
+                      child: const Text(nearestButtonText),
+                    ),
                   ),
-                ),
+                ],
                 SizedBox(height: bz.space2),
                 const Align(
                   alignment: Alignment.centerLeft,
@@ -652,6 +752,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 const _userSourceId = 'user-position';
 const _userHaloLayerId = 'user-position-halo';
 const _userDotLayerId = 'user-position-dot';
+const _routeSourceId = 'route-line';
+const _routeLayerId = 'route-line-layer';
 
 /// `#rrggbb` for MapLibre style colours.
 String _hex(Color c) => '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
