@@ -10,7 +10,8 @@ import '../theme/bz_theme.dart';
 import 'shell_panels.dart';
 
 /// Exact screen-reader label required by the spec.
-const sosSemanticsLabel = 'SOS, kontakt ze służbami. Przytrzymaj, aby zadzwonić pod 112.';
+const sosSemanticsLabel =
+    'SOS, kontakt ze służbami. Przytrzymaj, aby zadzwonić pod 112.';
 
 /// How long SOS must be held to dial 112.
 const sosHoldDuration = Duration(milliseconds: 800);
@@ -50,7 +51,8 @@ class SosButton extends ConsumerStatefulWidget {
   ConsumerState<SosButton> createState() => _SosButtonState();
 }
 
-class _SosButtonState extends ConsumerState<SosButton> with SingleTickerProviderStateMixin {
+class _SosButtonState extends ConsumerState<SosButton>
+    with SingleTickerProviderStateMixin {
   static const _slop = 24.0;
 
   late final AnimationController _ring;
@@ -158,12 +160,15 @@ class _SosButtonState extends ConsumerState<SosButton> with SingleTickerProvider
                 boxShadow: bz.shadowFloat,
               ),
               child: Center(
-                child: Text(
-                  'SOS',
-                  style: bz.label.copyWith(
-                    color: bz.onSos,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
+                // Fixed-size control: the label must not grow with the app text scale.
+                child: MediaQuery.withNoTextScaling(
+                  child: Text(
+                    'SOS',
+                    style: bz.label.copyWith(
+                      color: bz.onSos,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),
@@ -200,5 +205,6 @@ class _RingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_RingPainter old) => old.progress != progress || old.color != color;
+  bool shouldRepaint(_RingPainter old) =>
+      old.progress != progress || old.color != color;
 }

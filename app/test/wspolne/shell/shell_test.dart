@@ -157,10 +157,18 @@ void main() {
     final field = find.byType(EditableText).first;
     await tester.tap(field);
     await tester.pump();
-    expect(FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<EditableText>(), isNotNull);
+    expect(
+      FocusManager.instance.primaryFocus?.context
+          ?.findAncestorWidgetOfExactType<EditableText>(),
+      isNotNull,
+    );
     await tester.tap(sos());
     await tester.pumpAndSettle();
-    expect(FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<EditableText>(), isNull);
+    expect(
+      FocusManager.instance.primaryFocus?.context
+          ?.findAncestorWidgetOfExactType<EditableText>(),
+      isNull,
+    );
     expect(find.text('Kontakt ze służbami'), findsOneWidget);
   });
 
@@ -422,5 +430,35 @@ void main() {
       sosSemanticsLabel,
       'SOS, kontakt ze służbami. Przytrzymaj, aby zadzwonić pod 112.',
     );
+  });
+
+  testWidgets('SOS label keeps its design size at 1.5x text scale', (
+    tester,
+  ) async {
+    Future<(double, Size)> measure(double scale) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: buildBzTheme(),
+            home: MediaQuery(
+              data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+              child: const Center(child: SosButton()),
+            ),
+          ),
+        ),
+      );
+      final text = find.text('SOS');
+      final style = tester.widget<Text>(text);
+      final scaled = MediaQuery.textScalerOf(tester.element(text))
+          .scale(style.style!.fontSize!);
+      return (scaled, tester.getSize(text));
+    }
+
+    final (base, _) = await measure(1);
+    final (big, size) = await measure(1.5);
+    expect(big, base);
+    expect(size.width, lessThan(SosButton.size));
+    expect(size.height, lessThan(SosButton.size));
+    expect(find.bySemanticsLabel(sosSemanticsLabel), findsOneWidget);
   });
 }
