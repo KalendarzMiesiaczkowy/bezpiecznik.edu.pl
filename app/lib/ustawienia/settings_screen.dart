@@ -6,6 +6,8 @@ import 'package:material_ui/material_ui.dart';
 import '../app_router.dart';
 import '../czat/drawer/bz_logo.dart';
 import '../wspolne/theme/bz_buttons.dart';
+import '../paczki/pack_controller.dart';
+import '../paczki/pack_progress_strip.dart';
 import '../wspolne/theme/bz_theme.dart';
 import '../wspolne/theme/top_fade.dart';
 import 'data_wipe.dart';
@@ -49,6 +51,8 @@ class SettingsScreen extends ConsumerWidget {
     final bz = context.bz;
     final settings = ref.watch(settingsProvider).value ?? const AppSettings();
     final notifier = ref.read(settingsProvider.notifier);
+    // Shown only when this build downloads packs and the download started.
+    final hasPacks = packStripView(ref.watch(packsProvider)) != null;
 
     Widget section(String t) => Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 4),
@@ -151,6 +155,10 @@ class SettingsScreen extends ConsumerWidget {
                   value: settings.voiceEnabled,
                   onChanged: notifier.setVoiceEnabled,
                 ),
+                if (hasPacks) ...[
+                  section('Paczki danych'),
+                  const PackProgressStrip(padding: EdgeInsets.fromLTRB(16, 8, 16, 0)),
+                ],
                 section('Prywatność'),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),

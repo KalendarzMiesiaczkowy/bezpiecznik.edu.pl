@@ -4,7 +4,10 @@ import 'dart:ui' show Tristate;
 
 import 'package:bezpiecznik/mapa/map_assets.dart';
 import 'package:bezpiecznik/mapa/map_screen.dart';
+import 'package:bezpiecznik/mapa/map_pack_pending.dart';
 import 'package:bezpiecznik/mapa/position_provider.dart';
+import 'package:bezpiecznik/paczki/pack.dart';
+import 'package:bezpiecznik/paczki/pack_controller.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -74,6 +77,24 @@ void main() {
     if (await base.exists()) await base.delete(recursive: true);
   });
 
+  // Real file IO: let the installer finish. A fixed 400 ms was not enough
+  // when the whole suite runs in parallel, so wait (up to 5 s) until the
+  // "preparing" state is gone, then a few more frames for the providers.
+  Future<void> settle(WidgetTester tester) async {
+    Future<void> tick() async {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+      await tester.pump();
+    }
+
+    for (var i = 0; i < 250; i++) {
+      await tick();
+      if (i >= 5 && find.text(preparingTitle).evaluate().isEmpty) break;
+    }
+    for (var i = 0; i < 5; i++) {
+      await tick();
+    }
+  }
+
   Future<_FakeGateway> pump(
     WidgetTester tester,
     LocationAccess access, {
@@ -102,11 +123,7 @@ void main() {
         ),
       ),
     );
-    // Real file IO: let the installer finish.
-    for (var i = 0; i < 20; i++) {
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
-      await tester.pump();
-    }
+    await settle(tester);
     return gw;
   }
 
@@ -248,4 +265,115 @@ void main() {
     );
     expect(params!.initialTarget.latitude, 53.43);
   });
+
+  group('map pack not on the device', () {
+    final pack = AssetPack(
+      id: mapPackId,
+      label: 'mapę',
+      url: Uri.parse('https://example.test/m.mbtiles'),
+      fileName: 'm.mbtiles',
+      bytes: 100 * 1000 * 1000,
+    );
+
+    Future<_Packs> pumpPending(WidgetTester tester, PacksState initial, {File? Function()? packFile}) async {
+      final packs = _Packs(initial);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            locationGatewayProvider.overrideWithValue(_FakeGateway(LocationAccess.granted)),
+            packsProvider.overrideWith(() => packs),
+            mapInstallerProvider.overrideWith(
+              (ref) => MapAssetInstaller(
+                bundle: _Bundle(),
+                baseDir: base,
+                listAssets: () async => const [], // no bundled tiles
+                packTiles: () async => packFile?.call(),
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            theme: buildBzTheme(),
+            home: MapScreen(
+              mapBuilder: (context, params) => const SizedBox.expand(key: Key('fake-map')),
+            ),
+          ),
+        ),
+      );
+      await settle(tester);
+      return packs;
+    }
+
+    PacksState one(PackPhase phase, {int received = 0}) =>
+        PacksState(started: true, packs: [PackStatus(pack, phase: phase, received: received)]);
+
+    testWidgets('while downloading: progress instead of the install error', (tester) async {
+      await pumpPending(tester, one(PackPhase.downloading, received: 48 * 1000 * 1000));
+      expect(find.text(mapPackDownloadingTitle), findsOneWidget);
+      expect(find.text('48% z 100 MB'), findsOneWidget);
+      expect(find.text(installErrorText), findsNothing);
+      expect(find.byKey(const Key('fake-map')), findsNothing);
+    });
+
+    testWidgets('the map appears by itself when the pack finishes', (tester) async {
+      File? file;
+      final packs = await pumpPending(tester, one(PackPhase.downloading), packFile: () => file);
+      expect(find.byKey(const Key('fake-map')), findsNothing);
+
+      file = File(p.join(base.path, 'm.mbtiles'))..writeAsBytesSync([1]);
+      packs.set(one(PackPhase.done, received: pack.bytes));
+      // The reinstall is real file IO: wait for the map (up to 5 s).
+      for (var i = 0; i < 250 && find.byKey(const Key('fake-map')).evaluate().isEmpty; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+        await tester.pump();
+      }
+      expect(find.byKey(const Key('fake-map')), findsOneWidget);
+      expect(find.byKey(const Key('map-pack-pending')), findsNothing);
+    });
+
+    testWidgets('a failed download offers a retry', (tester) async {
+      final packs = await pumpPending(tester, one(PackPhase.error));
+      expect(find.text(mapPackErrorTitle), findsOneWidget);
+      await tester.tap(find.byKey(const Key('map-pack-action')));
+      expect(packs.retried, [mapPackId]);
+    });
+
+    testWidgets('outside the region: says why and lets the user download anyway', (tester) async {
+      final packs = await pumpPending(tester, one(PackPhase.skipped));
+      expect(find.text(mapPackOutsideTitle), findsOneWidget);
+      await tester.tap(find.text('Pobierz mimo to (100 MB)'));
+      expect(packs.retried, [mapPackId]);
+    });
+
+    testWidgets('waiting for Wi-Fi: mobile data needs an explicit tap', (tester) async {
+      final packs = await pumpPending(tester, one(PackPhase.waitingWifi));
+      expect(find.text(mapPackWaitWifiBody), findsOneWidget);
+      await tester.tap(find.byKey(const Key('map-pack-action')));
+      expect(packs.cellularAllowed, isTrue);
+    });
+
+    testWidgets('a build without a map pack says the map is unavailable', (tester) async {
+      await pumpPending(tester, const PacksState(started: true));
+      expect(find.text(mapPackUnavailableTitle), findsOneWidget);
+    });
+  });
+}
+
+/// Pack controller double: holds whatever state the test sets.
+class _Packs extends PacksController {
+  _Packs(this._initial);
+
+  final PacksState _initial;
+  final retried = <String>[];
+  bool cellularAllowed = false;
+
+  @override
+  PacksState build() => _initial;
+
+  void set(PacksState next) => state = next;
+
+  @override
+  Future<void> retry(String id) async => retried.add(id);
+
+  @override
+  void allowCellular() => cellularAllowed = true;
 }

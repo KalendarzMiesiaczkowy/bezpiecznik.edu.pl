@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:bezpiecznik/czat/answer/answer_builder.dart';
 import 'package:bezpiecznik/czat/answer/pipeline_answer_service.dart';
 import 'package:bezpiecznik/czat/llm/llm_engine.dart';
 import 'package:bezpiecznik/czat/retrieval/retriever.dart';
@@ -34,12 +35,14 @@ PipelineAnswerService svc(
   bool risk = false,
   String profile = '',
   void Function(String)? log,
+  String? Function()? modelNote,
 }) => PipelineAnswerService(
   search: (_) async => result ?? found([lift, water]),
   engine: engine,
   isRisk: (_) => risk,
   profileContext: () async => profile,
   onLog: log,
+  modelNote: modelNote,
 );
 
 Future<List<AnswerEvent>> run(PipelineAnswerService s, [String q = 'pożar w bloku']) =>
@@ -235,6 +238,19 @@ void main() {
     expect(a.origin, AnswerOrigin.noAi);
     expect(types(a), ['quote', 'quote']);
     expect(e.requests.length, 1);
+  });
+
+  test('a model that is still downloading is explained under the quotes', () async {
+    final e = FakeEngine([const LlmUnavailable('Model AI nie jest jeszcze pobrany.')]);
+    final a = ready(await run(svc(e, modelNote: () => 'Model AI jeszcze się pobiera (46%).')));
+    expect(a.origin, AnswerOrigin.noAi);
+    expect(a.note, 'Model AI jeszcze się pobiera (46%).');
+  });
+
+  test('the timeout note is not replaced by the download note', () async {
+    final e = FakeEngine([const LlmTimeout()]);
+    final a = ready(await run(svc(e, modelNote: () => 'Model AI jeszcze się pobiera (46%).')));
+    expect(a.note, kLlmTimeoutNote);
   });
 
   test('LlmTimeout and LlmDisabled behave the same', () async {

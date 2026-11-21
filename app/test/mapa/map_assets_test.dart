@@ -185,6 +185,67 @@ void main() {
     });
   });
 
+  group('MapAssetInstaller with the downloaded map pack', () {
+    const glyphKeys = [
+      '${mapGlyphsAssetPrefix}Stack-Regular/0-255.pbf',
+      '${mapGlyphsAssetPrefix}Stack-Bold/0-255.pbf',
+    ];
+
+    // A build without bundled tiles: the manifest does not list them.
+    MapAssetInstaller packInstaller(_FakeBundle b, File? pack) => MapAssetInstaller(
+      bundle: b,
+      baseDir: base,
+      listAssets: () async => ['assets/map/style.json', ...glyphKeys],
+      packTiles: () async => pack,
+    );
+
+    _FakeBundle noTiles() => bundle()..files.remove(mapTilesAsset);
+
+    test('without the pack and without bundled tiles the install reports missing tiles', () async {
+      final b = noTiles();
+      await expectLater(packInstaller(b, null).install(), throwsA(isA<MapTilesMissing>()));
+      expect(b.loaded, isNot(contains(mapTilesAsset)), reason: 'no attempt to load a missing asset');
+    });
+
+    test('the pack is used in place: the style points at it and only glyphs are copied', () async {
+      final pack = File(p.join(base.path, 'paczki', 'zachodniopomorskie.mbtiles'));
+      await pack.create(recursive: true);
+      await pack.writeAsBytes([9, 9, 9]);
+      final b = noTiles();
+      final res = await packInstaller(b, pack).install();
+
+      expect(res.mbtilesPath, pack.path);
+      expect(res.styleJson, contains('mbtiles://${pack.path}'));
+      expect(await File(res.stylePath).readAsString(), res.styleJson);
+      expect(await File(p.join(res.glyphsDir, 'Stack-Bold', '0-255.pbf')).readAsBytes(), [4, 5]);
+      expect(await pack.readAsBytes(), [9, 9, 9], reason: 'the pack itself is untouched');
+      expect(b.loaded, isNot(contains(mapTilesAsset)));
+    });
+
+    test('a second run with the pack copies nothing', () async {
+      final pack = File(p.join(base.path, 'paczki', 'zachodniopomorskie.mbtiles'));
+      await pack.create(recursive: true);
+      await packInstaller(noTiles(), pack).install();
+      final b2 = noTiles();
+      await packInstaller(b2, pack).install();
+      expect(b2.loaded, [mapStyleAsset]);
+    });
+
+    test('the pack wins over bundled tiles', () async {
+      final pack = File(p.join(base.path, 'paczki', 'zachodniopomorskie.mbtiles'));
+      await pack.create(recursive: true);
+      final b = bundle();
+      final inst = MapAssetInstaller(
+        bundle: b,
+        baseDir: base,
+        listAssets: () async => [...glyphKeys, mapTilesAsset],
+        packTiles: () async => pack,
+      );
+      expect((await inst.install()).mbtilesPath, pack.path);
+      expect(b.loaded, isNot(contains(mapTilesAsset)));
+    });
+  });
+
   group('bundled style and glyphs', () {
     final style = jsonDecode(File('assets/map/style.json').readAsStringSync())
         as Map<String, dynamic>;

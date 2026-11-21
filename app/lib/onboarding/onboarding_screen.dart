@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../paczki/pack_controller.dart';
+import '../paczki/pack_progress_strip.dart';
 import '../profil/profile_form.dart';
 import '../profil/profile_model.dart';
 import '../profil/profile_store.dart';
@@ -13,9 +15,10 @@ import 'location_gateway.dart';
 
 enum OnboardingStep { intro, location, profileAsk, profileForm }
 
-/// E0 (MVP): intro -> location -> profile (skippable) -> chat. The package
-/// download step is not in the MVP (packages are bundled), so progress is
-/// "Krok n z 3".
+/// E0 (MVP): intro -> location -> profile (skippable) -> chat. There is no
+/// separate package step: the model and the map download in the background
+/// from the first frame, and [PackProgressStrip] above the buttons shows the
+/// progress on every step. Step progress stays "Krok n z 3".
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -35,6 +38,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Future<void> _allow() async {
     final granted = await ref.read(locationPermissionGatewayProvider).request();
     if (!mounted) return;
+    // The map pack waits for this answer to know the region.
+    ref.read(packsProvider.notifier).locationDecided(granted: granted);
     setState(() {
       _locationGranted = granted;
       _step = OnboardingStep.profileAsk;
@@ -175,10 +180,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             variant: BzButtonVariant.ghost,
             size: BzButtonSize.xl,
             fullWidth: true,
-            onPressed: () => setState(() {
-              _locationGranted = false;
-              _step = OnboardingStep.profileAsk;
-            }),
+            onPressed: () {
+              ref.read(packsProvider.notifier).locationDecided(granted: false);
+              setState(() {
+                _locationGranted = false;
+                _step = OnboardingStep.profileAsk;
+              });
+            },
           ),
         ];
       case OnboardingStep.profileAsk:
@@ -297,6 +305,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
+  /// Screen height in text-scaled units below which the strip is left out:
+  /// the profile form needs every pixel sooner than the other steps, whose
+  /// content scrolls.
+  static const double _tightForm = 560;
+  static const double _tightStep = 400;
+
+  /// Puts the download progress between the step's scrolling content (its
+  /// last `Expanded`) and the pinned buttons. The form step gets the compact
+  /// strip. On a small screen with large text there is no room for it: the
+  /// download goes on, and Settings shows the progress.
+  List<Widget> _withPackStrip(List<Widget> body) {
+    final form = _step == OnboardingStep.profileForm;
+    final scaled = MediaQuery.sizeOf(context).height / MediaQuery.textScalerOf(context).scale(1);
+    if (scaled < (form ? _tightForm : _tightStep)) return body;
+    final at = body.lastIndexWhere((w) => w is Expanded) + 1;
+    return [
+      ...body.take(at),
+      PackProgressStrip(
+        compact: form,
+        padding: EdgeInsets.only(top: 12, bottom: form ? 4 : 16),
+      ),
+      ...body.skip(at),
+    ];
+  }
+
   Widget _confirmation() => Expanded(
     child: TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -334,7 +367,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: _confirming ? [_confirmation()] : _body(),
+                    children: _confirming ? [_confirmation()] : _withPackStrip(_body()),
                   ),
                 ),
               ),

@@ -5,9 +5,11 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../paczki/pack_controller.dart';
 import '../../profil/profile_store.dart';
 import '../../ratunek/detect/risk_detector.dart';
 import '../../ustawienia/settings_store.dart';
@@ -25,6 +27,8 @@ import 'answer_prompt.dart';
 import 'answer_validator.dart';
 
 typedef SearchFn = Future<RetrievalResult> Function(String question);
+
+const bool _chatLog = bool.fromEnvironment('CHAT_LOG');
 
 /// System prompt for off-topic small talk (no sources, no facts).
 const String kChatSystemPrompt =
@@ -58,6 +62,7 @@ class PipelineAnswerService implements AnswerService {
     required this.isRisk,
     this.profileContext,
     this.noAi,
+    this.modelNote,
     AnswerValidator? validator,
     this.onLog,
   }) : validator = validator ?? AnswerValidator();
@@ -75,6 +80,10 @@ class PipelineAnswerService implements AnswerService {
   /// "Tryb bez AI", asked once per request (the setting may still be loading
   /// at a cold start). When true the model is never called: source quotes only.
   final Future<bool> Function()? noAi;
+
+  /// Why the model is not available right now (e.g. still downloading), shown
+  /// under the source quotes; null when there is nothing to explain.
+  final String? Function()? modelNote;
 
   /// Diagnostics (rejected items, retries); no user data beyond the question.
   final void Function(String message)? onLog;
@@ -240,7 +249,7 @@ class PipelineAnswerService implements AnswerService {
           prompted,
           risk: risk,
           modelOff: true,
-          note: e is LlmTimeout ? kLlmTimeoutNote : null,
+          note: e is LlmTimeout ? kLlmTimeoutNote : modelNote?.call(),
         );
       }
       if (run.cancelled) return null;
@@ -327,6 +336,10 @@ final pipelineAnswerServiceProvider = Provider<AnswerService>((ref) {
     // "Tryb bez AI" (opt-in): awaits the settings so the first question after
     // a cold start already honours it.
     noAi: () async => (await ref.read(settingsProvider.future)).noAiMode,
+    modelNote: () => modelPendingNote(ref.read(packsProvider)),
+    // Diagnostics for test builds only (`--dart-define=CHAT_LOG=true`): the
+    // log holds the question and raw model output, so it is off by default.
+    onLog: _chatLog ? (m) => debugPrint('[czat] $m') : null,
     isRisk: (q) async {
       try {
         return (await ref.read(answerRiskDetectorProvider.future)).isRisk(q);

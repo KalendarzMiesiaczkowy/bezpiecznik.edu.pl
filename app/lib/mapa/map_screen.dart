@@ -13,7 +13,10 @@ import '../wspolne/shell/sos_button.dart';
 import '../wspolne/theme/bz_theme.dart';
 import 'kompas/compass_screen.dart';
 import 'gps_status.dart';
+import '../paczki/pack.dart' show mapPackId;
+import '../paczki/pack_controller.dart';
 import 'map_assets.dart';
+import 'map_pack_pending.dart';
 import 'position_provider.dart';
 import 'punkty/clusters.dart';
 import 'punkty/point_sheet.dart';
@@ -185,14 +188,30 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _startInstall() {
     _assets = () async {
       try {
-        final installer = await ref.read(mapInstallerProvider.future);
-        return await installer.install(onProgress: (f) => _progress.value = f);
+        _tilesMissing = false;
+        return await _install();
+      } on MapTilesMissing {
+        // Not an error: the map pack is still downloading (MapPackPending).
+        // It may have finished while the installer was looking: look again.
+        if (mounted && _mapPackPhase() == PackPhase.done) return _install();
+        _tilesMissing = true;
+        rethrow;
       } catch (e, st) {
         // Release builds show only installErrorText; this is the only trace.
         debugPrint('map install failed: $e\n$st');
         rethrow;
       }
     }();
+  }
+
+  /// The last install stopped because the map pack is not on the device.
+  bool _tilesMissing = false;
+
+  PackPhase? _mapPackPhase() => ref.read(packsProvider).byId(mapPackId)?.phase;
+
+  Future<MapAssets> _install() async {
+    final installer = await ref.read(mapInstallerProvider.future);
+    return installer.install(onProgress: (f) => _progress.value = f);
   }
 
   @override
@@ -464,6 +483,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final fix = ref.watch(gpsFixProvider);
     ref.listen(positionProvider, (_, _) => _syncUserMarker());
     ref.listen(gpsFixProvider, (_, _) => _syncUserMarker());
+    // The map pack finished downloading while this screen was open.
+    ref.listen(packsProvider.select((s) => s.byId(mapPackId)?.phase), (_, next) {
+      if (next == PackPhase.done && _tilesMissing && mounted) setState(_startInstall);
+    });
     final live = position != null && !fix.lastKnownOnly;
     final startAt = position ?? fix.lastKnown;
     final granted = access.value == LocationAccess.granted;
@@ -479,6 +502,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           FutureBuilder<MapAssets>(
             future: _assets,
             builder: (context, snap) {
+              if (snap.error is MapTilesMissing) return const MapPackPending();
               if (snap.hasError) {
                 return _InstallError(
                   noSpace: '${snap.error}'.contains('No space left') || '${snap.error}'.contains('errno = 28'),

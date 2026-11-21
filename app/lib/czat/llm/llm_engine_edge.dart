@@ -5,21 +5,26 @@ import 'package:flutter_edge_ai/flutter_edge_ai.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../../paczki/pack.dart' show modelPackFileName;
+import '../../paczki/pack_dir.dart';
 import 'llm_engine.dart';
 
 /// User-facing message when the model file is not on the device.
 const String edgeModelMissingMessage = 'Model AI nie jest jeszcze pobrany.';
 
 /// File name of the Gemma 4 E2B LiteRT-LM model.
-const String edgeModelFileName = 'gemma-4-E2B-it.litertlm';
+const String edgeModelFileName = modelPackFileName;
 
 /// Directories searched for [edgeModelFileName], in order.
 typedef ModelDirsProvider = Future<List<String>> Function();
 
-/// App documents dir first, then the app-specific external dir (reachable by
-/// `adb push` without root).
+/// The packs dir (in-app download) first, then the app documents dir, then the
+/// app-specific external dir (reachable by `adb push` without root).
 Future<List<String>> defaultModelDirs() async {
   final dirs = <String>[];
+  try {
+    dirs.add((await defaultPacksDir()).path);
+  } catch (_) {}
   try {
     dirs.add((await getApplicationDocumentsDirectory()).path);
   } catch (_) {}

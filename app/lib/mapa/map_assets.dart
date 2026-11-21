@@ -5,10 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../paczki/pack.dart' show mapPackFileName;
+import '../paczki/pack_dir.dart';
+
 /// Asset key of the style template (placeholders, see `assets/map/README.md`).
 const mapStyleAsset = 'assets/map/style.json';
 
-/// Asset key of the bundled MBTiles (git-ignored, built by `tools/`).
+/// Asset key of the MBTiles when a build bundles them (git-ignored, built by
+/// `tools/`). Normal builds leave them out and download the map pack instead.
 const mapTilesAsset = 'assets/generated/zachodniopomorskie.mbtiles';
 
 /// Prefix of the glyph PBF assets: `<prefix><Fontstack>/<range>.pbf`.
@@ -68,10 +72,23 @@ class MapAssets {
 /// Copy progress, 0..1.
 typedef MapInstallProgress = void Function(double fraction);
 
-/// First-run installer: copies the MBTiles and the glyph PBFs from the asset
-/// bundle to `<support dir>/map/` (native MapLibre cannot read Flutter assets
-/// for `mbtiles://` and, in maplibre_gl 0.28, not for glyphs either) and writes
-/// the style with absolute paths.
+/// The map tiles are neither downloaded nor bundled: the map cannot be shown
+/// until the map pack is on the device.
+class MapTilesMissing implements Exception {
+  const MapTilesMissing();
+
+  @override
+  String toString() => 'MapTilesMissing: the map pack is not on the device';
+}
+
+/// First-run installer: copies the glyph PBFs from the asset bundle to
+/// `<support dir>/map/` (native MapLibre cannot read Flutter assets for
+/// glyphs in maplibre_gl 0.28) and writes the style with absolute paths.
+///
+/// Tiles come from the downloaded map pack ([packTiles]) and are used in
+/// place. A build that bundles the MBTiles asset copies it instead (native
+/// MapLibre cannot read Flutter assets for `mbtiles://`). With neither,
+/// [install] throws [MapTilesMissing].
 ///
 /// Memory note: Flutter has no streaming asset API. `AssetBundle.load` returns
 /// the whole file as one `ByteData`, so the 101 MB tiles file is resident once
@@ -86,9 +103,13 @@ class MapAssetInstaller {
     required this.bundle,
     required this.baseDir,
     required this.listAssets,
+    this.packTiles,
   });
 
   final AssetBundle bundle;
+
+  /// The downloaded map pack, or null when it is not on the device.
+  final Future<File?> Function()? packTiles;
 
   /// Directory that will hold `map/` (support directory in production).
   final Directory baseDir;
@@ -113,40 +134,51 @@ class MapAssetInstaller {
       if (!await tiles.exists() || await tiles.length() != json['tilesBytes']) {
         return false;
       }
-      final glyphs = Directory(glyphsDir);
-      if (!await glyphs.exists()) return false;
-      var count = 0;
-      await for (final e in glyphs.list(recursive: true)) {
-        if (e is File && e.path.endsWith('.pbf')) count++;
-      }
-      return count == json['glyphCount'];
+      return await _glyphCount() == json['glyphCount'];
     } on Object {
       return false; // Corrupt marker: reinstall.
     }
   }
 
   Future<MapAssets> install({MapInstallProgress? onProgress}) async {
-    if (!await isInstalled()) {
-      await _copyAll(onProgress);
+    final pack = await packTiles?.call();
+    final String tilesPath;
+    if (pack != null) {
+      // Downloaded pack: used where it is, only the glyphs are copied.
+      tilesPath = pack.path;
+      final keys = glyphAssetKeys(await listAssets());
+      if (await _glyphCount() != keys.length) await _copyGlyphs(keys, onProgress);
+    } else {
+      final assets = await listAssets();
+      if (!assets.contains(mapTilesAsset)) throw const MapTilesMissing();
+      tilesPath = mbtilesPath;
+      if (!await isInstalled()) await _copyAll(glyphAssetKeys(assets), onProgress);
     }
     onProgress?.call(1);
     final template = await bundle.loadString(mapStyleAsset);
-    final json = substituteStyle(template, mbtilesPath: mbtilesPath, glyphsDir: glyphsDir);
+    final json = substituteStyle(template, mbtilesPath: tilesPath, glyphsDir: glyphsDir);
+    await mapDir.create(recursive: true);
     await File(stylePath).writeAsString(json, flush: true);
     return MapAssets(
       styleJson: json,
       stylePath: stylePath,
-      mbtilesPath: mbtilesPath,
+      mbtilesPath: tilesPath,
       glyphsDir: glyphsDir,
     );
   }
 
-  Future<void> _copyAll(MapInstallProgress? onProgress) async {
-    final dir = mapDir;
-    if (await dir.exists()) await dir.delete(recursive: true);
-    await dir.create(recursive: true);
+  /// Glyph PBF files on disk.
+  Future<int> _glyphCount() async {
+    final glyphs = Directory(glyphsDir);
+    if (!await glyphs.exists()) return 0;
+    var count = 0;
+    await for (final e in glyphs.list(recursive: true)) {
+      if (e is File && e.path.endsWith('.pbf')) count++;
+    }
+    return count;
+  }
 
-    final glyphKeys = glyphAssetKeys(await listAssets());
+  Future<void> _copyGlyphs(List<String> glyphKeys, MapInstallProgress? onProgress) async {
     // Glyphs are tiny (~500 KB total); weight them as 2% of the progress.
     for (var i = 0; i < glyphKeys.length; i++) {
       final key = glyphKeys[i];
@@ -159,6 +191,14 @@ class MapAssetInstaller {
       );
       onProgress?.call(0.02 * (i + 1) / glyphKeys.length);
     }
+  }
+
+  Future<void> _copyAll(List<String> glyphKeys, MapInstallProgress? onProgress) async {
+    final dir = mapDir;
+    if (await dir.exists()) await dir.delete(recursive: true);
+    await dir.create(recursive: true);
+
+    await _copyGlyphs(glyphKeys, onProgress);
 
     final tilesBytes = await _copyTiles(onProgress);
 
@@ -193,12 +233,18 @@ class MapAssetInstaller {
   }
 }
 
-/// Production installer: support dir + manifest listing from the root bundle.
+/// Production installer: support dir + manifest listing from the root bundle
+/// + the downloaded map pack.
 Future<MapAssetInstaller> createDefaultMapInstaller() async {
   final base = await getApplicationSupportDirectory();
   return MapAssetInstaller(
     bundle: rootBundle,
     baseDir: base,
+    packTiles: () async {
+      final file = File(p.join((await defaultPacksDir()).path, mapPackFileName));
+      // Only the finished pack has this name (downloads go to `.part`).
+      return await file.exists() ? file : null;
+    },
     listAssets: () async {
       final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
       return manifest.listAssets();
