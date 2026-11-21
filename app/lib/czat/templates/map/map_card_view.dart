@@ -14,7 +14,10 @@ import '../template_registry.dart';
 
 // Spec: szablony-czatu.md, `map` (states table).
 const mapCardTitle = 'Najbliższy schron'; // diagram title
+const mapHospitalCardTitle = 'Najbliższy szpital'; // verify:true (spec: no title)
 const mapNoPositionText = 'Nie znam twojej pozycji.'; // state: no position
+const mapUnknownDistancesText =
+    'Odległości nieznane. Poniżej schrony najbliżej centrum Szczecina.'; // verify:true
 const mapShowOnMapText = 'Pokaż na mapie'; // button without a position
 const mapNoPointsText =
     'Brak takich punktów w pobranych danych mapy.'; // state: no points of kind
@@ -59,7 +62,7 @@ class MapCardView extends ConsumerWidget {
     }
     return PanelCard(
       key: ValueKey('map-card-$target'),
-      title: mapCardTitle,
+      title: target == 'nearest_hospital' ? mapHospitalCardTitle : mapCardTitle,
       child: body,
     );
   }
@@ -82,6 +85,10 @@ class _Points extends StatelessWidget {
       children: [
         if (!_hasPosition) ...[
           Text(mapNoPositionText, style: bz.label.copyWith(color: bz.ink100)),
+          Text(
+            mapUnknownDistancesText,
+            style: bz.caption.copyWith(color: bz.ink200),
+          ),
           SizedBox(height: bz.space2),
         ],
         for (final p in points)

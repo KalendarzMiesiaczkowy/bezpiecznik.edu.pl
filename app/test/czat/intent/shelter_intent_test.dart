@@ -31,6 +31,8 @@ void main() {
     'szpital': ShelterIntent.hospital,
     'szpitla': ShelterIntent.hospital,
     'gdzie jest najbliższy SOR': ShelterIntent.hospital,
+    'gdzie mam się schować': ShelterIntent.whereToGo,
+    'gdzie schować': ShelterIntent.whereToGo,
     'gdzie znajdę szpital w pobliżu': ShelterIntent.hospital,
   };
 
@@ -57,6 +59,14 @@ void main() {
     'co zabrać do plecaka',
     'chronić dokumenty przed wilgocią',
     'gdzie kupić wodę',
+    'gdzie uciskać klatkę piersiową',
+    'czy jechać do szpitala z oparzeniem w okolicy oka',
+    'gdzie schować leki',
+    'gdzie ukryć dokumenty',
+    'gdzie przyłożyć opatrunek',
+    'gdzie położyć ręce przy RKO',
+    'gdzie uciskać ranę',
+    'gdzie jest rana przy krwawieniu',
   ];
   for (final q in negatives) {
     test('ignores "$q"', () => expect(detectShelterIntent(q), isNull));

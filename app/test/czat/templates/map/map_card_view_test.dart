@@ -105,6 +105,7 @@ void main() {
     await pump(tester, nearest: () async => three);
     expect(find.text(mapNoPositionText), findsOneWidget);
     expect(find.text(mapShowOnMapText), findsOneWidget);
+    expect(find.text(mapUnknownDistancesText), findsOneWidget);
     expect(find.textContaining(RegExp(r'\d+ m ')), findsNothing);
   });
 
@@ -125,6 +126,8 @@ void main() {
     await pump(tester, nearest: () async => three, position: pos(), target: 'nearest_hospital');
     expect(find.text(mapNoPointsText), findsOneWidget);
     expect(find.text('Schron A'), findsNothing);
+    expect(find.text(mapHospitalCardTitle), findsOneWidget);
+    expect(find.text(mapCardTitle), findsNothing);
   });
 
   test('registerMapTemplate replaces the placeholder', () {

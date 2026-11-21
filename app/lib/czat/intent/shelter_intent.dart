@@ -64,19 +64,61 @@ bool _wordMatch(String token, String word) {
 const _shelterStem = 'schron';
 const _hospitalStem = 'szpital';
 const _questionWords = ['gdzie', 'dokad'];
-const _goVerbs = [
+
+/// Movement verbs, matched exactly (no typo tolerance: "uciskac" is one edit
+/// from "uciekac" and must never count as a movement verb).
+const _goVerbs = {
   'isc',
   'pojsc',
   'udac',
-  'schowac',
-  'ukryc',
   'uciekac',
   'uciec',
   'schronic',
+  'uciekam',
+  'ide',
+  'schronie',
+};
+
+/// Hide verbs: only a where-to-go question when the object is the person
+/// ("sie") or absent; "gdzie schowac leki" is not a shelter question.
+const _hideVerbs = {
+  'schowac',
+  'ukryc',
   'skryc',
   'chowac',
-  'ukrywac', //
-  'schowam', 'ukryje', 'schronie', 'skrywac', 'uciekam', 'ide',
+  'ukrywac',
+  'skrywac',
+  'schowam',
+  'ukryje',
+};
+
+/// Words allowed next to a hide verb when no explicit "sie" is present.
+const _hideFillers = {
+  'gdzie', 'dokad', 'mam', 'moge', 'mozna', 'mamy', 'powinienem',
+  'powinnam', 'powinnismy', 'teraz', 'szybko', 'jak', 'nalezy',
+};
+
+/// First-aid stems: a "gdzie ..." question with one of these is about the
+/// body or a procedure, never a where-to-go request.
+const _firstAidStems = [
+  'ucisk',
+  'klatk',
+  'oparz',
+  'krwaw',
+  'krwot',
+  'oddych',
+  'opatrun',
+  'rko',
+  'reka',
+  'rece',
+  'reke',
+  'rane',
+  'rany',
+  'rana',
+  'ranie',
+  'zlaman',
+  'masaz',
+  'resuscyt',
 ];
 
 /// Cues that the user wants a place ("where is"), not information.
@@ -90,7 +132,6 @@ const _locationCues = [
   'najblizszym',
   'blisko',
   'poblizu',
-  'okolicy',
   'pokaz',
   'mapa',
   'mapie',
@@ -152,6 +193,8 @@ ShelterIntent? detectShelterIntent(String text) {
   final bare = tokens.length <= 3 && !startsAsQuestion;
   final wantsPlace = hasCue || bare;
 
+  // A hospital needs an explicit place request: "czy jechac do szpitala z
+  // oparzeniem" is a first-aid question, not a map request.
   final hospital = tokens.any(
     (t) => t == 'sor' || _stemMatch(t, _hospitalStem),
   );
@@ -166,7 +209,15 @@ ShelterIntent? detectShelterIntent(String text) {
   final question = tokens.any(
     (t) => _questionWords.any((q) => _wordMatch(t, q)),
   );
-  final verb = tokens.any((t) => _goVerbs.any((v) => _wordMatch(t, v)));
-  if (question && verb) return ShelterIntent.whereToGo;
+  if (!question) return null;
+  if (tokens.any((t) => _firstAidStems.any(t.startsWith))) return null;
+  if (tokens.any(_goVerbs.contains)) return ShelterIntent.whereToGo;
+  if (tokens.any(_hideVerbs.contains)) {
+    final self = tokens.contains('sie');
+    final bareHide = tokens.every(
+      (t) => _hideFillers.contains(t) || _hideVerbs.contains(t),
+    );
+    if (self || bareHide) return ShelterIntent.whereToGo;
+  }
   return null;
 }
