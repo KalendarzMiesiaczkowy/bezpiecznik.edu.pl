@@ -186,7 +186,9 @@ class BzSegmented extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.bz;
     return Container(
-      padding: const EdgeInsets.all(3),
+      // The 3 dp vertical inset lives inside each option, so the whole 48 dp
+      // height of the control is tappable.
+      padding: const EdgeInsets.symmetric(horizontal: 3),
       decoration: BoxDecoration(
         color: t.bg200,
         borderRadius: BorderRadius.circular(t.radiusFull),
@@ -204,13 +206,15 @@ class BzSegmented extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: () => onChanged(o.id),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: t.minTouchTarget - 6),
-                    child: Container(
+                    constraints: BoxConstraints(minHeight: t.minTouchTarget),
+                    child: AnimatedContainer(
+                      duration: t.durationFast,
+                      curve: t.easeInOut,
                       alignment: Alignment.center,
-                      margin: const EdgeInsets.symmetric(horizontal: 1),
+                      margin: const EdgeInsets.symmetric(horizontal: 1, vertical: 3),
                       decoration: BoxDecoration(
-                        color: o.id == value ? t.bg300 : null,
-                        border: o.id == value ? Border.all(color: t.line150) : null,
+                        color: o.id == value ? t.bg300 : t.bg300.withValues(alpha: 0),
+                        border: Border.all(color: o.id == value ? t.line150 : t.line150.withValues(alpha: 0)),
                         borderRadius: BorderRadius.circular(t.radiusFull),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 4),

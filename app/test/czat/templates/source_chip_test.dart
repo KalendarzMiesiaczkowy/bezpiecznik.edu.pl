@@ -40,4 +40,26 @@ void main() {
       expect(tester.getSize(find.byType(SourceChip)).height, greaterThanOrEqualTo(48));
     });
   }
+
+  testWidgets('BzSegmented: the whole 48 dp height is tappable', (tester) async {
+    String value = 'tak';
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildBzTheme(),
+        home: Scaffold(
+          body: Center(
+            child: BzSegmented(
+              options: const [VariantOption('tak', 'Tak'), VariantOption('nie', 'Nie')],
+              value: value,
+              onChanged: (v) => value = v,
+            ),
+          ),
+        ),
+      ),
+    );
+    final box = tester.getRect(find.byType(BzSegmented));
+    expect(box.height, greaterThanOrEqualTo(48));
+    await tester.tapAt(Offset(box.right - 40, box.top + 1));
+    expect(value, 'nie');
+  });
 }
