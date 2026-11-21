@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bezpiecznik/czat/templates/app_templates.dart';
 import 'package:bezpiecznik/czat/templates/call/call_panel_view.dart';
 import 'package:bezpiecznik/czat/templates/template_registry.dart';
 import 'package:bezpiecznik/czat/templates/template_renderer.dart';
@@ -20,8 +21,9 @@ void main() {
   testWidgets('child CPR card renders call, badge, child steps, footer', (tester) async {
     final service = (await tester.runAsync(() => RescueAnswerService.load(_FileBundle())))!;
     final answer = (await service.tryAnswer('dziecko nie oddycha'))!;
-    final registry = TemplateRegistry.withDefaults();
-    registerCallTemplate(registry);
+    // The app registry: call, cpr (draws the variant switch now that it is
+    // the first panel with variants), map, signal.
+    final registry = buildAppTemplateRegistry();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [templateRegistryProvider.overrideWithValue(registry)],
@@ -39,10 +41,11 @@ void main() {
     expect(find.text(rescueCardFooterText), findsOneWidget);
     // Child variant is selected in the switch.
     expect(find.text('Dziecko'), findsWidgets);
-    // Call panel is above the steps.
-    expect(
-      tester.getTopLeft(find.text(call112Label)).dy,
-      lessThan(tester.getTopLeft(find.text('RKO')).dy),
-    );
+    // Call panel, then the CPR instructor, then the steps (BG26).
+    final call = tester.getTopLeft(find.text(call112Label)).dy;
+    final start = tester.getTopLeft(find.text('Start RKO')).dy;
+    final firstStep = tester.getTopLeft(find.textContaining('Zapewnij bezpieczeństwo')).dy;
+    expect(call, lessThan(start));
+    expect(start, lessThan(firstStep));
   });
 }

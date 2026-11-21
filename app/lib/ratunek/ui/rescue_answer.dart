@@ -39,7 +39,7 @@ class RescueAnswerService {
     return buildAnswer(c, requestedVariant: hit.variant);
   }
 
-  /// Converts [c] into a chat answer: `call` first, then the card panels with
+  /// Converts [c] into a chat answer: `call` first, then `cpr`, then the card panels with
   /// the selected variant, the source records they cite and the
   /// `verify` flag (drives the "Do weryfikacji" badge).
   chat.AssistantAnswer buildAnswer(
@@ -47,9 +47,13 @@ class RescueAnswerService {
     String? requestedVariant,
   }) {
     final variant = c.selectVariant(requestedVariant) ?? c.defaultVariant;
+    // `call`, then the CPR instructor, then the remaining card panels: in a
+    // cardiac arrest "Start" must not sit below 30+ steps (night decision,
+    // BG26; ekran-1-czat.md "Karta RKO z przypiętym instruktorem").
     final panels = <Map<String, Object?>>[
       {'type': 'call'},
-      for (final p in c.panels) ?_panelJson(p),
+      for (final p in c.panels.whereType<card.CprPanel>()) ?_panelJson(p),
+      for (final p in c.panels.where((p) => p is! card.CprPanel)) ?_panelJson(p),
     ];
     final sources = <String, Object?>{};
     for (final id in <String>{...c.citedSourceIds, ...c.sourceIds}) {
