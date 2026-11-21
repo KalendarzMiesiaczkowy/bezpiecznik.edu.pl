@@ -38,6 +38,7 @@ Future<ProviderContainer> _pump(WidgetTester tester, ChatStore store) async {
     routes: [
       GoRoute(path: '/', builder: (_, _) => const _Host()),
       GoRoute(path: '/ustawienia', builder: (_, _) => const Text('SETTINGS')),
+      GoRoute(path: '/poradniki', builder: (_, _) => const Text('GUIDES')),
     ],
   );
   final container = ProviderContainer(
@@ -90,12 +91,11 @@ void main() {
     expect(tester.getSize(find.bySemanticsLabel(drawerSettings)).height, 48);
   });
 
-  testWidgets('"Poradniki i źródła" opens the sources sheet', (tester) async {
+  testWidgets('"Poradniki i źródła" opens the guides screen', (tester) async {
     await _pump(tester, ChatStore.inMemory());
     await tester.tap(find.byKey(const Key('drawer-sources')));
     await tester.pumpAndSettle();
-    expect(find.text('Źródła'), findsOneWidget);
-    expect(find.text('Poradnik bezpieczeństwa'), findsOneWidget);
+    expect(find.text('GUIDES'), findsOneWidget);
   });
 
   testWidgets('logo ignores the text scaler (BG71)', (tester) async {

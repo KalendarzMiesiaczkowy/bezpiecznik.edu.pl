@@ -8,11 +8,12 @@ Offline crisis assistant. Product and build specification: `../bezpiecznik/`.
 |---|---|---|
 | Knowledge base `assets/generated/kb.sqlite` | in the APK | `uv run --script tools/build_knowledge.py` |
 | Shelter points `assets/generated/points.sqlite` | in the APK | `uv run --script tools/build_points.py` (needs the OSM extract) |
+| Full guides `assets/generated/guide-*.pdf` + `guides.json` (~21 MB) | in the APK | `uv run --script tools/build_guides.py` |
 | Map tiles `zachodniopomorskie.mbtiles` (~100 MB) | downloaded by the app | `tools/build_tiles.sh` (Planetiler) |
 | Model `gemma-4-E2B-it.litertlm` (2.6 GB) | downloaded by the app | Hugging Face `litert-community/gemma-4-E2B-it-litert-lm` |
 
-`assets/generated/` is git-ignored. The Android build fails when `kb.sqlite`
-or `points.sqlite` is missing (check in `android/app/build.gradle.kts`): an
+`assets/generated/` is git-ignored. The Android build fails when `kb.sqlite`,
+`points.sqlite` or `guides.json` is missing (check in `android/app/build.gradle.kts`): an
 APK without them installs but answers nothing.
 
 The two heavy files are downloaded on first start (`lib/paczki/`), in the

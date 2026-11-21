@@ -8,6 +8,8 @@ import 'czat/templates/template_gallery.dart';
 import 'czat/ui/chat_screen.dart';
 import 'mapa/map_screen.dart';
 import 'onboarding/onboarding_screen.dart';
+import 'poradniki/guide_reader_screen.dart';
+import 'poradniki/guides_screen.dart';
 import 'profil/profile_screen.dart';
 import 'profil/profile_store.dart';
 import 'ustawienia/settings_screen.dart';
@@ -24,6 +26,7 @@ const chatRoutePath = '/';
 const mapRoutePath = '/mapa';
 const settingsRoutePath = '/ustawienia';
 const signalRoutePath = '/sygnal';
+const guidesRoutePath = '/poradniki';
 const profileRoutePath = '/ustawienia/profil';
 
 /// Builds the app router.
@@ -59,6 +62,16 @@ GoRouter createAppRouter({
           GoRoute(
             path: 'mapa',
             builder: (context, state) => const MapScreen(),
+          ),
+          GoRoute(
+            path: 'poradniki',
+            builder: (context, state) => const GuidesScreen(),
+            routes: [
+              GoRoute(
+                path: ':id',
+                builder: (context, state) => GuideReaderScreen(guideId: state.pathParameters['id']!),
+              ),
+            ],
           ),
           GoRoute(
             path: 'sygnal',

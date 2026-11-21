@@ -13,7 +13,6 @@ import '../wspolne/theme/bz_theme.dart';
 import '../wspolne/theme/top_fade.dart';
 import 'data_wipe.dart';
 import 'settings_store.dart';
-import 'sources.dart';
 
 /// E3 (MVP rows): Profil, Wygląd (text size), AI (Tryb bez AI, Głos
 /// instrukcji), Prywatność (Usuń wszystkie dane), O aplikacji. The theme row
@@ -242,9 +241,9 @@ class SettingsScreen extends ConsumerWidget {
                       key: const Key('set-sources'),
                       contentPadding: rowPadding,
                       leading: const Icon(LucideIcons.bookOpen),
-                      title: const Text('Źródła'),
+                      title: const Text('Poradniki i źródła'),
                       trailing: const Icon(LucideIcons.chevronRight),
-                      onTap: () => showSourcesSheet(context),
+                      onTap: () => context.push(guidesRoutePath),
                     ),
                     divider(),
                     SizedBox(height: bz.space3),

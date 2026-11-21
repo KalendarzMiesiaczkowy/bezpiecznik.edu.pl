@@ -1,8 +1,4 @@
-import 'package:material_ui/material_ui.dart';
-
-import '../wspolne/theme/bz_theme.dart';
-
-/// One row of "Źródła" (spec: title, publisher, release date, licence).
+/// One row of "Źródła i licencje" (shown on the guides screen) (spec: title, publisher, release date, licence).
 class SourceInfo {
   const SourceInfo(this.title, this.publisher, this.date, this.license);
   final String title;
@@ -44,37 +40,3 @@ const appSources = <SourceInfo>[
 ];
 
 const osmAttribution = '© OpenStreetMap contributors';
-
-/// Bottom sheet "Źródła": guides and data the app content comes from.
-void showSourcesSheet(BuildContext context) {
-  final bz = context.bz;
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    builder: (ctx) => SafeArea(
-      child: ListView(
-        shrinkWrap: true,
-        padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, bz.space5),
-        children: [
-          Text('Źródła', style: bz.title),
-          SizedBox(height: bz.space3),
-          for (final s in appSources)
-            Padding(
-              padding: EdgeInsets.only(bottom: bz.space3),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(s.title, style: bz.chat),
-                  Text(
-                    '${s.publisher} · ${s.date} · licencja: ${s.license}',
-                    style: bz.caption,
-                  ),
-                ],
-              ),
-            ),
-          Text(osmAttribution, style: bz.caption),
-        ],
-      ),
-    ),
-  );
-}

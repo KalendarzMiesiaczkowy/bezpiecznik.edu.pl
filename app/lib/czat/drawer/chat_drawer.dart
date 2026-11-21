@@ -9,7 +9,6 @@ import '../../wspolne/theme/bz_buttons.dart';
 import '../../wspolne/theme/bz_theme.dart';
 import '../data/chat_store.dart';
 import '../ui/chat_controller.dart';
-import '../../ustawienia/sources.dart';
 import 'bz_logo.dart';
 import 'drawer_groups.dart';
 
@@ -153,7 +152,10 @@ class ChatDrawer extends ConsumerWidget {
               key: const Key('drawer-sources'),
               label: drawerSources,
               icon: LucideIcons.bookOpen,
-              onTap: () => showSourcesSheet(context),
+              onTap: () {
+                _close(ref);
+                ref.read(appRouterProvider).push(guidesRoutePath);
+              },
             ),
             _Row(
               label: drawerSettings,

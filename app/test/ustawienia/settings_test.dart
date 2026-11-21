@@ -9,6 +9,7 @@ import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:bezpiecznik/wspolne/theme/top_fade.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
@@ -135,7 +136,7 @@ void main() {
 
     testWidgets('shows MVP rows, hides theme row', (tester) async {
       await pump(tester);
-      for (final t in ['Profil domu', 'Tryb bez AI', 'Rozmiar tekstu', 'Głos instrukcji', 'Usuń wszystkie dane', 'Źródła']) {
+      for (final t in ['Profil domu', 'Tryb bez AI', 'Rozmiar tekstu', 'Głos instrukcji', 'Usuń wszystkie dane', 'Poradniki i źródła']) {
         expect(find.text(t), findsOneWidget, reason: t);
       }
       expect(find.text('Motyw'), findsNothing);
@@ -159,11 +160,32 @@ void main() {
       expect(saved.textSize, TextSizeOption.extraLarge);
     });
 
-    testWidgets('sources list shows OSM attribution', (tester) async {
-      await pump(tester);
+    testWidgets('"Poradniki i źródła" opens the guides screen', (tester) async {
+      final router = GoRouter(
+        initialLocation: '/ustawienia',
+        routes: [
+          GoRoute(path: '/ustawienia', builder: (_, _) => const SettingsScreen()),
+          GoRoute(path: '/poradniki', builder: (_, _) => const Text('GUIDES')),
+        ],
+      );
+      addTearDown(router.dispose);
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            settingsStoreProvider.overrideWithValue(SettingsStore.inMemory()),
+            profileStoreProvider.overrideWithValue(ProfileStore.inMemory()),
+            chatStoreProvider.overrideWithValue(ChatStore.inMemory()),
+          ],
+          child: MaterialApp.router(theme: buildBzTheme(), routerConfig: router),
+        ),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('set-sources')));
       await tester.pumpAndSettle();
-      expect(find.text('© OpenStreetMap contributors'), findsOneWidget);
+      expect(find.text('GUIDES'), findsOneWidget);
     });
 
     testWidgets('delete all: cancel keeps data, confirm wipes', (tester) async {
