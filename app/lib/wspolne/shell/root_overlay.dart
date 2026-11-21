@@ -23,6 +23,16 @@ ShellScreen shellScreenForPath(String path) {
   return ShellScreen.other;
 }
 
+/// Path of the screen on top of the stack. After `push` the list's own
+/// `uri` still names the base location (E1), so a pushed E2 would get the
+/// NavIsland instead of Back (BG74); the pushed match carries its own list.
+String topRoutePath(RouteMatchList config) {
+  if (config.isEmpty) return chatRoutePath;
+  final last = config.last;
+  final top = last is ImperativeRouteMatch ? last.matches : config;
+  return top.uri.path;
+}
+
 const _edgeMargin = 16.0;
 const _minTop = 48.0;
 const _edgeSwipeWidth = 20.0;
@@ -78,10 +88,7 @@ class _RootOverlayState extends ConsumerState<RootOverlay> with WidgetsBindingOb
     }
   }
 
-  String _currentPath() {
-    final config = _router.routerDelegate.currentConfiguration;
-    return config.isEmpty ? chatRoutePath : config.uri.path;
-  }
+  String _currentPath() => topRoutePath(_router.routerDelegate.currentConfiguration);
 
   void _onRoute() {
     final path = _currentPath();

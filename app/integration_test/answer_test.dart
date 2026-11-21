@@ -4,7 +4,7 @@ import 'package:bezpiecznik/profil/profile_store.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:material_ui/material_ui.dart' show Key;
+import 'package:material_ui/material_ui.dart' show Key, ValueKey;
 
 import 'support/harness.dart';
 
@@ -63,6 +63,13 @@ void main() {
     // ignore: avoid_print
     print('map card shown after ${sw.elapsedMilliseconds} ms');
     expect(ok, isTrue);
+    await tester.pump(const Duration(seconds: 2));
+    // BG74: the map pushed from the card shows Back, not the island.
+    await tester.ensureVisible(find.byKey(const ValueKey('map-card-open')));
+    await tester.tap(find.byKey(const ValueKey('map-card-open')));
+    final onMap = await pumpUntil(tester, find.bySemanticsLabel('Wróć'), timeout: const Duration(seconds: 10));
+    expect(onMap, isTrue);
+    expect(find.bySemanticsLabel('Menu'), findsNothing);
     await tester.pump(const Duration(seconds: 2));
   });
 }

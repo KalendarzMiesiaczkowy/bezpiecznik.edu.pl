@@ -341,6 +341,20 @@ void main() {
     },
   );
 
+  testWidgets('E2 pushed over E1 (map card) shows Back, not the island (BG74)', (
+    tester,
+  ) async {
+    final h = await pumpApp(tester);
+    h.router.push('/mapa?point=1');
+    await tester.pumpAndSettle();
+    expect(back(), findsOneWidget);
+    expect(menu(), findsNothing);
+    await tester.tap(back());
+    await tester.pumpAndSettle();
+    expect(menu(), findsOneWidget);
+    expect(back(), findsNothing);
+  });
+
   testWidgets('back button pops E4 -> E3 -> E1 and E2 -> E1', (tester) async {
     final h = await pumpApp(tester, initial: '/ustawienia/profil');
     String path() => h.router.routerDelegate.currentConfiguration.uri.path;
