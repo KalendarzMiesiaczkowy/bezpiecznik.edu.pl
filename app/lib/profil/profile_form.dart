@@ -12,10 +12,15 @@ class ProfileForm extends StatefulWidget {
     super.key,
     required this.initial,
     required this.onChanged,
+    this.onValidityChanged,
   });
 
   final HouseholdProfile initial;
   final ValueChanged<HouseholdProfile> onChanged;
+
+  /// Reports whether every field is currently valid (false = show errors,
+  /// the host should block "Dalej").
+  final ValueChanged<bool>? onValidityChanged;
 
   @override
   State<ProfileForm> createState() => _ProfileFormState();
@@ -27,6 +32,7 @@ class _ContactDraft {
       phone = TextEditingController(text: phone);
   final TextEditingController name;
   final TextEditingController phone;
+  bool phoneTouched = false;
 }
 
 class _ProfileFormState extends State<ProfileForm> {
@@ -89,7 +95,7 @@ class _ProfileFormState extends State<ProfileForm> {
   String? _phoneError(_ContactDraft d) {
     final t = d.phone.text.trim();
     if (t.isEmpty) {
-      return d.name.text.trim().isEmpty
+      return d.name.text.trim().isEmpty || !d.phoneTouched
           ? null
           : 'Wpisz numer w formacie 600 100 200 albo +48 600 100 200.';
     }
@@ -140,9 +146,14 @@ class _ProfileFormState extends State<ProfileForm> {
     );
   }
 
+  bool get _valid =>
+      _floorError() == null &&
+      _contacts.every((d) => _nameError(d) == null && _phoneError(d) == null);
+
   void _changed([VoidCallback? mutate]) {
     setState(() => mutate?.call());
     widget.onChanged(_build());
+    widget.onValidityChanged?.call(_valid);
   }
 
   Widget _section(String title) => Padding(
@@ -324,6 +335,7 @@ class _ProfileFormState extends State<ProfileForm> {
                       ),
                       onChanged: (_) => _changed(),
                     ),
+                    SizedBox(height: context.bz.space3),
                     TextField(
                       key: Key('ice-phone-$i'),
                       controller: _contacts[i].phone,
@@ -332,7 +344,8 @@ class _ProfileFormState extends State<ProfileForm> {
                         labelText: 'Numer',
                         errorText: _phoneError(_contacts[i]),
                       ),
-                      onChanged: (_) => _changed(),
+                      onChanged: (_) =>
+                          _changed(() => _contacts[i].phoneTouched = true),
                     ),
                   ],
                 ),

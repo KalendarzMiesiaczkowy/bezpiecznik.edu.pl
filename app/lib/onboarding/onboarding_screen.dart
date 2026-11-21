@@ -28,6 +28,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool? _locationGranted;
   bool _profileSaved = false;
   HouseholdProfile _draft = HouseholdProfile.empty;
+  bool _formValid = true;
 
   void _go(OnboardingStep s) => setState(() => _step = s);
 
@@ -224,10 +225,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: Stack(
               children: [
                 SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.only(top: 16, bottom: 24),
                   child: ProfileForm(
                     initial: _draft,
                     onChanged: (p) => _draft = p,
+                    onValidityChanged: (v) {
+                      if (v != _formValid) setState(() => _formValid = v);
+                    },
+                  ),
+                ),
+                // Soft fade so headings are never sliced under the header.
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  height: 16,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      key: const Key('onb-form-fade-top'),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [bz.bg000, bz.bg000.withAlpha(0)],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 // Fade hints that more fields are below the buttons.
@@ -259,7 +282,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             variant: BzButtonVariant.primary,
             size: BzButtonSize.xl,
             fullWidth: true,
-            onPressed: _saveProfile,
+            onPressed: _formValid ? _saveProfile : null,
           ),
           BzButton(
             key: const Key('onb-profile-skip'),
@@ -299,30 +322,36 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final prev = _previous;
     final top = MediaQuery.paddingOf(context).top;
-    return Scaffold(
-      backgroundColor: context.bz.bg000,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: SafeArea(
-              child: Padding(
-                // Leaves room for the floating shell controls (Back, SOS).
-                padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: _body(),
+    return PopScope(
+      canPop: prev == null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && prev != null) _go(prev);
+      },
+      child: Scaffold(
+        backgroundColor: context.bz.bg000,
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: SafeArea(
+                child: Padding(
+                  // Leaves room for the floating shell controls (Back, SOS).
+                  padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: _body(),
+                  ),
                 ),
               ),
             ),
-          ),
-          // Same slot as the shell Back button (RootOverlay): left 16, top max(48, inset + 8).
-          if (prev != null)
-            Positioned(
-              left: 16,
-              top: top + 8 > 48 ? top + 8 : 48,
-              child: BzBackButton(onBack: () => _go(prev)),
-            ),
-        ],
+            // Same slot as the shell Back button (RootOverlay): left 16, top max(48, inset + 8).
+            if (prev != null)
+              Positioned(
+                left: 16,
+                top: top + 8 > 48 ? top + 8 : 48,
+                child: BzBackButton(onBack: () => _go(prev)),
+              ),
+          ],
+        ),
       ),
     );
   }

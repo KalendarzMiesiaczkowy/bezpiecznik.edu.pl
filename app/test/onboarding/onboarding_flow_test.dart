@@ -3,6 +3,7 @@ import 'package:bezpiecznik/onboarding/onboarding_screen.dart';
 import 'package:bezpiecznik/profil/profile_model.dart';
 import 'package:bezpiecznik/profil/profile_screen.dart';
 import 'package:bezpiecznik/profil/profile_store.dart';
+import 'package:bezpiecznik/wspolne/theme/bz_buttons.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -52,6 +53,35 @@ Future<void> pumpOnboarding(
 
 void main() {
   onboardingVisualTests();
+  testWidgets(
+    'system back on step 2 goes to step 1; no error on untouched number',
+    (tester) async {
+      await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(true));
+      await tester.tap(find.byKey(const Key('onb-next')));
+      await tester.pumpAndSettle();
+      expect(find.text('Krok 2 z 3'), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('onb-next')), findsOneWidget);
+      expect(find.text('Krok 2 z 3'), findsNothing);
+    },
+  );
+
+  testWidgets('empty untouched number shows no error', (tester) async {
+    await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(true));
+    await tester.tap(find.byKey(const Key('onb-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onb-allow')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onb-profile-fill')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('ice-add')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('ice-name-0')), 'Mama');
+    await tester.pump();
+    expect(find.textContaining('Wpisz numer w formacie'), findsNothing);
+  });
+
   testWidgets('step 2 of 3 shows a 6 dp progress bar filled 2/3', (
     tester,
   ) async {
@@ -120,8 +150,20 @@ void main() {
       find.text('To numer alarmowy. Wpisz numer bliskiej osoby.'),
       findsOneWidget,
     );
+    expect(
+      tester
+          .widget<BzButton>(find.byKey(const Key('onb-profile-save')))
+          .onPressed,
+      isNull,
+    );
     await tester.enterText(find.byKey(const Key('ice-phone-0')), '600 100 200');
     await tester.pump();
+    expect(
+      tester
+          .widget<BzButton>(find.byKey(const Key('onb-profile-save')))
+          .onPressed,
+      isNotNull,
+    );
     await tester.tap(find.byKey(const Key('onb-profile-save')));
     await tester.pumpAndSettle();
     expect(find.text('Profil domu'), findsOneWidget);
