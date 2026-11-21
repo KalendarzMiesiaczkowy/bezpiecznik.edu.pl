@@ -18,6 +18,9 @@ enum ShelterIntent {
   final String target;
 }
 
+/// True for the "Alarm / schron" quick action label (spec ekran-1-czat.md).
+bool isAlarmQuickAction(String text) => normalizePl(text) == 'alarm schron';
+
 /// Optimal-string-alignment distance (insert, delete, substitute, adjacent
 /// swap), so "schorn" is 1 away from "schron".
 int osaDistance(String a, String b) {
@@ -183,6 +186,9 @@ const _blockWords = [
 ShelterIntent? detectShelterIntent(String text) {
   final norm = normalizePl(text);
   if (norm.isEmpty) return null;
+  // The "Alarm / schron" quick action wants alarm content too: the pipeline
+  // answers it and appends the map card itself.
+  if (isAlarmQuickAction(text)) return null;
   final tokens = norm.split(' ');
   if (tokens.any(_blockWords.contains)) return null;
 

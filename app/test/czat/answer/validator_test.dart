@@ -4,6 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'fakes.dart';
 
 void main() {
+  test('sentenceCase lowers title case, keeps acronyms', () {
+    expect(sentenceCase('Sygnały Alarmowe'), 'Sygnały alarmowe');
+    expect(sentenceCase('Przygotowanie do Powodzi'), 'Przygotowanie do powodzi');
+    expect(sentenceCase('Zasady RKO'), 'Zasady RKO');
+  });
+
   final v = AnswerValidator();
 
   final lift = chunk(

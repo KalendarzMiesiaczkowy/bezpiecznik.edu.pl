@@ -18,6 +18,7 @@ Zwróć jeden obiekt JSON, bez tekstu poza nim:
 
 Dozwolone panele:
 - "steps": kroki po kolei, "bullets": lista bez kolejności. Każdy element ma "text" i "source_id" wybrany z podanych fragmentów.
+- Znaczenia sygnałów, fakty i listy rzeczy to "bullets"; "steps" tylko dla czynności po kolei.
 - "quote": {"type":"quote","source_id":"..."} gdy nie umiesz krótko streścić fragmentu.
 
 Zasady:

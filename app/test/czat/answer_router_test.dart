@@ -60,6 +60,23 @@ void main() {
     expect(engine.requests, isEmpty);
   });
 
+  test('Ewakuacja quick action -> backpack bullets + shelter map, no model', () async {
+    final engine = FakeEngine([]);
+    final e = await last(container(engine), 'Ewakuacja');
+    final panels = (e as AnswerReady).answer.panels;
+    expect(panels.first, isA<BulletsPanel>());
+    expect(panels.last, isA<MapPanel>());
+    expect(engine.requests, isEmpty);
+  });
+
+  test('Alarm / schron quick action reaches the pipeline and gets the map', () async {
+    final engine = FakeEngine([['{"panels":[]}']]);
+    final e = await last(container(engine), 'Alarm / schron');
+    final panels = (e as AnswerReady).answer.panels;
+    expect(panels.last, isA<MapPanel>());
+    expect(engine.requests, isNotEmpty);
+  });
+
   test('off-topic -> refusal without the model', () async {
     final engine = FakeEngine([]);
     final e = await last(container(engine), 'przepis na pierogi');

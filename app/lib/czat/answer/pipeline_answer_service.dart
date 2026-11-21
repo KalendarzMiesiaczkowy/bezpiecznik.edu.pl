@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../profil/profile_store.dart';
 import '../../ratunek/detect/risk_detector.dart';
 import '../../ustawienia/settings_store.dart';
+import '../intent/shelter_intent.dart' show isAlarmQuickAction;
 import '../llm/llm_engine.dart';
 import '../llm/llm_engine_off.dart';
 import '../llm/llm_provider.dart';
@@ -24,6 +25,19 @@ import 'answer_prompt.dart';
 import 'answer_validator.dart';
 
 typedef SearchFn = Future<RetrievalResult> Function(String question);
+
+/// Retrieval / prompt query for the "Alarm / schron" quick action.
+const String kAlarmQuery = 'sygnały alarmowe syreny alarm schron';
+
+AssistantAnswer _withShelterMap(AssistantAnswer a) => a.copyWith(
+  panels: [
+    ...a.panels,
+    const MapPanel(
+      target: 'nearest_shelter',
+      raw: {'type': 'map', 'target': 'nearest_shelter'},
+    ),
+  ],
+);
 
 class PipelineAnswerService implements AnswerService {
   PipelineAnswerService({
@@ -78,6 +92,10 @@ class PipelineAnswerService implements AnswerService {
       if (await _noAiMode()) run.engine = OffEngine();
       if (run.cancelled) return;
       emit(const AnswerThinking(ThinkingPhase.searching));
+      // "Alarm / schron" quick action: ask for the alarm signals and add the
+      // nearest-shelter map card to whatever the sources give.
+      final alarm = isAlarmQuickAction(question);
+      if (alarm) question = kAlarmQuery;
       final result = await search(question);
       if (run.cancelled) return;
       final risk = await isRisk(question);
@@ -87,7 +105,8 @@ class PipelineAnswerService implements AnswerService {
         final kind = result.decision == RetrievalDecision.offTopic
             ? NoSourceKind.offTopic
             : NoSourceKind.noSource;
-        emit(AnswerReady(buildRefusal(kind, risk: risk)));
+        final refusal = buildRefusal(kind, risk: risk);
+        emit(AnswerReady(alarm ? _withShelterMap(refusal) : refusal));
         return;
       }
 
@@ -104,7 +123,7 @@ class PipelineAnswerService implements AnswerService {
         risk: risk,
         run: run,
       );
-      if (answer != null) emit(AnswerReady(answer));
+      if (answer != null) emit(AnswerReady(alarm ? _withShelterMap(answer) : answer));
     } catch (e) {
       // Retrieval or an unexpected bug: never crash the chat.
       onLog?.call('pipeline error: $e');

@@ -6,6 +6,7 @@ import 'shelter_intent.dart' show osaDistance;
 bool detectKitIntent(String text) {
   final norm = normalizePl(text);
   if (norm.isEmpty) return false;
+  if (isEvacuationQuickAction(text)) return true;
   final tokens = norm.split(' ');
   if (tokens.any(_blockWords.contains)) return false;
   if (tokens.any((t) => _blockStems.any(t.startsWith))) return false;
@@ -22,6 +23,10 @@ bool detectKitIntent(String text) {
   final set = tokens.any((t) => _setStems.any(t.startsWith));
   return set && tokens.any((t) => t.startsWith('ewakuac'));
 }
+
+/// True for the "Ewakuacja" quick action label (answered with the backpack
+/// list plus the nearest-shelter map; plan 72 h rules are Po MVP).
+bool isEvacuationQuickAction(String text) => normalizePl(text) == 'ewakuacja';
 
 bool _isBackpack(String t) {
   if (t.length < 5) return false;

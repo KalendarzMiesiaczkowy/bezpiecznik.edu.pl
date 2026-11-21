@@ -79,11 +79,23 @@ String _safeTitle(Object? raw, String type, Set<String> sourceWords) {
     if (trimmed.isNotEmpty &&
         trimmed.length <= kMaxTitleLength &&
         _titleGrounded(n, sourceWords)) {
-      return trimmed;
+      return sentenceCase(trimmed);
     }
   }
   return type == 'steps' ? 'Co zrobić' : 'Najważniejsze';
 }
+
+/// "Sygnały Alarmowe" -> "Sygnały alarmowe": Polish sentence case, acronyms
+/// ("RKO", "SOR") kept.
+String sentenceCase(String s) => s
+    .split(' ')
+    .indexed
+    .map((e) {
+      final w = e.$2;
+      if (w == w.toUpperCase()) return w;
+      return e.$1 == 0 ? w : w.toLowerCase();
+    })
+    .join(' ');
 
 bool _titleGrounded(String normalized, Set<String> sourceWords) {
   var content = 0;

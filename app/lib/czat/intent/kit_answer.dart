@@ -31,7 +31,17 @@ class KitAnswerService {
   Future<AssistantAnswer?> tryAnswer(String question) async {
     if (!detectKitIntent(question)) return null;
     try {
-      return build(await _load());
+      final answer = build(await _load());
+      if (!isEvacuationQuickAction(question)) return answer;
+      return answer.copyWith(
+        panels: [
+          ...answer.panels,
+          const MapPanel(
+            target: 'nearest_shelter',
+            raw: {'type': 'map', 'target': 'nearest_shelter'},
+          ),
+        ],
+      );
     } on Object {
       _data = null;
       return null;
