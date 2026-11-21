@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../alarm/panel/call_panel.dart'
     show ContactCallPanel, ContactPanelVariant;
+import '../../../ratunek/ui/rescue_situation.dart';
 import '../../../wspolne/shell/sos_button.dart'
     show UriLauncher, defaultSosLauncher;
 import '../panel_card.dart';
@@ -21,8 +22,12 @@ final callLauncherProvider = Provider<UriLauncher>((ref) => defaultSosLauncher);
 /// (`ContactCallPanel`) inside a `PanelCard`, so the buttons, the GPS line, the
 /// contacts state ("Nie masz kontaktów alarmowych" / "Dodaj kontakty") and the
 /// "Więcej" row behave identically.
-class CallPanelView extends StatelessWidget {
-  const CallPanelView({super.key, this.situation, this.onAddContacts});
+class CallPanelView extends ConsumerWidget {
+  const CallPanelView({super.key, this.situation, this.cardId, this.onAddContacts});
+
+  /// Rescue card of the message this panel sits in: its name is the SMS
+  /// `Sytuacja` when [situation] is not given.
+  final String? cardId;
 
   /// SMS `{opis}`, when known.
   final String? situation;
@@ -31,11 +36,11 @@ class CallPanelView extends StatelessWidget {
   final VoidCallback? onAddContacts;
 
   @override
-  Widget build(BuildContext context) => PanelCard(
+  Widget build(BuildContext context, WidgetRef ref) => PanelCard(
     title: callTitle,
     child: ContactCallPanel(
       variant: ContactPanelVariant.inline,
-      situation: situation,
+      situation: situation ?? ref.watch(rescueCardNameProvider(cardId)),
       onAddContacts: onAddContacts,
     ),
   );
@@ -43,4 +48,4 @@ class CallPanelView extends StatelessWidget {
 
 /// Registers the real `call` template (replaces the placeholder).
 void registerCallTemplate(TemplateRegistry r) =>
-    r.register('call', (context, scope) => const CallPanelView());
+    r.register('call', (context, scope) => CallPanelView(cardId: scope.answer.cardId));

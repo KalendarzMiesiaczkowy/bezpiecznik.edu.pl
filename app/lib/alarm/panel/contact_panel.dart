@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ratunek/ui/rescue_situation.dart';
 import '../signal/signal_panel.dart';
 import 'call_panel.dart';
 
@@ -17,7 +18,7 @@ class ContactPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ContactCallPanel(
-      situation: situation,
+      situation: situation ?? ref.watch(chatSituationProvider),
       signalBuilder: (_) => const SignalPanelView(bare: true),
     );
   }
