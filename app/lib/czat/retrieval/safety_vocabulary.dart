@@ -8,6 +8,7 @@ const List<String> kSafetyVocabulary = [
   // injuries, bites, poisoning
   'ugryzienie', 'ukąszenie', 'pogryzienie', 'użądlenie', 'żmija', 'żmii',
   'zatrucie', 'zatruć', 'otrucie', 'trucizna', 'toksyczny', 'zatruł',
+  'kleszcz', 'kleszcza', 'kleszcze', 'kleszczy', 'borelioza',
   'grzyb', 'grzyby', 'grzybami', 'grzybach', 'muchomor', 'sinica',
   'skaleczenie', 'zranienie', 'oparzenie', 'odmrożenie', 'złamanie',
   'zwichnięcie', 'stłuczenie', 'wstrząs', 'wstrząśnienie', 'uraz',

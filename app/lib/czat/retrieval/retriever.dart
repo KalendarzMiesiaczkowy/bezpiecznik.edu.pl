@@ -36,6 +36,30 @@ const Set<String> kAmbiguousDomainWords = {
   'prognoza',
 };
 
+/// Safety words describing a person's state, not a topic: their absence from
+/// the KB says nothing ("ranny mocno krwawi" must not be refused for "ranny").
+/// Normalised.
+const Set<String> kStateWords = {
+  'ranny',
+  'ranni',
+  'rannego',
+  'rannej',
+  'poparzony',
+  'nieprzytomny',
+  'oddycha',
+  'umiera',
+  'umierajacy',
+  'cierpi',
+  'zemdlal',
+  'tonie',
+  'zaginiony',
+  'uwieziony',
+  'zasypany',
+  'zawalony',
+  'zagrozone',
+  'topielec',
+};
+
 enum RetrievalDecision { found, noSource, offTopic }
 
 /// One knowledge chunk with its document metadata.
@@ -128,9 +152,12 @@ class Retriever {
       }
     }
     // Health/safety words: in-domain even when the KB has no chunk (BG03).
+    final safety = <String>{};
     for (final e in kSafetyVocabulary) {
       _addWords(vocab, e);
+      _addWords(safety, e);
     }
+    _safety = safety;
     for (final e in extraVocabulary) {
       _addWords(vocab, e);
     }
@@ -152,6 +179,11 @@ class Retriever {
   late final QueryBuilder _builder;
   late final Set<String> _vocab;
   final Map<String, List<String>> _buckets = {};
+  late final Set<String> _safety;
+
+  /// A question word may be generic when its FTS match spans at least this
+  /// many documents (e.g. "przy", "podczas"): it cannot ground a hit.
+  static const int kGenericDocSpread = 5;
 
   /// Number of distinct normalised words in the domain vocabulary.
   int get vocabularySize => _vocab.length;
@@ -182,6 +214,8 @@ class Retriever {
         cp++;
       }
       if (cp >= longer - 2) return true;
+      // Long shared stem, short ending on the shorter word ("-iach" plurals).
+      if (cp >= 7 && cp >= shorter - 1) return true;
     }
     return false;
   }
@@ -212,6 +246,16 @@ class Retriever {
         chunks: [],
       );
     }
+    // A health/safety word of the question that no chunk mentions means the
+    // KB does not cover the topic ("ugryzienie węża", "trzęsienie ziemi"):
+    // other words ("co robić przy") must not turn it into a hit.
+    if (_hasAbsentSafetyTopic(question)) {
+      return RetrievalResult(
+        decision: RetrievalDecision.noSource,
+        chunks: const [],
+        matchQuery: match,
+      );
+    }
     final rows = _kb.db.select(
       '$_chunkSelect, bm25(chunks_fts) AS score '
       'FROM chunks_fts JOIN chunks c ON c.rowid = chunks_fts.rowid '
@@ -224,7 +268,9 @@ class Retriever {
     ];
     // BG03: a hit produced only by a non-domain token (e.g. "weza" -> "wezwij")
     // is not a source: keep chunks that match a domain token (or its synonyms).
-    final domainMatch = _builder.build(domainTokens(question).join(' '));
+    final domainMatch = _builder.build(
+      domainTokens(question).where((t) => !_isGeneric(t)).join(' '),
+    );
     final grounded = <String>{};
     if (domainMatch != null && chunks.isNotEmpty) {
       final marks = List.filled(chunks.length, '?').join(',');
@@ -247,6 +293,57 @@ class Retriever {
       matchQuery: match,
     );
   }
+
+  bool _isSafetyWord(String token) {
+    if (_safety.contains(token)) return true;
+    if (token.length < 3) return false;
+    for (final w in _safety) {
+      if (w.length < 3 || w.codeUnitAt(0) != token.codeUnitAt(0)) continue;
+      final shorter = token.length < w.length ? token.length : w.length;
+      final longer = token.length < w.length ? w.length : token.length;
+      var cp = 0;
+      while (cp < shorter && token.codeUnitAt(cp) == w.codeUnitAt(cp)) {
+        cp++;
+      }
+      if (cp >= 4 && (cp >= longer - 2 || (cp == shorter && cp >= 5))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  String? _tokenMatch(String token) {
+    final stem = token.length <= 5 ? token : stemOf(token);
+    // Normalised tokens are letters only, so the raw prefix is safe in MATCH.
+    return RegExp(r'^[a-z0-9]+$').hasMatch(stem) ? '$stem*' : null;
+  }
+
+  bool _hasAbsentSafetyTopic(String question) {
+    for (final t in domainTokens(question)) {
+      if (kStateWords.contains(t) || !_isSafetyWord(t)) continue;
+      final m = _tokenMatch(t);
+      if (m == null) continue;
+      final hit = _kb.db.select(
+        'SELECT 1 FROM chunks_fts WHERE chunks_fts MATCH ? LIMIT 1',
+        [m],
+      );
+      if (hit.isEmpty) return true;
+    }
+    return false;
+  }
+
+  final Map<String, bool> _genericCache = {};
+
+  bool _isGeneric(String token) => _genericCache.putIfAbsent(token, () {
+    final m = _builder.build(token);
+    if (m == null) return false;
+    final rows = _kb.db.select(
+      'SELECT COUNT(DISTINCT c.doc_id) AS n FROM chunks_fts '
+      'JOIN chunks c ON c.rowid = chunks_fts.rowid WHERE chunks_fts MATCH ?',
+      [m],
+    );
+    return (rows.first['n'] as int) >= kGenericDocSpread;
+  });
 
   /// Chunks by id (quote panel). Unknown ids are absent from the map.
   Future<Map<String, KbChunk>> sourcesFor(List<String> chunkIds) async {
