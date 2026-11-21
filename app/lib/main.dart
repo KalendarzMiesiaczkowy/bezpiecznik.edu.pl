@@ -1,36 +1,27 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'wspolne/config.dart';
+import 'app_router.dart';
+import 'wspolne/shell/root_overlay.dart';
 import 'wspolne/theme/bz_theme.dart';
-import 'wspolne/theme/gallery_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: BezpiecznikApp()));
 }
 
-/// Root widget. The shell (router, overlay) replaces `home` in C02.
-class BezpiecznikApp extends StatelessWidget {
+/// Root widget: router + theme + the shell overlay (SOS, island, panels).
+class BezpiecznikApp extends ConsumerWidget {
   const BezpiecznikApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
       title: 'Bezpiecznik',
       debugShowCheckedModeBanner: false,
       theme: buildBzTheme(),
-      home: kDebugMode
-          ? const GalleryScreen()
-          : Scaffold(
-              body: Center(
-                child: Text(
-                  'Bezpiecznik\nLLM: ${llmMode.name}',
-                  key: const Key('boot-text'),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
+      locale: const Locale('pl'),
+      routerConfig: ref.watch(appRouterProvider),
+      builder: (context, child) => RootOverlay(child: child!),
     );
   }
 }

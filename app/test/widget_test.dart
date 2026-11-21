@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('app boots', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: BezpiecznikApp()));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
 }
