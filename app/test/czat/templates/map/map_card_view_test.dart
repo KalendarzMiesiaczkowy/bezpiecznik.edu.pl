@@ -96,9 +96,9 @@ void main() {
       await pump(tester, nearest: () async => three, position: pos());
       expect(find.text('Schron A'), findsOneWidget);
       expect(find.text('Schron B'), findsNothing); // one point per card
-      // 53.43 vs 53.42 -> ~1,1 km -> 14 min at 5 km/h.
+      // 53.43 vs 53.42 -> ~1,1 km -> 15 min at 4,5 km/h.
       expect(
-        find.textContaining('w linii prostej · ok. 14 min'),
+        find.textContaining('w linii prostej · ok. 15 min'),
         findsOneWidget,
       );
       expect(find.text('OSM · zweryf. 03.2026'), findsOneWidget);
@@ -193,8 +193,17 @@ void main() {
   test('walkMinutes: 450 m -> 6 min, min 1, rounds up', () {
     expect(walkMinutes(450), 6);
     expect(walkMinutes(10), 1);
-    expect(walkMinutes(1000), 12);
-    expect(walkMinutes(1001), 13);
+    expect(walkMinutes(808), 11);
+    expect(walkMinutes(1000), 14);
+    expect(walkMinutes(54600), 728);
+  });
+
+  test('walkTimeText: minutes below an hour, "X h Y min" from 60', () {
+    expect(walkTimeText(6), '6 min');
+    expect(walkTimeText(59), '59 min');
+    expect(walkTimeText(60), '1 h');
+    expect(walkTimeText(70), '1 h 10 min');
+    expect(walkTimeText(728), '12 h 8 min');
   });
 
   test('sourceChipText / monthsSince', () {

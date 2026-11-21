@@ -48,8 +48,9 @@ String arrowFor(double bearing) {
   return arrows[(((bearing % 360) + 360) % 360 + 22.5) ~/ 45 % 8];
 }
 
-/// "450 m" below 1 km, "1,2 km" above (Polish decimal comma).
+/// "450 m" (rounded to 10 m) below 1 km, "1,2 km" above (Polish decimal
+/// comma; ekran-2-mapa.md Formaty).
 String formatDistance(double metres) {
-  if (metres < 999.5) return '${metres.round()} m';
+  if (metres < 995) return '${(metres / 10).round() * 10} m';
   return '${(metres / 1000).toStringAsFixed(1).replaceAll('.', ',')} km';
 }

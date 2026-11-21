@@ -41,6 +41,8 @@ void main() {
     expect(cardinalName(45), 'północny wschód');
     expect(formatDistance(350), '350 m');
     expect(formatDistance(1234), '1,2 km');
+    expect(formatDistance(808), '810 m');
+    expect(formatDistance(996), '1,0 km');
   });
 
   test('ageText', () {

@@ -72,13 +72,21 @@ class MapCardView extends ConsumerWidget {
   }
 }
 
-/// Average walking speed used for the walk-time estimate (assumption: spec
-/// gives 450 m -> 6 min, i.e. ~5 km/h rounded up; no other speed is given).
-const walkingSpeedKmh = 5.0;
+/// Average walking speed for the walk-time estimate (ekran-2-mapa.md
+/// Parametry `WALK_SPEED_KMH` = 4,5).
+const walkingSpeedKmh = 4.5;
 
 /// Walk time in whole minutes (rounded up, at least 1) for [metres].
 int walkMinutes(double metres) =>
     math.max(1, (metres / (walkingSpeedKmh * 1000 / 60)).ceil());
+
+/// "6 min" below an hour, "1 h 10 min" from 60 min (ekran-2-mapa.md Formaty).
+String walkTimeText(int minutes) {
+  if (minutes < 60) return '$minutes min';
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
+  return m == 0 ? '$h h' : '$h h $m min';
+}
 
 /// "Dane sprzed {n} mies." for a point older than the stale threshold.
 String staleMonthsText(int months) => 'Dane sprzed $months mies.';
@@ -103,7 +111,7 @@ String sourceChipText(String source, String verifiedAt) {
 /// Straight-line distance text: the MVP has no street routing, so the distance
 /// is always the spec's `straight_line = true` form.
 String distanceLineText(double metres) =>
-    '${formatDistance(metres)} w linii prostej · ok. ${walkMinutes(metres)} min';
+    '${formatDistance(metres)} w linii prostej · ok. ${walkTimeText(walkMinutes(metres))}';
 
 class _Points extends StatelessWidget {
   const _Points({required this.points, this.fromLat, this.fromLon});
