@@ -132,12 +132,18 @@ class SettingsScreen extends ConsumerWidget {
                                     border: o == settings.textSize ? Border.all(color: bz.line150) : null,
                                     borderRadius: BorderRadius.circular(bz.radiusFull),
                                   ),
-                                  child: Text(
-                                    o.label,
-                                    key: Key('set-text-size-${o.name}'),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: bz.label.copyWith(color: o == settings.textSize ? bz.ink100 : bz.ink200),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        o.label,
+                                        key: Key('set-text-size-${o.name}'),
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        style: bz.label.copyWith(color: o == settings.textSize ? bz.ink100 : bz.ink200),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

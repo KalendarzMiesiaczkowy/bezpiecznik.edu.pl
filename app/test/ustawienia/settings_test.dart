@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:bezpiecznik/czat/data/chat_store.dart';
 import 'package:bezpiecznik/profil/profile_model.dart';
 import 'package:bezpiecznik/profil/profile_store.dart';
@@ -89,6 +90,42 @@ void main() {
       await tester.pumpAndSettle();
       return container;
     }
+
+    testWidgets('text size labels never wrap at 360 dp and 1.5x scale', (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          settingsStoreProvider.overrideWithValue(SettingsStore.inMemory()),
+          profileStoreProvider.overrideWithValue(ProfileStore.inMemory()),
+          chatStoreProvider.overrideWithValue(ChatStore.inMemory()),
+        ],
+      );
+      addTearDown(container.dispose);
+      tester.view.physicalSize = const Size(360, 3000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: buildBzTheme(),
+            builder: (ctx, child) => MediaQuery(
+              data: MediaQuery.of(ctx).copyWith(textScaler: const TextScaler.linear(1.5)),
+              child: child!,
+            ),
+            home: const SettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final single = tester.renderObject<RenderParagraph>(find.byKey(const Key('set-text-size-large'))).size.height;
+      for (final o in TextSizeOption.values) {
+        final f = find.byKey(Key('set-text-size-${o.name}'));
+        final para = tester.renderObject<RenderParagraph>(f);
+        expect(para.size.height, single, reason: '${o.label} must be one line');
+        expect(tester.getSize(find.ancestor(of: f, matching: find.byType(Container)).first).height, greaterThanOrEqualTo(48));
+      }
+    });
 
     testWidgets('shows MVP rows, hides theme row', (tester) async {
       await pump(tester);
