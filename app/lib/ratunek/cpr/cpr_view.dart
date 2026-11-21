@@ -53,12 +53,12 @@ const String cprAedDoneLabel = 'Ukryj przypomnienie o AED';
 
 /// Short in-chat notice while the pinned instructor runs (spec: szablony-czatu.md, CprPinned).
 const String cprRunningNotice = 'Instruktor RKO działa ↓';
-const String cprCompressLabel = 'UCISKAJ';
+const String cprCompressLabel = 'Uciskaj';
 
 /// Initial rescue breaths: neutral label; the count (card data
 /// `initial_breaths`) is shown in the counter slot, like the compressions.
 const String cprInitialBreathsLabel = 'Oddechy ratownicze';
-const String cprPausedLabel = 'PAUZA';
+const String cprPausedLabel = 'Pauza';
 
 /// `m:ss` for the change countdown ("Zmiana za 0:18").
 String formatCprChange(Duration d) =>
@@ -98,13 +98,52 @@ class CprCard extends ConsumerWidget {
     return ListenableBuilder(
       listenable: session,
       builder: (context, _) {
+        final variant = config.variant(scope.variant);
+        final meta = variant == null
+            ? null
+            : Text(
+                '${variant.label} · ${config.rateBpm}/min · ${variant.compressions}:${variant.breaths}',
+                key: const ValueKey('cpr-summary'),
+                style: t.chat.copyWith(
+                  color: t.ink200,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              );
+        final chip = source == null
+            ? null
+            : Align(
+                alignment: Alignment.centerLeft,
+                child: SourceChip(
+                  source: source,
+                  onTap: () => scope.onOpenSource(source),
+                ),
+              );
         if (session.running) {
           if (inlinePinned) return CprPinned(session: session);
+          // DS `.bz-cprcard__running`: meta, "● Instruktor RKO działa ↓", source.
           return PanelCard(
             title: cprTitle,
-            child: Text(
-              cprRunningNotice,
-              style: t.chat.copyWith(color: t.ink200),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (meta != null) ...[meta, SizedBox(height: t.space3)],
+                Row(
+                  children: [
+                    _Beat(color: t.sosText),
+                    SizedBox(width: t.space3),
+                    Expanded(
+                      child: Text(
+                        cprRunningNotice,
+                        style: t.chat.copyWith(
+                          color: t.ink100,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (chip != null) ...[SizedBox(height: t.space2), chip],
+              ],
             ),
           );
         }
@@ -121,18 +160,19 @@ class CprCard extends ConsumerWidget {
                   style: t.chat.copyWith(color: t.ink200),
                 ),
                 SizedBox(height: t.space3),
-                BzButton(
-                  label: cprRestartLabel,
-                  variant: BzButtonVariant.secondary,
-                  size: BzButtonSize.xl,
-                  fullWidth: true,
-                  onPressed: () => session.start(config, scope.variant),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: BzButton(
+                    label: cprRestartLabel,
+                    variant: BzButtonVariant.secondary,
+                    size: BzButtonSize.lg,
+                    onPressed: () => session.start(config, scope.variant),
+                  ),
                 ),
               ],
             ),
           );
         }
-        final variant = config.variant(scope.variant);
         return PanelCard(
           title: cprTitle,
           child: Column(
@@ -146,31 +186,17 @@ class CprCard extends ConsumerWidget {
                 ),
                 SizedBox(height: t.space3),
               ],
-              if (variant != null)
-                Text(
-                  '${variant.label} · ${config.rateBpm}/min · ${variant.compressions}:${variant.breaths}',
-                  key: const ValueKey('cpr-summary'),
-                  style: t.chat.copyWith(color: t.ink200),
-                ),
+              ?meta,
               SizedBox(height: t.space3),
               BzButton(
                 label: cprStartLabel,
-                icon: LucideIcons.heartPulse,
+                icon: LucideIcons.play,
                 variant: BzButtonVariant.primary,
-                size: BzButtonSize.xl,
+                size: BzButtonSize.lg,
                 fullWidth: true,
                 onPressed: () => session.start(config, scope.variant),
               ),
-              if (source != null) ...[
-                SizedBox(height: t.space2),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: SourceChip(
-                    source: source,
-                    onTap: () => scope.onOpenSource(source),
-                  ),
-                ),
-              ],
+              if (chip != null) ...[SizedBox(height: t.space2), chip],
             ],
           ),
         );
@@ -346,11 +372,15 @@ class CprPinned extends ConsumerWidget {
     } else {
       label = cprCompressLabel;
     }
+    // "17 z 30": the big number, then the quieter total (DS `.bz-cpr__count`).
     final counter = s.phase == CprPhase.initialBreaths
         ? '${v.initialBreaths}'
         : inBreaths
         ? ''
-        : '${s.beatInCycle} / ${s.cycleLength}';
+        : '${s.beatInCycle}';
+    final total = s.phase == CprPhase.compressing || (paused && !inBreaths)
+        ? s.cycleLength
+        : null;
     final showChange =
         s.changesDue > 0 &&
         s.sinceChange < cprChangeBannerDuration &&
@@ -358,14 +388,18 @@ class CprPinned extends ConsumerWidget {
     // Keyboard open: one line "UCISKAJ 17/30 · 03:42 · [Pauza]".
     if (keyboardOpen) {
       final line = [
-        if (counter.isEmpty) label else '$label ${counter.replaceAll(' ', '')}',
+        if (counter.isEmpty)
+          label
+        else
+          '$label $counter${total == null ? '' : '/$total'}',
         formatCprElapsed(s.elapsed),
       ].join(' · ');
       return DecoratedBox(
         key: const ValueKey('cpr-pinned-compact'),
         decoration: BoxDecoration(
           color: t.bg200,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(t.radiusLg)),
+          border: Border.all(color: t.line150),
+          borderRadius: BorderRadius.circular(t.radiusLg),
           boxShadow: t.shadowFloat,
         ),
         child: Padding(
@@ -400,54 +434,65 @@ class CprPinned extends ConsumerWidget {
         ),
       );
     }
-    final accent = breathing ? t.signal : t.ink100;
+    final accent = breathing ? t.signal : t.sosText;
 
     // Large text: the AED reminder wraps to two lines instead of overflowing.
     final large = MediaQuery.textScalerOf(context).scale(15) > 15 * 1.25;
     final metaStyle = t.label.copyWith(
       color: t.ink300,
-      fontSize: 14,
-      height: 20 / 14,
+      fontWeight: FontWeight.w400,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    final phaseStyle = t.readout.copyWith(
+      color: t.ink100,
+      height: 34 / 28,
+      fontFeatures: const [],
     );
 
     return DecoratedBox(
       key: const ValueKey('cpr-pinned'),
       decoration: BoxDecoration(
         color: t.bg200,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(t.radiusLg)),
+        // The rescuer-change prompt is the only time the card turns red (DS).
+        border: Border.all(color: showChange ? t.sos : t.line150),
+        borderRadius: BorderRadius.circular(t.radiusLg),
         boxShadow: t.shadowFloat,
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(t.space4, t.space1, t.space4, t.space2),
+        padding: EdgeInsets.fromLTRB(t.space4, t.space3, t.space4, t.space3),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header: the 112 pill keeps a 48 dp hit area (BzButton pads to it).
-            Row(
-              children: [
-                Expanded(
+            if (showChange)
+              Padding(
+                padding: EdgeInsets.only(bottom: t.space3),
+                child: Container(
+                  key: const ValueKey('cpr-change-banner'),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: t.space3,
+                    vertical: t.space2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: t.sosTint,
+                    borderRadius: BorderRadius.circular(t.radiusMd),
+                  ),
                   child: Text(
-                    '$cprShortTitle · ${v.label}',
-                    style: t.label.copyWith(color: t.ink100),
+                    cfg.voice.change,
+                    style: t.label.copyWith(
+                      color: t.sosText,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                BzButton(
-                  key: const ValueKey('cpr-112'),
-                  label: '112',
-                  variant: BzButtonVariant.sos,
-                  size: BzButtonSize.sm,
-                  onPressed: () => unawaited(_dial(ref)),
-                ),
-              ],
-            ),
+              ),
+            // Phase + counter: "● Uciskaj        17 z 30".
             Row(
               children: [
-                _Dots(
-                  active: s.phase == CprPhase.compressing
-                      ? (s.beatInCycle - 1) % 4
-                      : -1,
-                  color: accent,
+                _Beat(
+                  color: paused ? t.ink300 : accent,
+                  tick: s.phase == CprPhase.compressing ? s.beatInCycle : null,
                 ),
                 SizedBox(width: t.space3),
                 Expanded(
@@ -460,10 +505,7 @@ class CprPinned extends ConsumerWidget {
                       key: const ValueKey('cpr-phase'),
                       maxLines: 1,
                       softWrap: false,
-                      style: t.title.copyWith(
-                        color: t.ink100,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: phaseStyle,
                     ),
                   ),
                 ),
@@ -472,83 +514,69 @@ class CprPinned extends ConsumerWidget {
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerRight,
-                    child: Text(
-                      counter,
-                      key: const ValueKey('cpr-counter'),
-                      style: t.readout.copyWith(color: t.ink100),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          counter,
+                          key: const ValueKey('cpr-counter'),
+                          style: t.readout.copyWith(color: t.ink100),
+                        ),
+                        if (total != null)
+                          Text(
+                            ' z $total',
+                            style: t.chat.copyWith(
+                              color: t.ink200,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures(),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-            if (showChange)
-              Padding(
-                padding: EdgeInsets.only(top: t.space2),
-                child: Container(
-                  key: const ValueKey('cpr-change-banner'),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: t.space3,
-                    vertical: t.space2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: t.signalTint,
-                    borderRadius: BorderRadius.circular(t.radiusMd),
-                  ),
-                  child: Text(
-                    cfg.voice.change,
-                    style: t.label.copyWith(color: t.signalInk),
-                  ),
-                ),
-              ),
-            // One meta line (the variant is already in the header).
-            Padding(
-              padding: EdgeInsets.only(top: t.space1),
-              child: Wrap(
-                spacing: t.space2,
-                children: [
-                  Text(
-                    'Czas ${formatCprElapsed(s.elapsed)}',
-                    key: const ValueKey('cpr-time'),
-                    style: metaStyle,
-                  ),
-                  Text('·', style: metaStyle),
-                  Text(
-                    'Zmiana za ${formatCprChange(s.untilChange)}',
-                    key: const ValueKey('cpr-change'),
-                    style: metaStyle,
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: t.space1),
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: t.space2,
+            // One meta line "RKO · Dorosły · 01:28 · zmiana za 0:32" + the
+            // 112 pill (kept: 112 is always one tap away, 48 dp hit area).
+            Row(
               children: [
-                if (breathing)
-                  BzButton(
-                    label: cprBreathsDoneLabel,
-                    variant: BzButtonVariant.secondary,
-                    size: BzButtonSize.md,
-                    onPressed: session.breathsDone,
+                Expanded(
+                  child: Wrap(
+                    spacing: t.space1,
+                    children: [
+                      Text('$cprShortTitle · ${v.label}', style: metaStyle),
+                      Text('·', style: metaStyle),
+                      Text(
+                        formatCprElapsed(s.elapsed),
+                        key: const ValueKey('cpr-time'),
+                        style: metaStyle,
+                      ),
+                      Text('·', style: metaStyle),
+                      Text(
+                        'zmiana za ${formatCprChange(s.untilChange)}',
+                        key: const ValueKey('cpr-change'),
+                        style: metaStyle,
+                      ),
+                    ],
                   ),
-                BzButton(
-                  label: paused ? cprResumeLabel : cprPauseLabel,
-                  variant: BzButtonVariant.ghost,
-                  size: BzButtonSize.md,
-                  onPressed: paused ? session.resume : session.pause,
                 ),
                 BzButton(
-                  label: cprStopLabel,
-                  variant: BzButtonVariant.ghost,
-                  size: BzButtonSize.md,
-                  onPressed: () => unawaited(_confirmStop(context)),
+                  key: const ValueKey('cpr-112'),
+                  label: '112',
+                  variant: BzButtonVariant.sos,
+                  size: BzButtonSize.sm,
+                  onPressed: () => unawaited(_dial(ref)),
                 ),
               ],
             ),
             if (session.aedReminderVisible)
               Container(
                 key: const ValueKey('cpr-aed-row'),
+                margin: EdgeInsets.only(top: t.space1),
                 padding: EdgeInsets.only(left: t.space3),
                 decoration: BoxDecoration(
                   color: t.overlayHover,
@@ -567,6 +595,45 @@ class CprPinned extends ConsumerWidget {
                   onPressed: () => unawaited(_insertAedCard(ref, aedId)),
                 ),
               ),
+            SizedBox(height: t.space1),
+            // DS `.bz-cpr__actions`: equal columns, 44 px ("Dalej" joins the
+            // row during breaths, so the pinned card stays short).
+            Row(
+              children: [
+                if (breathing) ...[
+                  Expanded(
+                    child: BzButton(
+                      label: cprBreathsDoneLabel,
+                      variant: BzButtonVariant.primary,
+                      size: BzButtonSize.lg,
+                      fullWidth: true,
+                      onPressed: session.breathsDone,
+                    ),
+                  ),
+                  SizedBox(width: t.space2),
+                ],
+                Expanded(
+                  child: BzButton(
+                    label: paused ? cprResumeLabel : cprPauseLabel,
+                    icon: paused ? LucideIcons.play : LucideIcons.pause,
+                    variant: BzButtonVariant.secondary,
+                    size: BzButtonSize.lg,
+                    fullWidth: true,
+                    onPressed: paused ? session.resume : session.pause,
+                  ),
+                ),
+                SizedBox(width: t.space2),
+                Expanded(
+                  child: BzButton(
+                    label: cprStopLabel,
+                    variant: BzButtonVariant.ghost,
+                    size: BzButtonSize.lg,
+                    fullWidth: true,
+                    onPressed: () => unawaited(_confirmStop(context)),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -610,33 +677,50 @@ class _KeyboardBuilderState extends State<_KeyboardBuilder>
   );
 }
 
-class _Dots extends StatelessWidget {
-  const _Dots({required this.active, required this.color});
+/// Metronome dot (DS `.bz-beat`): 10 dp, pulses 1.35 -> 0.85 on every
+/// compression ([tick] changes). A function, not decoration: it keeps beating
+/// with reduced motion; [tick] null = still dot (pause, breaths).
+class _Beat extends StatefulWidget {
+  const _Beat({required this.color, this.tick});
 
-  final int active;
   final Color color;
+  final int? tick;
 
   @override
-  Widget build(BuildContext context) {
-    final t = context.bz;
-    return ExcludeSemantics(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (var i = 0; i < 4; i++)
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: i == active ? color : t.bg300,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
+  State<_Beat> createState() => _BeatState();
+}
+
+class _BeatState extends State<_Beat> with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 300),
+    value: 1,
+  );
+
+  @override
+  void didUpdateWidget(_Beat old) {
+    super.didUpdateWidget(old);
+    if (widget.tick != null && widget.tick != old.tick) _c.forward(from: 0);
   }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: ScaleTransition(
+      scale: Tween<double>(
+        begin: 1.35,
+        end: widget.tick == null ? 1 : 0.85,
+      ).animate(CurvedAnimation(parent: _c, curve: context.bz.easeOut)),
+      child: Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: widget.color),
+      ),
+    ),
+  );
 }
