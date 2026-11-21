@@ -305,6 +305,7 @@ class _ProfileFormState extends State<ProfileForm> {
             ),
             onChanged: (_) => _changed(),
           ),
+          SizedBox(height: context.bz.space2),
           _yesNo(
             'Winda',
             _elevator,
@@ -327,8 +328,9 @@ class _ProfileFormState extends State<ProfileForm> {
         _section('Kogo powiadomić w razie zagrożenia?', LucideIcons.bookUser, [
           Text(
             'Do tych osób przygotujemy SMS z twoją pozycją. Wyślesz go sam.',
-            style: context.bz.caption,
+            style: context.bz.caption.copyWith(color: context.bz.ink200),
           ),
+          SizedBox(height: context.bz.space3),
           for (var i = 0; i < _contacts.length; i++)
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
