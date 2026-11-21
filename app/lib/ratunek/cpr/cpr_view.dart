@@ -33,9 +33,9 @@ const String cprAedHowLabel = 'Jak użyć AED';
 const String cprAedDoneLabel = 'Ukryj przypomnienie o AED';
 const String cprCompressLabel = 'UCISKAJ';
 
-/// Initial rescue breaths: neutral label, the count comes from the card data
-/// (`initial_breaths`); the card has no voice text for them.
-String cprInitialBreathsLabel(int count) => 'Oddechy ratownicze · $count';
+/// Initial rescue breaths: neutral label; the count (card data
+/// `initial_breaths`) is shown in the counter slot, like the compressions.
+const String cprInitialBreathsLabel = 'Oddechy ratownicze';
 const String cprPausedLabel = 'PAUZA';
 
 /// `m:ss` for the change countdown ("Zmiana za 0:18").
@@ -192,11 +192,15 @@ class CprPinned extends ConsumerWidget {
       // "Dwa oddechy · 0:08": card text plus the countdown of a timed phase.
       label = breathTime == null ? cfg.voice.breaths : '${cfg.voice.breaths} · $breathTime';
     } else if (s.phase == CprPhase.initialBreaths) {
-      label = cprInitialBreathsLabel(v.initialBreaths);
+      label = cprInitialBreathsLabel;
     } else {
       label = cprCompressLabel;
     }
-    final counter = inBreaths ? '' : '${s.beatInCycle} / ${s.cycleLength}';
+    final counter = s.phase == CprPhase.initialBreaths
+        ? '${v.initialBreaths}'
+        : inBreaths
+        ? ''
+        : '${s.beatInCycle} / ${s.cycleLength}';
     final showChange =
         s.changesDue > 0 && s.sinceChange < cprChangeBannerDuration && cfg.voice.change.isNotEmpty;
     final accent = breathing ? t.signal : t.ink100;
@@ -230,10 +234,17 @@ class CprPinned extends ConsumerWidget {
                 _Dots(active: s.phase == CprPhase.compressing ? (s.beatInCycle - 1) % 4 : -1, color: accent),
                 SizedBox(width: t.space3),
                 Expanded(
-                  child: Text(
-                    label,
-                    key: const ValueKey('cpr-phase'),
-                    style: t.title.copyWith(color: accent),
+                  // One line, never broken mid-phrase: shrinks when too wide.
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      label,
+                      key: const ValueKey('cpr-phase'),
+                      maxLines: 1,
+                      softWrap: false,
+                      style: t.title.copyWith(color: accent),
+                    ),
                   ),
                 ),
                 Flexible(

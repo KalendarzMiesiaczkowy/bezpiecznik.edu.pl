@@ -5,6 +5,7 @@ import 'package:bezpiecznik/czat/ui/chat_controller.dart';
 import 'package:bezpiecznik/ratunek/cards/rescue_card.dart' show RescueCardRepository, rescueCardIds;
 import 'package:bezpiecznik/ratunek/detect/risk_detector.dart';
 import 'package:bezpiecznik/ratunek/ui/rescue_answer.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter/services.dart' show ByteData, CachingAssetBundle;
 import 'package:bezpiecznik/ustawienia/settings_store.dart' show voiceEnabledProvider;
 import 'package:bezpiecznik/czat/templates/panel_model.dart';
@@ -104,7 +105,7 @@ void main() {
     expect(rig.session.variant!.id, 'infant');
     expect(find.byKey(const ValueKey('cpr-pinned')), findsOneWidget);
     // Infant starts with the initial breaths and waits for the tap.
-    expect(find.text(cprInitialBreathsLabel(5)), findsOneWidget);
+    expect(find.text(cprInitialBreathsLabel), findsOneWidget);
     expect(find.text(cprBreathsDoneLabel), findsOneWidget);
     rig.session.stop();
   });
@@ -212,11 +213,31 @@ void main() {
     await tester.pump();
     await tester.tap(find.text(cprStartLabel));
     await tester.pump();
-    expect(find.text('Oddechy ratownicze · 5'), findsOneWidget);
+    expect(find.text('Oddechy ratownicze'), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('cpr-counter'))).data, '5');
     expect(find.text('Dalej'), findsOneWidget);
     rig.advance(const Duration(seconds: 60));
     await tester.pump();
-    expect(find.text('Oddechy ratownicze · 5'), findsOneWidget);
+    expect(find.text('Oddechy ratownicze'), findsOneWidget);
+    rig.session.stop();
+  });
+
+  testWidgets('child initial breaths on a 411 dp phone: phase label stays on one line', (tester) async {
+    tester.view.physicalSize = const Size(411, 914);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final (rig, _) = await pumpCard(tester);
+    await tester.tap(find.text('Dziecko'));
+    await tester.pump();
+    await tester.tap(find.text(cprStartLabel));
+    await tester.pump();
+    final phase = find.byKey(const ValueKey('cpr-phase'));
+    expect(find.text('Oddechy ratownicze'), findsOneWidget);
+    final lineHeight = tester.widget<Text>(phase).style!.fontSize! * (tester.widget<Text>(phase).style!.height ?? 1.4);
+    expect(tester.getSize(phase).height, lessThanOrEqualTo(lineHeight + 1));
+    final box = tester.renderObject<RenderParagraph>(phase);
+    expect(box.didExceedMaxLines, isFalse);
+    expect(box.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 18)).length, 1);
     rig.session.stop();
   });
 
