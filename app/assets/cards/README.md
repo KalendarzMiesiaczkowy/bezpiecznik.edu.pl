@@ -1,6 +1,6 @@
 # Rescue cards
 
-`rko.json`, `choking.json`, `bleeding.json`, `unconscious.json` follow
+`rko.json`, `choking.json`, `bleeding.json`, `unconscious.json`, `aed.json` follow
 `bezpiecznik/04-dane/kontrakty-tresci.md#karta-ratunkowa`. `sources.json` holds
 the source records the cards cite. Loader: `lib/ratunek/cards/rescue_card.dart`
 (`RescueCardRepository`). Add `- assets/cards/` to `pubspec.yaml` assets.
@@ -57,8 +57,9 @@ signed off by a paramedic or PRC instructor. The UI shows the `VerifyBadge`
     15:2 as a separate step.
   - adult `initial_breaths: 0`: the adult sequence starts with compressions
     (page 3 of the BLS algorithm), unlike the 5 initial breaths of children.
-  - `aed_card_id: "aed"` names a card that is not shipped; the repository
-    exposes it as `null`, so the UI hides "Jak użyć AED".
+  - `aed_card_id: "aed"` names the shipped `aed` card ("Jak użyć AED",
+    priority 4, adult/child/infant variants, last step links to `rko`).
+    The repository exposes it as `null` only when the card fails to load.
 - Not shipped: `animation` panel (no GIF assets), `quote` panels (the source
   chip opens the quote from `sources.json`).
 

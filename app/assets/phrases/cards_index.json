@@ -38,7 +38,9 @@
       "phrases": [
         "zadlawil",
         "zadlawic",
-        "dlawi sie", "sie dlawi", "sie dusi",
+        "dlawi sie",
+        "sie dlawi",
+        "sie dusi",
         "udlawil",
         "zakrztusil",
         "zakrztusila",
@@ -86,6 +88,30 @@
         "nie reaguje",
         "nie odpowiada na pytania",
         "lezy i sie nie rusza"
+      ]
+    },
+    {
+      "id": "aed",
+      "priority": 4,
+      "variants": [
+        "adult",
+        "child",
+        "infant"
+      ],
+      "phrases": [
+        "aed",
+        "defibrylator",
+        "defibrylatora",
+        "automatyczny defibrylator",
+        "defibrylacja",
+        "jak uzyc aed",
+        "jak uzyc defibrylatora",
+        "jak uzywac aed",
+        "jak uzywac defibrylatora",
+        "jak obslugiwac aed",
+        "jak obslugiwac defibrylator",
+        "uzyc aed",
+        "uzyc defibrylatora"
       ]
     }
   ],

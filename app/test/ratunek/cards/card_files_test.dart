@@ -69,7 +69,7 @@ _Page _page(String docId, int pdfPage) {
 }
 
 void main() {
-  const cardIds = ['rko', 'choking', 'bleeding', 'unconscious'];
+  const cardIds = ['rko', 'choking', 'bleeding', 'unconscious', 'aed'];
   late Map<String, dynamic> sourcesJson;
   late Map<String, Map<String, dynamic>> cardJson;
   late RescueCardRepository repo;
@@ -456,9 +456,13 @@ void main() {
       );
     });
 
-    test('the aed button is hidden: no aed card is shipped', () {
-      expect(repo.card('aed'), isNull);
-      expect(repo.card('rko')!.cpr!.aedCardId, isNull);
+    test('the aed card is shipped, so the cpr panel keeps aed_card_id', () {
+      expect(repo.card('aed'), isNotNull);
+      expect(repo.card('rko')!.cpr!.aedCardId, 'aed');
+      final raw = (cardJson['rko']!['panels'] as List)
+          .cast<Map<String, dynamic>>()
+          .firstWhere((p) => p['type'] == 'cpr');
+      expect(raw['aed_card_id'], 'aed');
     });
   });
 

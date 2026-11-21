@@ -35,6 +35,18 @@ DOCS = {
         short='ERC 2025, I pomoc, algorytmy',
         title='Pierwsza pomoc - algorytmy',
         file='erc-2025-pierwsza-pomoc-algorytmy/pierwsza-pomoc-algorytmy.pdf', issued='2026-04'),
+    'erc-2025-bls': dict(
+        short='ERC 2025, BLS (rozdział)',
+        title='Wytyczne ERC 2025 - podstawowe zabiegi resuscytacyjne u dorosłych (rozdział BLS)',
+        file='erc-2025-bls/wytyczne-erc-2025-bls.pdf', issued='2025-10'),
+    'erc-2025-kluczowe-bls': dict(
+        short='ERC 2025, BLS kluczowe',
+        title='Podstawowe zabiegi resuscytacyjne u dorosłych - kluczowe informacje',
+        file='erc-2025-kluczowe-bls/kluczowe-bls.pdf', issued='2025-10'),
+    'erc-2025-broszura-resuscytacja-dla-kazdego': dict(
+        short='ERC 2025, Resuscytacja dla każdego',
+        title='Resuscytacja dla każdego (broszura ERC 2025, wersja polska)',
+        file='erc-2025-broszura-resuscytacja-dla-kazdego/broszura-resuscytacja-dla-kazdego.pdf', issued='2026-04'),
 }
 
 _pages = {}
@@ -92,6 +104,9 @@ ALG = 'erc-2025-bls-algorytmy'
 SUM = 'erc-2025-podsumowanie'
 FA = 'erc-2025-pierwsza-pomoc'
 FAA = 'erc-2025-pierwsza-pomoc-algorytmy'
+BLS = 'erc-2025-bls'
+KBLS = 'erc-2025-kluczowe-bls'
+BRO = 'erc-2025-broszura-resuscytacja-dla-kazdego'
 
 # ---------------------------------------------------------------- adult BLS
 a = {}
@@ -182,6 +197,30 @@ u['r5'] = frag(4, FA, 19, 'Nogę leżącą na górze ułóż tak', 'zgięte pod 
 u['r6'] = frag(5, FA, 19, 'Ostrożnie odchyl głowę poszkodowanego do tyłu', 'z jamy ustnej.')
 u['r7'] = frag(6, FA, 19, 'Regularnie sprawdzaj, czy poszkodowany prawidłowo oddycha.', 'bez nadzoru.')
 u['worse'] = frag(2, FA, 18, 'Osoba ułożona w pozycji bezpiecznej powinna być stale', 'rozpocząć u niego RKO.')
+
+# --------------------------------------------------------------------- AED
+e = {}
+e['anyone'] = frag(1, KBLS, 1, 'Każdy może użyć AED, nawet jeśli nie przeszedł szkolenia', 'nawet jeśli nie przeszedł szkolenia')
+e['safe'] = frag(1, BRO, 27, 'AED nie wyzwoli wyładowania', 'odpowiednich warunków.')
+e['now'] = frag(1, BLS, 7, 'Użyj AED natychmiast, gdy tylko jest dostępny.', 'gdy tylko jest dostępny.')
+e['send'] = frag(2, BRO, 27, 'wyślij kogoś po najbliższe AED.', 'wyślij kogoś po najbliższe AED.')
+e['open'] = frag(2, BLS, 7, 'Otwórz obudowę AED (jeżeli występuje).', 'włącz urządzenie.')
+e['voice'] = frag(3, BLS, 7, 'Postępuj zgodnie z poleceniami głosowymi/wizualnymi AED.', 'wizualnymi AED.')
+e['pads'] = frag(4, BLS, 7, 'Przyklej elektrody na odsłoniętą klatkę piersiową', '(lub na elektrodach AED)')
+e['place'] = frag(1, BLS, 24, 'Jedna elektroda powinna być umieszczona poniżej prawego obojczyka', 'środkowej.')
+e['breast'] = frag(2, BLS, 24, 'Należy w miarę możliwości unikać umieszczania elektrod na tkance gruczołu piersiowego.', 'gruczołu piersiowego.')
+e['bra'] = frag(1, BLS, 25, 'Jeśli jednak biustonosz utrudnia', 'właściwe przyklejenie elektrod.')
+e['more'] = frag(5, BLS, 7, 'Jeżeli na miejscu zdarzenia jest więcej niż jeden ratownik', 'naklejania elektrod do defibrylacji.')
+e['analyse'] = frag(6, BLS, 7, 'Upewnij się, że nikt nie dotyka poszkodowanego w czasie, gdy AED analizuje', 'rytm serca.')
+e['shock'] = frag(7, BLS, 7, 'Jeżeli wskazane jest wykonanie defibrylacji', 'nikt nie dotyka poszkodowanego.')
+e['auto'] = frag(8, BLS, 7, 'Niektóre AED (w pełni automatyczne)', 'przycisku defibrylacji.')
+e['after'] = frag(9, BLS, 7, 'Natychmiast po defibrylacji wznów', 'klatki piersiowej.')
+e['noshock'] = frag(10, BLS, 7, 'Jeżeli defibrylacja nie jest wskazana', 'od uciśnięć klatki piersiowej.')
+e['follow'] = frag(11, BLS, 7, 'Kontynuuj RKO, stosując się do instrukcji wydawanych przez AED.', 'ponownej analizy rytmu serca.')
+e['p_follow'] = frag(1, SUM, 68, 'postępuj według instrukcji AED;', 'prowadzi RKO);')
+e['p_pads_adultsize'] = frag(2, SUM, 68, 'elektrody do defibrylacji w rozmiarze dla dorosłych rozmieść', 'między łopatkami,')
+e['p_pads_big'] = frag(3, SUM, 68, 'u dzieci o masie ciała powyżej 25 kg i nastolatków możliwe jest', 'pod lewą pachą.')
+e['p_teen'] = frag(4, SUM, 68, 'Jeśli stosujesz ułożenie przednio-tylne u nastolatków', 'gruczole piersiowym;')
 
 
 MAXLEN = 120
@@ -509,7 +548,77 @@ unconscious = {
     ],
 }
 
-CARDS = [rko, choking, bleeding, unconscious]
+# --------------------------------------------------------------------- AED
+aed_head = cat(
+    I(e['anyone'], 'Każdy może użyć AED, nawet bez szkolenia.'),
+    I(e['safe'], 'AED nie wyzwoli wyładowania, jeśli nie wykryje odpowiednich warunków.'),
+    I(e['send'], 'Jeśli jest więcej świadków, wyślij kogoś po najbliższe AED.'),
+    I(e['now'], 'Użyj AED natychmiast, gdy tylko je masz.'),
+    I(e['open'],
+      'Otwórz obudowę AED, jeśli ją ma.',
+      'Niektóre AED włączają się automatycznie po otwarciu.',
+      'Jeśli nie, znajdź przycisk zasilania i włącz urządzenie.'),
+)
+aed_tail = cat(
+    I(e['analyse'], 'Upewnij się, że nikt nie dotyka poszkodowanego, gdy AED analizuje rytm serca.'),
+    I(e['shock'], 'Jeśli AED wskazuje defibrylację, upewnij się, że nikt nie dotyka poszkodowanego.'),
+    I(e['auto'],
+      'W pełni automatyczne AED wykonają defibrylację same.',
+      'W półautomatycznym AED naciśnij przycisk defibrylacji.'),
+    I(e['after'], 'Natychmiast po defibrylacji wznów uciśnięcia klatki piersiowej.'),
+    I(e['noshock'], 'Jeśli defibrylacja nie jest wskazana, natychmiast wznów RKO od uciśnięć klatki piersiowej.'),
+    I(e['follow'],
+      'Kontynuuj RKO zgodnie z instrukcjami AED.',
+      'AED po określonym czasie zaleci przerwę w RKO i ponownie zanalizuje rytm serca.',
+      link=RKO_LINK2),
+)
+aed_adult = cat(
+    aed_head,
+    I(e['voice'], 'Postępuj zgodnie z poleceniami głosowymi i wizualnymi AED.'),
+    I(e['pads'], 'Przyklej elektrody na odsłoniętą klatkę piersiową zgodnie z instrukcją na AED lub na elektrodach.'),
+    I(e['place'], 'Jedną elektrodę przyklej poniżej prawego obojczyka, przy prawym brzegu mostka, drugą poniżej lewej pachy.'),
+    I(e['breast'], 'W miarę możliwości unikaj przyklejania elektrod na tkance gruczołu piersiowego.'),
+    I(e['bra'], 'Jeśli biustonosz utrudnia przyklejenie elektrod, przesuń go.'),
+    I(e['more'], 'Jeśli jest więcej niż jeden ratownik, kontynuuj RKO podczas naklejania elektrod.'),
+    aed_tail,
+)
+aed_child_mid = cat(
+    I(e['p_follow'], 'Postępuj według instrukcji AED.',
+      'Przyklej elektrody, minimalizując przerwy w RKO.',
+      'Jedna osoba nakleja elektrody, druga prowadzi RKO.'),
+    I(c['aed_pad'],
+      'Niemowlę lub dziecko poniżej 25 kg (do ok. 8. r.ż.): włącz tryb pediatryczny, jeśli AED go ma.',
+      'Większe dziecko i nastolatek: standardowy tryb dla dorosłych.',
+      'Jeśli AED nie ma trybu pediatrycznego, stosuj tryb dla dorosłych.'),
+    I(e['p_pads_adultsize'],
+      'Elektrody w rozmiarze dla dorosłych, dziecko poniżej 25 kg: jedna z przodu, tuż na lewo od mostka.',
+      'Druga elektroda na plecach, na środku, między łopatkami.'),
+    I(e['p_pads_big'],
+      'Dziecko powyżej 25 kg i nastolatek: jedna elektroda poniżej prawego obojczyka, druga pod lewą pachą.'),
+    I(e['p_teen'], 'U nastolatka, przy ułożeniu przednio-tylnym, unikaj elektrody na gruczole piersiowym.'),
+    I(c['aed_one'], 'Jeśli jesteś sam, priorytetem jest wezwanie pogotowia i RKO, a nie przynoszenie AED.'),
+)
+aed_child_tail = cat(
+    I(c['aed_touch'], 'Nie dotykaj dziecka, gdy AED analizuje rytm.',
+      'Po defibrylacji natychmiast wznów uciśnięcia klatki piersiowej.'),
+    I(e['follow'], 'Kontynuuj RKO zgodnie z instrukcjami AED.', link=RKO_LINK2),
+)
+aed_child = cat(aed_head, I(e['voice'], 'Postępuj zgodnie z poleceniami głosowymi i wizualnymi AED.'),
+                aed_child_mid, aed_child_tail)
+
+aed = {
+    'version': 1, 'id': 'aed', 'name': 'Jak użyć AED', 'priority': 4, 'verify': True,
+    'verify_note': 'Parafraza wytycznych ERC/PRC 2025 do sprawdzenia przez ratownika medycznego lub instruktora PRC przed publikacją.',
+    'panels': [
+        {'type': 'steps', 'title': 'Jak użyć AED', 'read_aloud': True, 'variants': [
+            {'id': 'adult', 'label': 'Dorosły', 'items': aed_adult},
+            {'id': 'child', 'label': 'Dziecko', 'items': aed_child},
+            {'id': 'infant', 'label': 'Niemowlę', 'items': aed_child},
+        ]},
+    ],
+}
+
+CARDS = [rko, choking, bleeding, unconscious, aed]
 IDX = json.load(open(ROOT / 'app/assets/phrases/cards_index.json', encoding='utf-8'))
 idx_by_id = {x['id']: x for x in IDX['cards']}
 
