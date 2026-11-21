@@ -31,7 +31,7 @@ ProviderScope(overrides: [templateRegistryProvider.overrideWithValue(r)], ...)
 
 `PanelScope` gives: `panel`, `index`, `answer`, `variant` (selected, shared by the message),
 `showVariantSwitch` (true only for the first panel with variants), `onVariantChanged`, `done`,
-`onDoneChanged(item, value)`, `onOpenSource`. `sourceOpenerProvider` (default no-op) is called by source
+`onDoneChanged(item, value)`, `onOpenSource`. `sourceOpenerProvider` (default: source sheet; takes the tapped BuildContext) is called by source
 chips and "Powiększ"; the PDF-preview task overrides it.
 
 ## Gallery

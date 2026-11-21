@@ -107,7 +107,7 @@ void main() {
     await tester.pumpWidget(
       host(
         TemplateRenderer(answer: fixture('quote')),
-        overrides: [sourceOpenerProvider.overrideWithValue((s) => opened.add(s.sourceId))],
+        overrides: [sourceOpenerProvider.overrideWithValue((_, s) => opened.add(s.sourceId))],
       ),
     );
     expect(find.text('Źródło'), findsOneWidget);
@@ -124,7 +124,7 @@ void main() {
     await tester.pumpWidget(
       host(
         TemplateRenderer(answer: fixture('steps')),
-        overrides: [sourceOpenerProvider.overrideWithValue((s) => opened.add(s.pageLabel))],
+        overrides: [sourceOpenerProvider.overrideWithValue((_, s) => opened.add(s.pageLabel))],
       ),
     );
     await tester.tap(find.text('▸ Przykład, s. 22'));

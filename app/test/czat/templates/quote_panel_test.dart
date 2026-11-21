@@ -22,7 +22,7 @@ Future<List<String>> pump(WidgetTester t, String text) async {
     ProviderScope(
       overrides: [
         templateRegistryProvider.overrideWithValue(TemplateRegistry.withDefaults()),
-        sourceOpenerProvider.overrideWithValue((s) => opened.add(s.sourceId)),
+        sourceOpenerProvider.overrideWithValue((_, s) => opened.add(s.sourceId)),
       ],
       child: MaterialApp(
         theme: buildBzTheme(),

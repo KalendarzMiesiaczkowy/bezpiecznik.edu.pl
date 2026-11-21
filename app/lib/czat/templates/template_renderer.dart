@@ -82,7 +82,7 @@ class TemplateRenderer extends ConsumerWidget {
         done: answer.doneFor(i, panelVariant),
         onDoneChanged: (item, value) =>
             onChanged?.call(answer.withDone(i, panelVariant, item, value)),
-        onOpenSource: openSource,
+        onOpenSource: (s) => openSource(context, s),
       );
       children.add(KeyedSubtree(key: ValueKey('panel-$i-${panel.type}'), child: builder(context, scope)));
     }

@@ -84,6 +84,6 @@ final templateRegistryProvider = Provider<TemplateRegistry>(
 );
 
 /// Called when a source chip / "Powiększ" is tapped. Default: source sheet.
-final sourceOpenerProvider = Provider<void Function(SourceRecord)>(
+final sourceOpenerProvider = Provider<void Function(BuildContext, SourceRecord)>(
   (ref) => openSourceSheet,
 );
