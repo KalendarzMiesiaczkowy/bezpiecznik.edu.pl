@@ -185,11 +185,16 @@ class BzSegmented extends StatelessWidget {
                         border: o.id == value ? Border.all(color: t.line150) : null,
                         borderRadius: BorderRadius.circular(t.radiusFull),
                       ),
-                      child: Text(
-                        o.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: t.label.copyWith(color: o.id == value ? t.ink100 : t.ink200),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      // BG109: at large font scales the label shrinks to fit
+                      // instead of ellipsizing ('Niemo…').
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          o.label,
+                          maxLines: 1,
+                          style: t.label.copyWith(color: o.id == value ? t.ink100 : t.ink200),
+                        ),
                       ),
                     ),
                   ),
