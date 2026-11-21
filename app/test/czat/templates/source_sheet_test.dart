@@ -53,6 +53,22 @@ void main() {
     },
   );
 
+  testWidgets('200% font on a phone: quote card and sheet do not overflow', (t) async {
+    t.view.physicalSize = const Size(360, 740);
+    t.view.devicePixelRatio = 1;
+    t.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(t.view.reset);
+    addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
+    await pumpApp(t, 'quote');
+    await t.ensureVisible(find.text('Powiększ'));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Powiększ'));
+    await t.pumpAndSettle();
+    expect(find.text('Strona 14'), findsOneWidget);
+    expect(find.text('Zamknij').hitTestable(), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('Powiększ in quote opens sheet with fragment text', (t) async {
     await pumpApp(t, 'quote');
     await t.tap(find.text('Powiększ'));

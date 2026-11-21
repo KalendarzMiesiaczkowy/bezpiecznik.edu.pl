@@ -22,7 +22,8 @@ const String drawerLoadError = 'Nie mogę wczytać rozmów.';
 const String drawerDeleteError = 'Nie udało się usunąć czatu.';
 const String drawerCprBlocked = 'Najpierw zakończ RKO.';
 
-const double _rowHeight = 44;
+/// Rows are a full touch target (brief: >= 48 dp; the DS drew them at 44).
+const double _rowHeight = 48;
 
 /// P1 content (spec panel-1-boczny.md): logo, "Nowy czat", chats grouped by
 /// day, privacy note and "Ustawienia". Rendered inside `PanelHost`.
@@ -185,7 +186,7 @@ class _Note extends StatelessWidget {
   );
 }
 
-/// 44 px borderless row: optional icon, one-line title, selection by fill.
+/// 48 dp borderless row: optional icon, one-line title, selection by fill.
 class _Row extends StatelessWidget {
   const _Row({
     super.key,

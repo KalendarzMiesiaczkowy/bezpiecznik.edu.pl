@@ -1,6 +1,7 @@
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../wspolne/theme/bz_buttons.dart';
 import '../../wspolne/theme/bz_theme.dart';
 import 'panel_card.dart';
 import 'panel_model.dart';
@@ -36,22 +37,16 @@ class QuotePanelView extends StatelessWidget {
           Text(source.docTitle, style: t.label.copyWith(fontSize: 15, fontWeight: FontWeight.w700)),
           Text(meta, style: t.caption.copyWith(color: t.ink300)),
           SizedBox(height: t.space3),
-          _QuoteWindow(text: source.text, onTap: () => scope.onOpenSource(source)),
-          SizedBox(height: t.space2),
+          QuotePaper(text: source.text, onTap: () => scope.onOpenSource(source)),
+          SizedBox(height: t.space1),
+          // Quiet 32 dp pill (48 dp hit area), reference czat-zrodlo.png.
           Align(
             alignment: Alignment.centerRight,
-            child: OutlinedButton.icon(
+            child: BzButton(
+              label: quoteExpandLabel,
+              icon: LucideIcons.maximize2,
+              size: BzButtonSize.sm,
               onPressed: () => scope.onOpenSource(source),
-              style: OutlinedButton.styleFrom(
-                minimumSize: Size(t.minTouchTarget, t.minTouchTarget),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                shape: const StadiumBorder(),
-                side: BorderSide(color: t.line150),
-                foregroundColor: t.ink100,
-                textStyle: t.label.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-              icon: const Icon(LucideIcons.maximize2, size: 16),
-              label: const Text(quoteExpandLabel),
             ),
           ),
         ],
@@ -68,13 +63,16 @@ const int _maxLines = 8;
 /// Collapsed window height: top padding plus a whole number of lines.
 const double quoteWindowMaxHeight = _padV + _maxLines * _lineHeight;
 
-/// Paper window with the highlighted fragment. Clipped to whole lines; the
-/// fade into the paper only shows when the text is actually clipped.
-class _QuoteWindow extends StatelessWidget {
-  const _QuoteWindow({required this.text, required this.onTap});
+/// Paper window with the highlighted fragment. Collapsed (default): clipped
+/// to whole lines, the fade into the paper only shows when the text is
+/// actually clipped. [expanded] (source sheet): the whole fragment as a plain
+/// page, since a mark over everything marks nothing.
+class QuotePaper extends StatelessWidget {
+  const QuotePaper({super.key, required this.text, this.onTap, this.expanded = false});
 
   final String text;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool expanded;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +81,7 @@ class _QuoteWindow extends StatelessWidget {
     return Semantics(
       label: text,
       excludeSemantics: true,
-      button: true,
+      button: onTap != null,
       onTap: onTap,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -97,10 +95,10 @@ class _QuoteWindow extends StatelessWidget {
                 textDirection: TextDirection.ltr,
                 textScaler: MediaQuery.textScalerOf(context),
               )..layout(maxWidth: (box.maxWidth - 2 * _padH).clamp(0, double.infinity));
-              final clipped = painter.height + _padV * 2 > quoteWindowMaxHeight;
+              final clipped = !expanded && painter.height + _padV * 2 > quoteWindowMaxHeight;
               painter.dispose();
               return ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: quoteWindowMaxHeight),
+                constraints: BoxConstraints(maxHeight: expanded ? double.infinity : quoteWindowMaxHeight),
                 child: Stack(
                   children: [
                     ColoredBox(
@@ -112,7 +110,7 @@ class _QuoteWindow extends StatelessWidget {
                           child: Text.rich(
                             TextSpan(
                               text: text,
-                              style: TextStyle(
+                              style: expanded ? null : TextStyle(
                                 backgroundColor: t.highlight,
                                 decoration: TextDecoration.underline,
                                 decorationColor: t.signalPress,
