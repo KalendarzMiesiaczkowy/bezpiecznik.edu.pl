@@ -30,6 +30,24 @@ adb push gemma-4-E2B-it.litertlm /sdcard/Android/data/pl.edu.bezpiecznik.bezpiec
 
 Missing file -> `LlmUnavailable('Model AI nie jest jeszcze pobrany.')`.
 
+## Backend (edge mode)
+
+CPU (XNNPACK) by default. Measured on a Galaxy A55 (Exynos 1480, Samsung
+Xclipse 530), 2026-11-21: on the GPU (OpenCL, float16) every answer was
+random tokens, with a 4096 and with a 2048 token context; on the CPU the same
+question got a valid sourced answer in under a minute including the model
+load. To measure another phone:
+
+```
+--dart-define=LLM_BACKEND=gpu            # GPU, the bundle's float16
+--dart-define=LLM_BACKEND=gpu --dart-define=LLM_FP32=true
+```
+
+The model is loaded with a 2048-token context; `answer_prompt.dart` keeps
+prompt + answer inside it. `--dart-define=CHAT_LOG=true` prints rejected and
+unparseable model output to logcat (test builds only: it contains the text of
+the conversation).
+
 ## Dependency note
 
 `flutter_edge_ai` core registers no inference engine. Edge mode needs

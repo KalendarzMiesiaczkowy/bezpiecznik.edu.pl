@@ -6,8 +6,17 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../paczki/pack.dart' show modelPackFileName;
+import '../answer/answer_prompt.dart' show kModelContextTokens;
 import '../../paczki/pack_dir.dart';
 import 'llm_engine.dart';
+
+// Backend of the on-device model. CPU by default: on the demo phone (Galaxy
+// A55, Samsung Xclipse 530, OpenCL at float16) the GPU returned random tokens
+// for every prompt, while the CPU (XNNPACK) answered correctly and sooner.
+// `--dart-define=LLM_BACKEND=gpu` (optionally with `LLM_FP32=true`) is for
+// measuring another phone, see lib/czat/llm/README.md.
+const String _backendDefine = String.fromEnvironment('LLM_BACKEND', defaultValue: 'cpu');
+const bool _fp32Define = bool.fromEnvironment('LLM_FP32');
 
 /// User-facing message when the model file is not on the device.
 const String edgeModelMissingMessage = 'Model AI nie jest jeszcze pobrany.';
@@ -62,7 +71,13 @@ class FlutterEdgeAiRuntime implements EdgeRuntime {
       modelType: ModelType.gemma4,
       fileType: ModelFileType.litertlm,
     ).fromFile(modelPath).install();
-    _model = await FlutterEdgeAi.getActiveModel(maxTokens: 4096);
+    // Context size, not output size. The prompt builder keeps prompt +
+    // answer inside it (a smaller context also loads and prefills faster).
+    _model = await FlutterEdgeAi.getActiveModel(
+      maxTokens: kModelContextTokens,
+      preferredBackend: _backendDefine == 'gpu' ? PreferredBackend.gpu : PreferredBackend.cpu,
+      activationDataType: _fp32Define ? ActivationDataType.float32 : null,
+    );
   }
 
   static String _flatten(List<LlmMessage> messages) {
@@ -135,7 +150,10 @@ class EdgeAiEngine implements LlmEngine {
   EdgeAiEngine({
     EdgeRuntime? runtime,
     ModelDirsProvider? modelDirs,
-    this.noTokenTimeout = const Duration(seconds: 20),
+    // Time to the first token = reading the whole prompt. On the CPU that is
+    // ~65 tokens/s (Galaxy A55), so a 1.3 k token prompt needs ~20 s: the
+    // spec's 20 s limit cut off answers that were about to start.
+    this.noTokenTimeout = const Duration(seconds: 90),
     this.onTiming,
   }) : _runtime = runtime ?? FlutterEdgeAiRuntime(),
        _modelDirs = modelDirs ?? defaultModelDirs;

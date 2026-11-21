@@ -7,8 +7,56 @@ import '../retrieval/retriever.dart';
 
 const int kMaxPromptChunks = 4;
 
-/// Per-chunk character cap, keeps the prompt near 1 k tokens.
-const int kMaxChunkChars = 1500;
+/// Context size the on-device model is loaded with: prompt + answer must fit
+/// in it. 2048 is also the most Gemma 4 handles at float16 on Android GPUs
+/// (LiteRT-LM #4001), should a build switch the backend to the GPU.
+const int kModelContextTokens = 2048;
+
+/// Tokens reserved for the answer: 6 items of <= 120 characters plus the JSON
+/// around them and the (long) source ids.
+const int kAnswerMaxTokens = 600;
+
+/// Characters of source text in one prompt. With the system prompt (~1.2 k
+/// characters) and the question this keeps the prompt under 1.4 k tokens at
+/// 2.5 characters per token, the densest Polish text measured.
+const int kPromptChunkBudgetChars = 2000;
+
+/// Per-chunk cap, so one long chunk cannot take the whole budget (the median
+/// chunk is ~600 characters, the longest ~1400).
+const int kMaxChunkChars = 900;
+
+/// Below this a truncated chunk is too short to be worth citing.
+const int _minChunkChars = 200;
+
+/// [text] cut to at most [cap] characters, at the last sentence or line end
+/// when there is one in the second half, else at the last space.
+String _fit(String text, int cap) {
+  final t = text.trim();
+  if (t.length <= cap) return t;
+  final head = t.substring(0, cap);
+  var cut = -1;
+  for (final end in const ['. ', '.\n', '\n']) {
+    final i = head.lastIndexOf(end);
+    if (i > cut) cut = i + (end == '\n' ? 0 : 1);
+  }
+  if (cut < cap ~/ 2) cut = head.lastIndexOf(' ');
+  return (cut <= 0 ? head : head.substring(0, cut)).trimRight();
+}
+
+/// The chunks that go into the prompt (best first) with their text cut to the
+/// budget. A chunk that would get less than [_minChunkChars] is left out.
+List<({KbChunk chunk, String text})> fitChunks(List<KbChunk> chunks) {
+  final out = <({KbChunk chunk, String text})>[];
+  var left = kPromptChunkBudgetChars;
+  for (final c in chunks.take(kMaxPromptChunks)) {
+    final cap = left < kMaxChunkChars ? left : kMaxChunkChars;
+    if (cap < _minChunkChars && c.text.trim().length > cap) continue;
+    final text = _fit(c.text, cap);
+    out.add((chunk: c, text: text));
+    left -= text.length;
+  }
+  return out;
+}
 
 const String kSystemPrompt = '''
 Jesteś asystentem bezpieczeństwa. Odpowiadasz WYŁĄCZNIE na podstawie fragmentów źródeł podanych w wiadomości. Nigdy nie korzystaj z własnej wiedzy.
@@ -79,15 +127,12 @@ LlmRequest buildAnswerRequest({
   required List<KbChunk> chunks,
   bool retry = false,
 }) {
-  final used = chunks.take(kMaxPromptChunks).toList();
+  final used = fitChunks(chunks);
   final b = StringBuffer('Fragmenty źródeł:\n');
-  for (final c in used) {
-    final text = c.text.length > kMaxChunkChars
-        ? c.text.substring(0, kMaxChunkChars)
-        : c.text;
+  for (final (:chunk, :text) in used) {
     b
-      ..writeln('[source_id: ${c.id}] (${c.docShort}, s. ${c.pageLabel})')
-      ..writeln(text.trim())
+      ..writeln('[source_id: ${chunk.id}] (${chunk.docShort}, s. ${chunk.pageLabel})')
+      ..writeln(text)
       ..writeln();
   }
   if (profileContext.trim().isNotEmpty) {
@@ -105,8 +150,8 @@ LlmRequest buildAnswerRequest({
     systemPrompt: kSystemPrompt,
     messages: [LlmMessage.user(b.toString())],
     jsonMode: true,
-    jsonSchema: answerSchema([for (final c in used) c.id]),
-    maxTokens: 900,
+    jsonSchema: answerSchema([for (final u in used) u.chunk.id]),
+    maxTokens: kAnswerMaxTokens,
     temperature: retry ? 0.0 : 0.1,
   );
 }

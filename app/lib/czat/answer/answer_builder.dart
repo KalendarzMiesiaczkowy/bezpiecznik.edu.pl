@@ -28,12 +28,31 @@ List<Map<String, Object?>> _withCall(
   bool risk,
 ) => [if (risk) _callPanel, ...panels];
 
+/// Joins neighbouring `steps` / `bullets` panels that share a title into one.
+/// The on-device model tends to open a new panel for every step, which would
+/// show three cards each numbered "1" instead of one list 1-2-3.
+List<Map<String, Object?>> _mergeNeighbours(List<Map<String, Object?>> panels) {
+  final out = <Map<String, Object?>>[];
+  for (final p in panels) {
+    final last = out.isEmpty ? null : out.last;
+    final list = p['type'] == 'steps' || p['type'] == 'bullets';
+    final a = last?['items'], b = p['items'];
+    if (list && last != null && last['type'] == p['type'] && last['title'] == p['title'] && a is List && b is List) {
+      out[out.length - 1] = {...last, 'items': [...a, ...b]};
+    } else {
+      out.add(p);
+    }
+  }
+  return out;
+}
+
 /// Answer from validated model panels. `call` goes first when [risk].
 AssistantAnswer buildModelAnswer(
   List<Map<String, Object?>> panels,
   List<KbChunk> chunks, {
   required bool risk,
 }) {
+  panels = _mergeNeighbours(panels);
   final used = <String>{};
   for (final p in panels) {
     final id = p['source_id'];
