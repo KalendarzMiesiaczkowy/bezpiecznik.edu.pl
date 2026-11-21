@@ -251,7 +251,7 @@ void main() {
     await tester.pump();
     expect(find.text('Poproś kogoś o AED'), findsOneWidget);
     expect(find.text('Jak użyć AED'), findsOneWidget);
-    await tester.tap(find.descendant(of: find.byKey(const ValueKey('cpr-aed-row')), matching: find.byType(BzButton)));
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('cpr-aed-row')), matching: find.byType(BzButton)).last);
     await tester.pump();
     expect(find.text('Poproś kogoś o AED'), findsNothing);
     for (var i = 0; i < 1210; i++) {
@@ -366,14 +366,37 @@ void main() {
     expect(deco.border, isNull);
 
     final aed = find.byKey(const ValueKey('cpr-aed-how'));
-    expect(tester.widget<BzButton>(aed).variant, BzButtonVariant.secondary);
-    final panelLeft = tester.getTopLeft(find.byKey(const ValueKey('cpr-pinned'))).dx;
-    expect(tester.getTopLeft(aed).dx, panelLeft + t.space4);
+    expect(tester.widget<BzButton>(aed).variant, BzButtonVariant.ghost);
 
     final sos = find.widgetWithText(BzButton, '112');
     final sosSize = tester.getSize(sos);
     expect(sosSize.width, greaterThanOrEqualTo(48));
     expect(sosSize.height, greaterThanOrEqualTo(48));
+    rig.session.stop();
+  });
+
+  testWidgets('pinned panel is compact: <= 240 dp tall at 411x914, 112 target >= 48x48', (tester) async {
+    tester.view.physicalSize = const Size(411 * 2.625, 914 * 2.625);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(tester.view.reset);
+    final (rig, _) = await pumpCard(tester);
+    await tester.tap(find.text('Dziecko'));
+    await tester.pump();
+    await tester.tap(find.text(cprStartLabel));
+    await tester.pump();
+    // Initial breaths: worst case (Dalej + AED reminder row all visible).
+    expect(find.text(cprBreathsDoneLabel), findsOneWidget);
+    expect(find.byKey(const ValueKey('cpr-aed-row')), findsOneWidget);
+    final h = tester.getSize(find.byKey(const ValueKey('cpr-pinned'))).height;
+    expect(h, lessThanOrEqualTo(240));
+    final sos = tester.getSize(find.byKey(const ValueKey('cpr-112')));
+    expect(sos.width, greaterThanOrEqualTo(48));
+    expect(sos.height, greaterThanOrEqualTo(48));
+    for (final label in [cprBreathsDoneLabel, cprPauseLabel, cprStopLabel, cprAedHowLabel]) {
+      final size = tester.getSize(find.widgetWithText(BzButton, label));
+      expect(size.height, greaterThanOrEqualTo(48), reason: label);
+      expect(size.width, greaterThanOrEqualTo(48), reason: label);
+    }
     rig.session.stop();
   });
 
@@ -383,7 +406,7 @@ void main() {
     await tester.pump();
     final size = tester.getSize(find.byKey(const ValueKey('cpr-aed-how')));
     expect(size.height, greaterThanOrEqualTo(48));
-    await tester.tap(find.descendant(of: find.byKey(const ValueKey('cpr-aed-row')), matching: find.byType(BzButton)));
+    await tester.tap(find.descendant(of: find.byKey(const ValueKey('cpr-aed-row')), matching: find.byType(BzButton)).last);
     await tester.pump();
     expect(find.text('Poproś kogoś o AED'), findsNothing);
     expect(find.text(cprAedHowLabel), findsOneWidget);
