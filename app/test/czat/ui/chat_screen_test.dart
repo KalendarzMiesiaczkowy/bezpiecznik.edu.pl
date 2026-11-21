@@ -77,7 +77,7 @@ void main() {
     expect(bubble, findsOneWidget);
     expect(tester.getTopRight(bubble).dx, greaterThan(tester.view.physicalSize.width / tester.view.devicePixelRatio - 40));
     expect(find.text('Przykładowy krok pierwszy'), findsOneWidget);
-    expect(find.text('▸ Przykład, s. 14'), findsNWidgets(2));
+    expect(find.text('▸ Przykład, s. 14'), findsOneWidget);
     // The input is cleared after sending.
     expect(tester.widget<TextField>(find.byKey(const Key('composer-field'))).controller!.text, isEmpty);
   });

@@ -9,7 +9,8 @@ import 'template_registry.dart';
 /// Header shown when every step is checked (spec `steps` "Stany").
 const String stepsAllDoneText = 'Wszystko zrobione';
 
-/// `steps`: numbered, checkable steps with a source chip under each one.
+/// `steps`: numbered, checkable steps; a source chip appears under a step only
+/// when its source differs from the previous step's (BG18: no repeated chips).
 /// The first unchecked step is the current one (bar + bold).
 class StepsPanelView extends StatelessWidget {
   const StepsPanelView({super.key, required this.scope});
@@ -44,7 +45,7 @@ class StepsPanelView extends StatelessWidget {
             _StepRow(
               number: i + 1,
               item: items[i],
-              source: scope.answer.source(items[i].sourceId),
+              source: _chipSource(scope, items, i),
               done: done.contains(i),
               current: i == current,
               onChanged: (v) => scope.onDoneChanged(i, v),
@@ -54,6 +55,16 @@ class StepsPanelView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Source for step [i]'s chip, or null when it equals the previous step's.
+SourceRecord? _chipSource(PanelScope scope, List<PanelItem> items, int i) {
+  final s = scope.answer.source(items[i].sourceId);
+  if (s == null || i == 0) return s;
+  final p = scope.answer.source(items[i - 1].sourceId);
+  final same =
+      p != null && p.docId == s.docId && p.pageLabel == s.pageLabel && p.chipLabel == s.chipLabel;
+  return same ? null : s;
 }
 
 class _StepRow extends StatelessWidget {
