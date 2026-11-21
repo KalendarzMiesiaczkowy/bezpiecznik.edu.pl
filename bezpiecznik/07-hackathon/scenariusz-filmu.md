@@ -71,7 +71,7 @@ Bez wybuchu w kadrze i bez ofiar. Strach buduje dźwięk i to, czego nie widać.
 |---|---|---|
 | 0:33 | Efekt przewijania taśmy: scena 3 cofa się w 1 s aż do dłoni z telefonem | Odwrócony dźwięk, potem ta sama syrena |
 | 0:34 | Ta sama ciemność, ta sama dłoń. Na ekranie Bezpiecznik | **Lektor:** „Jeszcze raz. Tym razem wiesz, co zrobić.” |
-| 0:37 | Zbliżenie na pigułkę stanu: **offline · GPS ✓**. Kadr zatrzymuje się na niej na pół sekundy | Syrena ciszej, w tle |
+| 0:37 | Zbliżenie na pasek stanu telefonu: ikona trybu samolotowego (**offline**). Kadr zatrzymuje się na niej na pół sekundy | Syrena ciszej, w tle |
 | 0:38 | To samo pytanie, wpisane tak samo jak w Google | Klawiatura |
 | 0:41 | Odpowiedź: karta „Teraz” z krokami i chipami źródła („Poradnik bezpieczeństwa, s. …”). Dotknięcie chipu otwiera okno PDF z podświetlonym zdaniem (1 s) | Spokojny, ciepły dźwięk tła zamiast drona |
 | 0:46 | Karta „Najbliższy schron”: mini mapa, „… m · … min pieszo”. Kciuk: „Prowadź”. Strzałka kompasu | |
@@ -123,7 +123,7 @@ Mikroscena 5 kończy się na uderzeniu: uciskające dłonie, cięcie do czerni, 
 
 ## Po filmie: pokaz na żywo
 
-Film daje emocję i zapowiedź funkcji, a dowód przychodzi na żywo. Szczegóły, czyli cytat z PDF, odmowa „Nie wiem. Moje źródła tego nie opisują…” i profil, zostają w [scenariuszu pokazu](scenariusz-pokazu.md). Nie upychamy ich w filmie.
+Film daje emocję i zapowiedź funkcji, a dowód przychodzi na żywo. Szczegóły, czyli cytat z PDF, odmowa „Nie wiem. Moje źródła tego nie opisują. Zapytaj lekarza, farmaceutę albo właściwą instytucję.” i profil, zostają w [scenariuszu pokazu](scenariusz-pokazu.md). Nie upychamy ich w filmie.
 
 **Przejście:** plansza gaśnie, na scenie zapala się światło. Prezentujący trzyma ten sam telefon co w filmie i mówi: „Ten telefon od początku filmu jest w trybie samolotowym.” Potem pokaz według scenariusza pokazu. Gdyby pokaz na żywo zawiódł, puszczamy zapasowe nagranie demo (zob. [plan budowy](plan-budowy.md)).
 
@@ -199,4 +199,4 @@ Wszystko poniżej to sceny 3, 4 i 4b, ok. 2,5 h zdjęć łącznie. Reszty nie na
 | Lektor | `saytts`, głos Wojciecha |
 | Syrena, huk, bicie serca, oddech, płacz niemowlęcia | Nagrania z sieci |
 | Muzyka do sceny 4b (110 BPM) | Z sieci |
-| Przewijanie taśmy, drżenie obrazu, zbliżenie na pigułkę „offline” | Efekty w montażu |
+| Przewijanie taśmy, drżenie obrazu, zbliżenie na ikonę trybu samolotowego | Efekty w montażu |

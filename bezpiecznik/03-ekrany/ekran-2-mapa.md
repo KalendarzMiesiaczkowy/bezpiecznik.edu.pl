@@ -36,13 +36,13 @@ Aktywne prowadzenie zapisuje w lokalnym stanie aplikacji `navigationContext = { 
 
 ## Układ
 
-Stałe elementy nad mapą we wszystkich stanach (globalne, renderowane w `RootOverlay`, [README](README.md#elementy-globalne)): przycisk wstecz (lewy górny), pigułka stanu „offline · GPS · bateria” (górny środek, **do potwierdzenia**), SOS (prawy górny). Arkusze zajmują najwyżej 70% wysokości ekranu i nigdy nie zasłaniają tych trzech elementów.
+Stałe elementy nad mapą we wszystkich stanach (globalne, renderowane w `RootOverlay`, [README](README.md#elementy-globalne)): przycisk wstecz (lewy górny) i SOS (prawy górny). Stan GPS i baterii pokazuje pasek `Notice` pod nimi (tylko gdy jest co zgłosić: szukanie GPS, brak GPS, niska bateria). Arkusze zajmują najwyżej 70% wysokości ekranu i nigdy nie zasłaniają przycisku wstecz ani SOS.
 
 **`browse`**
 
 ```
 ┌──────────────────────────────┐
-│(←)  offline·GPS ✓·64%  (SOS) │
+│(←)                     (SOS) │
 │                              │
 │      S            +          │
 │             ▲                │
@@ -60,7 +60,7 @@ Stałe elementy nad mapą we wszystkich stanach (globalne, renderowane w `RootOv
 
 ```
 ┌──────────────────────────────┐
-│(←)  offline·GPS ✓·64%  (SOS) │
+│(←)                     (SOS) │
 │      S         ▲             │
 │               (mapa)         │
 │┌────────────────────────────┐│
@@ -79,7 +79,7 @@ Stałe elementy nad mapą we wszystkich stanach (globalne, renderowane w `RootOv
 
 ```
 ┌──────────────────────────────┐
-│(←)  offline·GPS ✓·64%  (SOS) │
+│(←)                     (SOS) │
 │               (mapa)         │
 │┌────────────────────────────┐│
 ││ Najbliższe schronienie     ││
@@ -95,7 +95,7 @@ Stałe elementy nad mapą we wszystkich stanach (globalne, renderowane w `RootOv
 
 ```
 ┌──────────────────────────────┐
-│(←)  offline·GPS ✓·64%  (SOS) │
+│(←)                     (SOS) │
 │               (mapa)         │
 │┌────────────────────────────┐│
 ││ Warstwy                    ││
@@ -114,7 +114,7 @@ Stałe elementy nad mapą we wszystkich stanach (globalne, renderowane w `RootOv
 
 ```
 ┌──────────────────────────────┐
-│(←)  offline·GPS ✓·64%  (SOS) │
+│(←)                     (SOS) │
 │┌────────────────────────────┐│
 ││ ↱ Za 120 m w prawo         ││
 ││   w ul. Lipową             ││
@@ -133,7 +133,7 @@ Stałe elementy nad mapą we wszystkich stanach (globalne, renderowane w `RootOv
 
 ```
 ┌──────────────────────────────┐
-│(←)  offline·GPS ✗·64%  (SOS) │
+│(←)                     (SOS) │
 │Do: Schron, ul. Lipowa 5      │
 │              ▲               │
 │             ███              │
@@ -153,9 +153,9 @@ Legenda szkiców: `▲` ty i kierunek patrzenia, `S` schron, `U` ukrycie, `M` mi
 | Element | Zachowanie |
 |---|---|
 | Przycisk wstecz | Pływający, okrągły, min. 48 dp. Opis dla czytnika: „Wróć”. Zob. wyjście. |
-| Pigułka stanu | Globalny `StatusPill`, stany i kolory: [README](README.md#pigułka-stanu). Na tym ekranie bez zmian. |
+| Stan GPS i baterii | `Notice` (wariant `bar`) pod górnymi przyciskami: „Szukam pozycji GPS…”, „Brak sygnału GPS.”, „Niska bateria ({n}%).”. Bez wskaźnika, gdy wszystko działa. Stany: tabela niżej. |
 | SOS | Czerwony, zawsze ten sam kształt i miejsce, nigdy niezasłonięty ([przycisk SOS](../02-funkcje/05-alarm/przycisk-sos.md)). Opis dla czytnika: „SOS, kontakt ze służbami. Przytrzymaj, aby zadzwonić pod 112.” |
-| Mapa | MapLibre, kafelki z plików lokalnych: mapa uproszczona Polski zawsze, szczegółowa tam, gdzie jest pobrana paczka województwa ([mapa offline](../05-technologia/mapa-offline.md)). Styl jasny albo ciemny kryzysowy wg motywu z [Ustawień](ekran-3-ustawienia.md). Przesuwanie i przybliżanie palcami. Przesunięcie wyłącza śledzenie pozycji. |
+| Mapa | MapLibre, kafelki z plików lokalnych: mapa uproszczona Polski zawsze, szczegółowa tam, gdzie jest pobrana paczka województwa ([mapa offline](../05-technologia/mapa-offline.md)). W MVP jeden styl ciemny (po MVP: styl jasny albo ciemny kryzysowy wg motywu z [Ustawień](ekran-3-ustawienia.md)). Przesuwanie i przybliżanie palcami. Przesunięcie wyłącza śledzenie pozycji. |
 | Pozycja użytkownika | Kropka z wachlarzem kierunku patrzenia (kurs z magnetometru, względem północy geograficznej, gdy system ją podaje). Okrąg dokładności, gdy dokładność > 20 m. Bez fixu: szara kropka w ostatniej znanej pozycji z etykietą wieku („3 min temu”). |
 | Przycisk `◎` | Wyśrodkowuje mapę na pozycji i włącza śledzenie. Bez GPS nieaktywny. |
 | Punkty | Z tabeli `points` w SQLite ([dane mapy](../04-dane/dane-mapy.md), [schemat](../04-dane/kontrakty-tresci.md#baza-punktów)). Rodzaj z pola `kind`. Tylko z włączonych warstw. Przy przybliżeniu < 12 grupowane w kółka z liczbą; dotknięcie grupy przybliża. Dotknięcie punktu otwiera arkusz `point`. Cel dotyku min. 48 dp. |
@@ -197,14 +197,14 @@ Formaty: odległość < 1000 m w metrach zaokrąglonych do 10 („450 m”), od 
 | Ładowanie | Otwieranie plików kafelków i bazy punktów | Tło w kolorze motywu i wskaźnik ładowania, elementy stałe (wstecz, SOS) aktywne od pierwszej klatki |
 | Pusto: brak punktów w widoku | Żaden punkt włączonych warstw w widocznym obszarze | Dyskretny pasek „Brak punktów w tym widoku.” |
 | Pusto: brak danych o punktach | Brak pobranej paczki z punktami (np. pominięta przy pierwszym uruchomieniu) | Arkusz `nearest` i pasek: „Nie mam danych o punktach w tej okolicy. Pobierz mapę województwa.” + **Pobierz** |
-| Offline | Brak internetu | Wszystko działa normalnie. Pigułka „offline”. W arkuszu `region` **Pobierz** zastąpione tekstem „Pobierzesz, gdy będzie internet.” |
+| Offline | Brak internetu | Wszystko działa normalnie, bez osobnego wskaźnika. W arkuszu `region` **Pobierz** zastąpione tekstem „Pobierzesz, gdy będzie internet.” |
 | Tylko Wi-Fi, sieć komórkowa | `settings.wifiOnly = true` i brak Wi-Fi | Arkusz `region`: „Czekam na Wi-Fi.” + **Pobierz przez sieć komórkową** |
-| Szukam GPS | Brak pierwszego fixu | Pigułka `GPS …`, pasek „Szukam pozycji GPS…”. Po 60 s: „Nie mogę ustalić pozycji. Wyjdź pod otwarte niebo.” |
-| Brak GPS | Fix utracony | Szara kropka w ostatniej znanej pozycji z wiekiem. `◎` i **Najbliższy schron** nieaktywne; dotknięcie pokazuje „Potrzebuję pozycji GPS, żeby znaleźć najbliższe punkty.” W `route` → `compass` (zob. Elementy). Bez ostatniej znanej pozycji kompas pokazuje tylko „Brak pozycji GPS. Nie wiem, w którą stronę iść.” |
+| Szukam GPS | Brak pierwszego fixu | `Notice` „Szukam pozycji GPS…”. Po 60 s: „Nie mogę ustalić pozycji. Wyjdź pod otwarte niebo.” |
+| Brak GPS | Fix utracony | `Notice` „Brak sygnału GPS.” Szara kropka w ostatniej znanej pozycji z wiekiem. `◎` i **Najbliższy schron** nieaktywne; dotknięcie pokazuje „Potrzebuję pozycji GPS, żeby znaleźć najbliższe punkty.” W `route` → `compass` (zob. Elementy). Bez ostatniej znanej pozycji kompas pokazuje tylko „Brak pozycji GPS. Nie wiem, w którą stronę iść.” |
 | Brak zgody na lokalizację | Uprawnienie odrzucone lub usługi lokalizacji wyłączone | Mapa bez pozycji. Pasek „Bez dostępu do lokalizacji nie pokażę, gdzie jesteś.” + **Otwórz ustawienia telefonu**. Karta punktu bez odległości. |
 | Brak magnetometru | Telefon nie podaje kursu | Brak wachlarza kierunku. `compass`: strzałka obrócona wg kierunku ruchu z GPS, gdy użytkownik idzie; gdy stoi: tylko kierunek świata i komunikat „Twój telefon nie ma kompasu. Idź na {kierunek}.” |
 | Tryb bez AI | Nie dotyczy: mapa nie używa modelu. |
-| Niska bateria | Bateria < `LOW_BATTERY_PCT` albo motyw kryzysowy | Ciemny styl mapy, aktualizacja pozycji co 5 s zamiast co 1 s, bez animacji przesuwania. W `route` jednorazowy pasek „Niska bateria. Kompas zużywa mniej energii.” + **Przełącz na kompas**. |
+| Niska bateria | Bateria < `LOW_BATTERY_PCT` (po MVP także motyw kryzysowy) | `Notice` „Niska bateria ({n}%).” Ciemny styl mapy (w MVP zawsze), aktualizacja pozycji co 5 s zamiast co 1 s, bez animacji przesuwania. W `route` jednorazowy pasek „Niska bateria. Kompas zużywa mniej energii.” + **Przełącz na kompas**. |
 | Poza mapą szczegółową | Pozycja poza pobranymi województwami | Wskaźnik „○ Poza mapą szczegółową” + **Pobierz**. Widać tylko mapę uproszczoną. Prowadzenie wyłącznie w linii prostej (`compass`). |
 | Błąd: uszkodzona paczka | Suma kontrolna pliku mapy lub punktów się nie zgadza | Pasek „Mapa województwa jest uszkodzona. Pobierz ją ponownie w Ustawieniach.” + **Otwórz Ustawienia**. Uszkodzona paczka nie jest używana; mapa uproszczona i kompas działają. |
 | Błąd: punkt nie istnieje | `target_point_id` z czatu nie ma w bazie | Stan `browse`, pasek „Nie znalazłem tego punktu na mapie.” |
@@ -288,7 +288,7 @@ Formaty: odległość < 1000 m w metrach zaokrąglonych do 10 („450 m”), od 
 - [ ] Wejście z pozycją w niepobranym województwie pokazuje arkusz `region`; „Nie teraz” wycisza go dla tego województwa na 24 h.
 - [ ] Przy `wifiOnly = true` na sieci komórkowej pobieranie nie startuje bez wyraźnej zgody.
 - [ ] Po pobraniu paczki szczegóły i punkty pojawiają się bez restartu.
-- [ ] Przy baterii < `LOW_BATTERY_PCT` mapa ma ciemny styl, a pozycja odświeża się co 5 s.
+- [ ] Przy baterii < `LOW_BATTERY_PCT` pozycja odświeża się co 5 s (styl mapy w MVP zawsze ciemny).
 - [ ] Odrzucenie zgody na lokalizację nie blokuje ekranu: mapa i karty punktów działają, widać przycisk do ustawień telefonu.
 - [ ] Podpis „© OpenStreetMap contributors” jest widoczny na mapie.
 - [ ] Wszystkie przyciski mają min. 48 dp i opis dla czytnika ekranu.

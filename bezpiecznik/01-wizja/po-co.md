@@ -21,7 +21,7 @@ Bezpiecznik robi z tej wiedzy **jedną rozmowę, która działa bez sieci**. Uż
 3. dopasowuje odpowiedź do domowników, leków i mieszkania z profilu domu,
 4. pokazuje drogę do najbliższego punktu schronienia.
 
-Gdy źródła nie zawierają odpowiedzi, Bezpiecznik mówi: „Nie wiem. Moje źródła tego nie opisują. Jeśli komuś grozi niebezpieczeństwo, zadzwoń pod 112.” i nie zgaduje.
+Gdy źródła nie zawierają odpowiedzi, Bezpiecznik mówi: „Nie wiem. Moje źródła tego nie opisują. Zapytaj lekarza, farmaceutę albo właściwą instytucję.” i nie zgaduje.
 
 ## Czym Bezpiecznik nie jest
 

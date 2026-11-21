@@ -14,7 +14,7 @@ Odpowiedź Bezpiecznika nie jest ścianą tekstu, tylko zestawem gotowych paneli
 | `bullets` | Lista punktowana bez kolejności | Co zabrać do schronu |
 | `map` | Miniatura mapy z najbliższym punktem, odległością i przyciskiem „Prowadź” | Najbliższy schron 450 m |
 | `animation` | Krótka animacja (GIF) | Ułożenie dłoni przy RKO |
-| `call` | Przyciski 112, 999, 998, 997, współrzędne i „Wyślij lokalizację SMS-em” | Po opisie wypadku |
+| `call` | Dwa przyciski: „Zadzwoń 112” i „Powiadom bliskich”; zwinięte „Więcej”: 999, 998, 997, współrzędne | Po opisie wypadku |
 | `signal` | Dźwięk SOS, latarka, stroboskop | Zagubienie w terenie |
 | `quote` | Cytat, dokument, strona, data wydania; okno PDF z podświetlonym fragmentem, do rozwinięcia na pełny ekran | Osobny szablon pod odpowiedzią; pod każdym krokiem jest tylko chip źródła |
 | `cpr` | Instruktor RKO przypięty nad polem wiadomości na czas działania | „Ktoś nie oddycha” |

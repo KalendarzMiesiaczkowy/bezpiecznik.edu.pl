@@ -18,7 +18,6 @@ Jedna przewijana lista wszystkich ustawień aplikacji: profil, czaty, wygląd, p
 | **Profil domu** | [Ekran 4](ekran-4-profil.md) w trybie `edit` |
 | **Usuń wszystkie dane** | Po potwierdzeniu → [Ekran 0](ekran-0-pierwsze-uruchomienie.md) |
 
-Brak pigułki stanu (jest tylko na czacie i mapie).
 
 ## Układ
 
@@ -31,7 +30,7 @@ Brak pigułki stanu (jest tylko na czacie i mapie).
 │  Usuwanie historii  Nigdy >  │
 │  Usuń wszystkie czaty        │
 │WYGLĄD                        │
-│  Motyw          Systemowy >  │
+│  Motyw (po MVP) Systemowy >  │
 │  Rozmiar tekstu  ●──○──○     │
 │  Ograniczenie ruchu   [━○]   │
 │PACZKI DANYCH                 │
@@ -53,9 +52,9 @@ Wszystkie wartości zapisane lokalnie pod kluczem `settings.*`, działają od ra
 | Profil | Profil domu | Wiersz z podsumowaniem „Uzupełniono {n} z 8” | — | Otwiera [Ekran 4](ekran-4-profil.md) w trybie `edit` |
 | Czaty | Automatyczne usuwanie historii | Wybór: Nigdy, Po 24 godzinach, Po 7 dniach, Po 30 dniach | Nigdy (dp) | `settings.chatAutoDelete`. Czaty, których ostatnia wiadomość jest starsza niż próg, są usuwane przy starcie aplikacji i co godzinę, gdy jest aktywna. Wybór krótszego progu, przez który zniknęłyby istniejące czaty, wymaga potwierdzenia z ich liczbą. |
 | Czaty | Usuń wszystkie czaty | Przycisk destrukcyjny + okno potwierdzenia | — | Usuwa historię wszystkich czatów. Lista w Panelu 1 jest pusta, czat otwiera się jako nowy. |
-| Wygląd | Motyw | Wybór: Systemowy, Jasny, Ciemny, Kryzysowy | Systemowy (dp) | `settings.theme`. Kryzysowy: wysoki kontrast, czarne tło, brak animacji, ciemny styl mapy, mniejsze zużycie baterii na ekranach OLED. „Systemowy” = jasny lub ciemny wg telefonu. |
+| Wygląd | Motyw | **MVP: wiersz ukryty, aplikacja ma tylko motyw Ciemny.** Po MVP wybór: Systemowy, Jasny, Ciemny, Kryzysowy | Po MVP: Systemowy (dp) | `settings.theme`. Po MVP. Kryzysowy: czarne tło, wyższy kontrast, brak animacji, ciemny styl mapy, mniejsze zużycie baterii na ekranach OLED. Jasny: osobna paleta. „Systemowy” = jasny lub ciemny wg telefonu. |
 | Wygląd | Rozmiar tekstu | Suwak 3 pozycje: Standardowy, Duży, Bardzo duży | Standardowy | `settings.textScale` = 1,0 / 1,25 / 1,5 (dp), mnożone przez skalę czcionki systemu. Podgląd zdania pod suwakiem. |
-| Wygląd | Ograniczenie ruchu | Przełącznik | Wg ustawienia systemu „ogranicz ruch” | `settings.reduceMotion`. Wyłącza animacje. Przy motywie Kryzysowym zawsze włączone (przełącznik nieaktywny). |
+| Wygląd | Ograniczenie ruchu | Przełącznik | Wg ustawienia systemu „ogranicz ruch” | `settings.reduceMotion`. Wyłącza animacje. Po MVP przy motywie Kryzysowym zawsze włączone (przełącznik nieaktywny). |
 | Paczki danych | Pobieranie tylko przez Wi-Fi | Przełącznik | Włączone | `settings.wifiOnly`. Dotyczy wszystkich paczek (model AI, baza wiedzy, mapy). Na sieci komórkowej pobieranie czeka na Wi-Fi; ręczne **Pobierz** pyta „Pobrać przez sieć komórkową?”. |
 | Paczki danych | Sprawdzanie województwa | Wybór: Co 1 h, Co 3 h, Co 6 h, Tylko przy uruchomieniu | Co 3 h | `settings.regionCheckInterval`. Sprawdzanie tylko, gdy aplikacja jest aktywna. Wykrycie województwa bez paczki → propozycja pobrania (arkusz `region` na [Ekranie 2](ekran-2-mapa.md)). Wykrywanie w tle: P2, poza zakresem. |
 | Paczki danych | Baza wiedzy | Wiersz: data wydania, rozmiar, stan + **Pobierz** / **Aktualizuj** | — | Bez usuwania. **Aktualizuj** widoczne, gdy manifest ma nowszą wersję. Bez bazy czat pokazuje tylko karty ratunkowe. |
@@ -65,7 +64,7 @@ Wszystkie wartości zapisane lokalnie pod kluczem `settings.*`, działają od ra
 | Paczki danych | + Pobierz województwo | Przycisk → lista 16 województw z rozmiarami | — | Pobrane oznaczone ✓. Wybór startuje pobieranie. |
 | Paczki danych | Postęp pobierania | Pasek w wierszu paczki: % i rozmiar + **Wstrzymaj** / **Wznów**, **Anuluj** | — | Pobieranie w tle, wznawiane od miejsca przerwania (także po restarcie). Po pobraniu sprawdzenie podpisu i sumy kontrolnej; błąd → stan „Plik uszkodzony” + **Pobierz ponownie** ([prywatność](../05-technologia/prywatnosc-i-bezpieczenstwo.md#integralność-paczek)). Za mało miejsca → komunikat z potrzebnym i wolnym miejscem. |
 | AI i bateria | Tryb bez AI | Wybór: Automatycznie, Zawsze, Nigdy | Automatycznie | `settings.noAiMode`. Automatycznie = tryb bez AI poniżej progu baterii. Bez pobranego modelu tryb bez AI działa zawsze, niezależnie od wyboru (opis pod wierszem). [Czat: tryb bez AI](../02-funkcje/01-czat/czat.md#tryb-bez-ai). |
-| AI i bateria | Próg baterii | Wybór: 15%, 20%, 30% | 20% (dp) | `settings.lowBatteryPct`. Widoczny przy „Automatycznie”. Ten sam próg włącza oszczędzanie na mapie (`LOW_BATTERY_PCT`, [Ekran 2](ekran-2-mapa.md)). Kolory baterii w pigułce stanu: [README](README.md#pigułka-stanu). |
+| AI i bateria | Próg baterii | Wybór: 15%, 20%, 30% | 20% (dp) | `settings.lowBatteryPct`. Widoczny przy „Automatycznie”. Ten sam próg włącza oszczędzanie na mapie (`LOW_BATTERY_PCT`, [Ekran 2](ekran-2-mapa.md)). |
 | AI i bateria | Głos instrukcji | Przełącznik | Włączony | `settings.voiceEnabled`. Czytanie instrukcji na głos (`flutter_tts`): karty ratunkowe, instruktor RKO. |
 | AI i bateria | Tempo mowy | Wybór: Wolne, Normalne, Szybkie + **Posłuchaj** | Normalne | `settings.speechRate` = 0,8 / 1,0 / 1,2 (dp). **Posłuchaj** czyta zdanie próbne. Nieaktywne przy wyłączonym głosie. Brak polskiego głosu w systemie → „Telefon nie ma polskiego głosu. Zainstaluj go w ustawieniach telefonu.” |
 | Prywatność | Informacja | Tekst | — | „Profil, czaty i lokalizacja zostają w telefonie. Wysyłasz je tylko ty, np. SMS-em do bliskich. Nie ma konta ani serwera. Sieć służy tylko do pobierania paczek.” |
@@ -108,7 +107,7 @@ Wszystkie wartości zapisane lokalnie pod kluczem `settings.*`, działają od ra
 | `settings.chats.deleteAll` | Usuń wszystkie czaty |
 | `settings.chats.deleteAll.confirm` | Usunąć wszystkie czaty? Tego nie da się cofnąć. |
 | `settings.theme` | Motyw |
-| `settings.theme.options` | Systemowy / Jasny / Ciemny / Kryzysowy |
+| `settings.theme.options` | Po MVP: Systemowy / Jasny / Ciemny / Kryzysowy (w MVP tylko Ciemny, wiersz ukryty) |
 | `settings.theme.crisisHint` | Czarne tło, wysoki kontrast, bez animacji. Oszczędza baterię. |
 | `settings.textScale` | Rozmiar tekstu |
 | `settings.textScale.options` | Standardowy / Duży / Bardzo duży |
@@ -166,7 +165,8 @@ Wszystkie wartości zapisane lokalnie pod kluczem `settings.*`, działają od ra
 ## Kryteria akceptacji
 
 - [ ] Każda zmiana ustawienia działa od razu i przetrwa restart aplikacji.
-- [ ] Motyw Kryzysowy daje czarne tło, wyłącza animacje (przełącznik ograniczenia ruchu nieaktywny) i ciemny styl mapy.
+- [ ] MVP: wiersz „Motyw” jest ukryty, aplikacja ma motyw Ciemny.
+- [ ] Po MVP: motyw Kryzysowy daje czarne tło, wyłącza animacje (przełącznik ograniczenia ruchu nieaktywny) i ciemny styl mapy.
 - [ ] Rozmiar tekstu „Bardzo duży” powiększa tekst na wszystkich ekranach bez obcinania przycisku SOS.
 - [ ] Przy `wifiOnly` na sieci komórkowej żadne pobieranie nie startuje bez potwierdzenia.
 - [ ] Przerwane pobieranie (zabicie aplikacji, utrata sieci) wznawia się od miejsca przerwania.

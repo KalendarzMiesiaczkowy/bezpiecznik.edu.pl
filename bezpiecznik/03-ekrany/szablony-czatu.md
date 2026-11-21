@@ -21,7 +21,7 @@ Model zwraca tylko `{ "panels": [...] }` (format z [lokalne-ai.md](../05-technol
 | `text` | string? | Tylko dla `refusal`: tekst odmowy |
 | `created_at` | ISO 8601 | Czas utworzenia |
 
-Etykieta nad wiadomością według `origin`: `rescue_card` → „Karta ratunkowa”, `rules` → „Z twojego profilu” (brak etykiety, gdy wiadomość ma pole `intent`, [intencje](../04-dane/kontrakty-tresci.md#intencje)), `ai` → brak, `no_ai` → „Tryb bez AI: fragmenty źródeł”, `refusal` → brak.
+Etykieta nad wiadomością według `origin`: `rescue_card` → „Karta ratunkowa”, `rules` → „Z twojego profilu” (brak etykiety, gdy wiadomość ma pole `intent`, [intencje](../04-dane/kontrakty-tresci.md#intencje)), `ai` → brak, `no_ai` → „Tryb bez AI: fragmenty źródeł”, `refusal` → brak (odmowa to spokojny komponent `NoSource`, bez 112; [odmowa](../02-funkcje/01-czat/odpowiedzi-tylko-ze-zrodel.md#odmowa)).
 
 ### Kto może użyć którego szablonu
 
@@ -265,7 +265,7 @@ Format: GIF. Później Lottie: to samo pole, renderer wybiera po rozszerzeniu pl
 
 ## `call`
 
-**Cel:** wezwanie pomocy bez wychodzenia z czatu. To ten sam komponent co [Panel 2](panel-2-kontakt-ze-sluzbami.md) (`EmergencyContactPanel`, wariant `inline`), w skróconej formie.
+**Cel:** wezwanie pomocy bez wychodzenia z czatu. To ten sam komponent co [Panel 2](panel-2-kontakt-ze-sluzbami.md) (`CallPanel`, wariant `inline`), z tym samym układem.
 
 ```json
 { "type": "call" }
@@ -273,17 +273,25 @@ Format: GIF. Później Lottie: to samo pole, renderer wybiera po rozszerzeniu pl
 
 Brak pól od modelu. Pozycję, adres i kontakty ICE dopisuje aplikacja przy wyświetleniu.
 
+Na wierzchu dwa duże przyciski (po 80 px): **Zadzwoń 112** i **Powiadom bliskich** (SMS), pod nimi przełącznik „Dołącz dane z profilu”, linia stanu GPS i zwinięty wiersz **„Więcej”** (domyślnie zamknięty).
+
 ```
 ┌ Wezwij pomoc ────────────────┐
-│ 52.22977, 21.01178  ±12 m    │
-│ ok. ul. Marszałkowska 10     │
-│ [       Zadzwoń 112        ] │
-│ [999 Pog.][998 Straż][997 P.]│
-│ [ Wyślij lokalizację SMS-em ]│
+│ ┌──────────────────────────┐ │
+│ │       ZADZWOŃ 112        │ │
+│ └──────────────────────────┘ │
+│ ┌──────────────────────────┐ │
+│ │    POWIADOM BLISKICH     │ │
+│ └──────────────────────────┘ │
+│ [✓] Dołącz dane z profilu    │
+│ GPS ±12 m                    │
+│ Więcej                     ▾ │
 └──────────────────────────────┘
 ```
 
-**Interakcje:** identyczne jak w [Panelu 2](panel-2-kontakt-ze-sluzbami.md#elementy): przyciski numerów → systemowe wybieranie numeru, „Wyślij lokalizację SMS-em” → „Powiadom bliskich”. Dotknięcie współrzędnych → kopiuje je i pokazuje toast „Skopiowano współrzędne”.
+Po rozwinięciu „Więcej” (inline, w tej samej karcie): 999 Pogotowie, 998 Straż, 997 Policja, współrzędne (dziesiętne i DMS), najbliższy adres (po MVP), notka AML, „Co powiedzieć dyspozytorowi” i sygnał ratunkowy. Szczegóły: [Panel 2](panel-2-kontakt-ze-sluzbami.md#elementy).
+
+**Interakcje:** identyczne jak w [Panelu 2](panel-2-kontakt-ze-sluzbami.md#elementy): „Zadzwoń 112” (oraz numery z „Więcej”) → systemowe wybieranie numeru, „Powiadom bliskich” → systemowe okno SMS. Dotknięcie współrzędnych w „Więcej” → kopiuje je i pokazuje toast „Skopiowano współrzędne”.
 
 **Stany:** jak w Panelu 2 (brak GPS, brak adresu, brak kontaktów ICE, telefon bez SMS).
 
@@ -351,7 +359,7 @@ Brak pól od modelu. Pozycję, adres i kontakty ICE dopisuje aplikacja przy wyś
 
 **Wygląd i zasady**
 
-- Okno: wycinek strony `pdf_page` wokół sumy prostokątów `rects` z marginesem, pełna szerokość dymka, wysokość do 200 dp. Fragment podświetlony (żółte tło, ok. 40% krycia) i podkreślony.
+- Okno: wycinek strony `pdf_page` wokół sumy prostokątów `rects` z marginesem, pełna szerokość dymka, wysokość do 200 dp. Fragment podświetlony tokenem `highlight` (ochra `signal`) i podkreślony.
 - Okno nie ma gestów (przewijanie czatu działa normalnie).
 - Strona rysowana z pliku PDF albo z wcześniej wyrenderowanego obrazu strony w paczce bazy wiedzy. Wybór należy do buildera; kontrakt (`pdf_file`, `pdf_page`, `rects`) jest ten sam.
 - Etykieta dla czytnika ekranu: pełny `text` fragmentu.

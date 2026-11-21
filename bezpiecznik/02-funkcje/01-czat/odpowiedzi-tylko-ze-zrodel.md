@@ -30,8 +30,8 @@ Są dokładnie dwa teksty odmowy (`origin: refusal`, pole `text`). Innych wersji
 
 | Odmowa | Tekst | Kiedy |
 |---|---|---|
-| `not_in_sources` „brak w źródłach” | Nie wiem. Moje źródła tego nie opisują. Jeśli komuś grozi niebezpieczeństwo, zadzwoń pod 112. | Domyślna. Wyszukiwanie poniżej progu, a wiadomość zawiera choć jedno słowo z dziedziny: frazy kart, [frazy ryzyka, intencje, synonimy](../../04-dane/kontrakty-tresci.md) |
-| `off_topic` „poza tematem” | Pomagam tylko w sytuacjach kryzysowych i bezpieczeństwie. Tego nie opisują moje źródła. | Wyszukiwanie poniżej progu i żadnego słowa z dziedziny. Bez 112, żeby nie odsyłać na numer alarmowy z pytaniem niezwiązanym z bezpieczeństwem |
+| `not_in_sources` „brak w źródłach” | Nie wiem. Moje źródła tego nie opisują. Zapytaj lekarza, farmaceutę albo właściwą instytucję. | Domyślna. Wyszukiwanie poniżej progu, a wiadomość zawiera choć jedno słowo z dziedziny: frazy kart, [frazy ryzyka, intencje, synonimy](../../04-dane/kontrakty-tresci.md). Spokojna, bez 112 (komponent `NoSource`, z podpowiedzią, gdzie szukać). Gdy wiadomość zawiera frazę ryzyka, aplikacja dodaje szablon `call` (reguła bez zmian) |
+| `off_topic` „poza tematem” | Pomagam tylko w sytuacjach kryzysowych i bezpieczeństwie. Tego nie opisują moje źródła. | Wyszukiwanie poniżej progu i żadnego słowa z dziedziny. Też bez 112, żeby nie odsyłać na numer alarmowy z pytaniem niezwiązanym z bezpieczeństwem |
 
 Przy wątpliwości wygrywa „brak w źródłach”. Przycisk SOS jest widoczny przy obu odmowach.
 

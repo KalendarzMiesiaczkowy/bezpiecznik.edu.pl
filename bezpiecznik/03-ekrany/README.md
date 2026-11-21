@@ -53,8 +53,8 @@ graph LR
   E4 -->|Wstecz| E3
   ANY{{Dowolny ekran}} -->|SOS dotknięcie| P2[P2 Kontakt ze służbami]
   ANY -->|SOS przytrzymanie| DIAL[Systemowe wybieranie 112]
-  P2 -->|112 / 999 / 998 / 997| DIAL2[Systemowe wybieranie numeru]
-  P2 -->|Wyślij lokalizację SMS-em| SMS[Systemowe okno SMS]
+  P2 -->|112 / Więcej: 999, 998, 997| DIAL2[Systemowe wybieranie numeru]
+  P2 -->|Powiadom bliskich| SMS[Systemowe okno SMS]
   P2 -->|Dodaj kontakty| E4
 ```
 
@@ -70,21 +70,14 @@ Renderowane w korzeniu aplikacji, nad nawigatorem (`RootOverlay`), a nie w każd
 
 | Element | Komponent | Gdzie | Zachowanie |
 |---|---|---|---|
-| Wyspa | `NavIsland` | E1, lewy górny róg | Pigułka z dwoma przyciskami po min. 48 × 48 dp: `≡` otwiera P1, `▦` (mapa) otwiera E2. Etykiety dla czytnika: „Menu”, „Mapa”. |
+| Wyspa | `NavIsland` | E1, lewy górny róg | Kapsuła z dwoma przyciskami po min. 48 × 48 dp: `≡` otwiera P1, `▦` (mapa) otwiera E2. Etykiety dla czytnika: „Menu”, „Mapa”. |
 | Wstecz | `BackButton` | E2, E3, E4, lewy górny róg | Okrągły przycisk 48 × 48 dp, strzałka „←”. Cofa jeden ekran. Etykieta: „Wróć”. W PV zamiast strzałki „✕” z etykietą „Zamknij”. |
 | SOS | `SosButton` | Każdy ekran (E1–E4, PV) i nad każdym panelem, prawy górny róg | Czerwony, min. 56 × 56 dp, napis „SOS”. Dotknięcie: otwiera P2 (gdy P2 jest otwarty: nic). Przytrzymanie 800 ms: wibracja i `tel:112` (system pokazuje potwierdzenie). Podczas przytrzymania wypełnia się obwódka. Etykieta: „SOS, kontakt ze służbami. Przytrzymaj, aby zadzwonić pod 112.” W E0 też widoczny. |
-| Pigułka stanu | `StatusPill` | E1 i E2, środek u góry | `offline · GPS ✓ · 64%`. Bez akcji po dotknięciu. Szczegóły stanów niżej. *Domyślne, do potwierdzenia.* |
-| Wskaźnik RKO | `CprIndicator` | E2, E3, E4, PV, gdy działa instruktor RKO | Zastępuje pigułkę stanu (albo zajmuje jej miejsce u góry): `● RKO 03:42 · wróć`. Dotknięcie wraca do E1. *Domyślne, do potwierdzenia.* |
+| Wskaźnik RKO | `CprIndicator` | E2, E3, E4, PV, gdy działa instruktor RKO | Środek u góry: `● RKO 03:42 · wróć`. Dotknięcie wraca do E1. *Domyślne, do potwierdzenia.* |
 
-### Pigułka stanu
+### Stan GPS i baterii
 
-| Część | Wartości |
-|---|---|
-| Sieć | `offline` (szary) · `online` (szary). Wyłącznie informacja: aplikacja działa tak samo w obu stanach. |
-| GPS | `GPS ✓` pozycja świeża (≤ 60 s) · `GPS …` szukanie · `GPS ✗` brak uprawnienia lub brak pozycji |
-| Bateria | `64%` · bursztynowy przy ≤ `settings.lowBatteryPct` (domyślnie 20%) · czerwony przy ≤ 10% |
-
-Pigułka nie może zachodzić na wyspę ani SOS. Na wąskim ekranie skraca się do ikon: `○ ◎ 64%`.
+Nie ma globalnego wskaźnika stanu (wskaźnik `offline · GPS · bateria` usunięty, decyzja 2026-11-21). Stan GPS i baterii jest tam, gdzie ma znaczenie: na mapie (`Notice` w pasku: brak GPS, niska bateria), w `MapCard` (szablon `map`) i w `CallPanel` (linia GPS). Aplikacja działa tak samo online i offline, więc stanu sieci nie pokazujemy.
 
 ### Kolejność warstw (od góry)
 
@@ -95,16 +88,16 @@ Pigułka nie może zachodzić na wyspę ani SOS. Na wąskim ekranie skraca się 
 5. P2 Kontakt ze służbami.
 6. PV Podgląd PDF.
 7. P1 Panel boczny z przyciemnieniem tła.
-8. Wyspa, Wstecz, pigułka stanu, wskaźnik RKO.
+8. Wyspa, Wstecz, wskaźnik RKO.
 9. Przypięty instruktor `cpr` i pole wiadomości.
 10. Treść ekranu.
 
 Reguły wykonania:
 
-- Elementy globalne (`SosButton`, wyspa, pigułka stanu) renderować w `RootOverlay`: `Stack` w `MaterialApp.builder`, nad `Navigator`. Dialogi, arkusze i toasty otwierać przez `Navigator` aplikacji (`showDialog`, `showModalBottomSheet` bez `useRootNavigator` ponad `RootOverlay`), żeby zawsze leżały pod SOS.
+- Elementy globalne (`SosButton`, wyspa) renderować w `RootOverlay`: `Stack` w `MaterialApp.builder`, nad `Navigator`. Dialogi, arkusze i toasty otwierać przez `Navigator` aplikacji (`showDialog`, `showModalBottomSheet` bez `useRootNavigator` ponad `RootOverlay`), żeby zawsze leżały pod SOS.
 - Toasty pokazywać na dole, nad polem wiadomości. Nigdy w prawym górnym rogu.
 - Klawiatura nie przesuwa SOS ani wyspy.
-- W motywie kryzysowym elementy globalne nie mają animacji (poza obwódką przytrzymania SOS).
+- W MVP jest tylko motyw ciemny. Po MVP w motywie kryzysowym elementy globalne nie mają animacji (poza obwódką przytrzymania SOS).
 
 ## Wzór specyfikacji ekranu
 
@@ -127,9 +120,8 @@ Legenda symboli w szkicach: `[≡ ▦]` wyspa (menu, mapa), `(SOS)` lub `[SOS]` 
 
 Wartości domyślne przyjęte bez decyzji właściciela. Builder je wdraża; zmiana nie wymaga przebudowy.
 
-- Pigułka stanu `offline · GPS · bateria` na środku u góry, tylko w E1 i E2.
 - Szybkie przyciski pustego czatu: „Ktoś nie oddycha”, „Brak prądu”, „Alarm / schron”, „Ewakuacja” (przejęte z dawnej specyfikacji).
-- W P2 kolejność: 112 na pierwszym miejscu, „Powiadom bliskich” niżej. Właściciel wymienił tę funkcję jako pierwszą; 112 wyżej wynika z zasady projektowania pod stres (jedna, najważniejsza akcja najwyżej).
+- W P2 kolejność: 112 na pierwszym miejscu, „Powiadom bliskich” niżej; reszta (999, 998, 997, współrzędne, adres, notki) pod zwiniętym „Więcej”. Właściciel wymienił tę funkcję jako pierwszą; 112 wyżej wynika z zasady projektowania pod stres (jedna, najważniejsza akcja najwyżej).
 - Napis na przycisku: „SOS” (dawna specyfikacja: „SOS 112”). Przytrzymanie: 800 ms.
 - Tekst SMS bez polskich znaków (mieści się w mniejszej liczbie części SMS). Link do mapy w SMS: OpenStreetMap (`https://www.openstreetmap.org/?mlat={lat}&mlon={lon}#map=17/{lat}/{lon}`), bez Google. Do potwierdzenia: czy link otwiera się czytelnie w domyślnej przeglądarce odbiorcy.
 - Przełącznik „Dołącz dane z profilu” w P2: domyślnie włączony (do potwierdzenia). Wyłączony = SMS bez linii `{profil}`.
@@ -138,6 +130,6 @@ Wartości domyślne przyjęte bez decyzji właściciela. Builder je wdraża; zmi
 - Limit czasu odpowiedzi AI: 20 s bez pierwszego panelu → odpowiedź jak w trybie bez AI.
 - Próg niskiej baterii: `settings.lowBatteryPct`, domyślnie 20%, do wyboru 15/20/30% (automatyczny tryb bez AI, jeśli tak ustawiono w E3). Nigdzie nie wpisujemy progu na sztywno; teksty używają `{n}`.
 - Instruktor RKO jest jeden na całą aplikację, działa dalej po wyjściu z czatu (wskaźnik RKO). Metronom i głos grają w tle, np. podczas rozmowy z 112 na głośniku (decyzja z 2026-11-21; etap po MVP).
-- Szablon `animation` w motywie kryzysowym i przy ograniczeniu ruchu nie startuje sam (pierwsza klatka + „Odtwórz”).
+- Szablon `animation` przy ograniczeniu ruchu (po MVP także w motywie kryzysowym) nie startuje sam (pierwsza klatka + „Odtwórz”).
 - E0: zgoda na lokalizację przed pobieraniem paczek (żeby od razu wykryć województwo).
-- E3: motyw domyślny „Systemowy”; „Usuń wszystkie dane” nie kasuje paczek (bez sieci nie da się ich odzyskać).
+- E3: w MVP tylko motyw Ciemny (Systemowy, Jasny i Kryzysowy po MVP; po MVP domyślny „Systemowy”); „Usuń wszystkie dane” nie kasuje paczek (bez sieci nie da się ich odzyskać).

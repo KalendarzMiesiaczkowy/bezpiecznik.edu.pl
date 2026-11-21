@@ -19,7 +19,7 @@ Każde pole i każdą sekcję można pominąć.
 | `edit` | [Ekran 3: Ustawienia](ekran-3-ustawienia.md) → **Profil domu** | Wstecz: z formularza sekcji → lista sekcji → Ustawienia |
 | `edit`, `section: 'iceContacts'` | [Panel 2](panel-2-kontakt-ze-sluzbami.md) → „Dodaj kontakty” albo „Zmień” (Panel 2 się zamyka) | Od razu formularz sekcji 8. Wstecz → ekran, z którego otwarto Panel 2 |
 
-Na każdym kroku: przycisk wstecz w lewym górnym rogu (w `wizard` poprzedni krok), SOS w prawym górnym rogu (dotknięcie → Panel 2, przytrzymanie → 112). Brak pigułki stanu.
+Na każdym kroku: przycisk wstecz w lewym górnym rogu (w `wizard` poprzedni krok), SOS w prawym górnym rogu (dotknięcie → Panel 2, przytrzymanie → 112).
 
 ## Układ
 

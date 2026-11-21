@@ -2,7 +2,7 @@
 
 Kryzysowy asystent offline. Bezpiecznik zamienia rozproszoną wiedzę państwa o bezpieczeństwie w jedną rozmowę, która działa bez internetu. Mówi, co zrobić teraz, podaje źródło z numerem strony i prowadzi do najbliższego punktu schronienia.
 
-Ten folder to **przepis na aplikację**: jedyne źródło prawdy dla budującego. Gdy dwa pliki sobie przeczą, wygrywa nowsza decyzja z [dziennika decyzji](#dziennik-decyzji), a potem plik bardziej szczegółowy (ekran > funkcja > wizja).
+Ten folder to **przepis na aplikację**: jedyne źródło prawdy dla budującego. Gdy dwa pliki sobie przeczą, wygrywa nowsza decyzja z [dziennika decyzji](#dziennik-decyzji), a potem plik bardziej szczegółowy (ekran > funkcja > wizja). **Design system** decyduje o wyglądzie (kolory, typografia, wymiary komponentów); o zachowaniu i zawartości ekranów decyduje specyfikacja. Rozbieżności między nimi rozstrzyga sekcja [Odstępstwa od specyfikacji](08-design-system/komponenty.md), a opisy w `08-design-system/components/*` sprzeczne z rozstrzygnięciami (np. pigułka stanu, „dwa przyciski, nic więcej” w `CallPanel`) są nieaktualne.
 
 ## Jak czytać (kolejność dla budującego)
 
@@ -77,5 +77,8 @@ Ten folder to **przepis na aplikację**: jedyne źródło prawdy dla budującego
 | 2026-11-21 | Metronom i głos RKO grają w tle podczas rozmowy z 112 | [Instruktor RKO](02-funkcje/02-pierwsza-pomoc/instruktor-rko.md) |
 | 2026-11-21 | Hackathon w Szczecinie: prawdziwy GPS, symulowana pozycja tylko jako zapas | [Ograniczenia](07-hackathon/ograniczenia.md) |
 | 2026-11-21 | Development na Androidzie, iOS z tego samego kodu; głosówki: Gemma 4 audio, zapas Whisper | [Architektura](05-technologia/architektura.md), [Rozmowa głosowa](02-funkcje/08-w-przyszlosci/glos.md) |
+| 2026-11-21 | Dodany design system (kolory, typografia, komponenty, ruch; React jako wzorzec dla Fluttera) i mapa komponentów | [Design system](08-design-system/README.md), [Komponenty](08-design-system/komponenty.md) |
+| 2026-11-21 | Odstępstwa design systemu rozstrzygnięte: (1) Panel 2 i szablon `call` = dwa przyciski po 80 px (Zadzwoń 112, Powiadom bliskich) + zwinięte „Więcej” (999 / 998 / 997, współrzędne, adres po MVP, AML, co powiedzieć); (2) odmowa „brak w źródłach” spokojna, bez 112 (`NoSource`), 112 tylko przy zagrożeniu życia | [Panel 2](03-ekrany/panel-2-kontakt-ze-sluzbami.md), [Odmowa](02-funkcje/01-czat/odpowiedzi-tylko-ze-zrodel.md#odmowa), [Odstępstwa](08-design-system/komponenty.md) |
+| 2026-11-21 | (3) usunięty globalny wskaźnik stanu (offline · GPS · bateria), stan GPS i baterii na mapie, w `MapCard` i `CallPanel`; (4) MVP tylko motyw Ciemny, Kryzysowy / Jasny / Systemowy po MVP; (5) Panel boczny jak w ChatGPT (wiersze 44 px, bez godzin i ramek); (6) podświetlenie cytatu tokenem `highlight` zamiast żółtego tła | [Ekrany](03-ekrany/README.md), [Panel 1](03-ekrany/panel-1-boczny.md), [Ustawienia](03-ekrany/ekran-3-ustawienia.md), [Szablony](03-ekrany/szablony-czatu.md) |
 
 Wartości domyślne czekające na potwierdzenie: [Ekrany: do potwierdzenia](03-ekrany/README.md).

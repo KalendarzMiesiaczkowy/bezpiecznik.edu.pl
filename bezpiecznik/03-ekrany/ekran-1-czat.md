@@ -1,6 +1,6 @@
 # Ekran 1 · Czat
 
-`ChatScreen`. Ekran główny aplikacji. Elementy globalne (wyspa, SOS, pigułka stanu, warstwy): [README](README.md#elementy-globalne). Szablony odpowiedzi: [szablony w czacie](szablony-czatu.md).
+`ChatScreen`. Ekran główny aplikacji. Elementy globalne (wyspa, SOS, warstwy): [README](README.md#elementy-globalne). Szablony odpowiedzi: [szablony w czacie](szablony-czatu.md).
 
 ## Cel
 
@@ -22,7 +22,7 @@ Użytkownik opisuje sytuację własnymi słowami albo dotyka szybkiego przycisku
 | SOS dotknięcie / przytrzymanie | P2 / systemowe wybieranie 112 |
 | `map`: „Prowadź” / dotknięcie mini mapy | E2 w trybie trasy / E2 wyśrodkowana na punkcie |
 | Chip źródła, `quote` → „Powiększ” | PV Podgląd PDF |
-| `call`: numer / „Wyślij lokalizację SMS-em” | Systemowe wybieranie numeru / systemowe okno SMS |
+| `call`: „Zadzwoń 112” (numery w „Więcej”) / „Powiadom bliskich” | Systemowe wybieranie numeru / systemowe okno SMS |
 
 ## Układ
 
@@ -30,7 +30,7 @@ Pusty czat:
 
 ```
 ┌──────────────────────────────┐
-│[≡ ▦]  offline·GPS✓·64%  (SOS)│
+│[≡ ▦]                    (SOS)│
 │                              │
 │        Co się dzieje?        │
 │                              │
@@ -54,7 +54,7 @@ Odpowiedź (`origin: ai`):
 
 ```
 ┌──────────────────────────────┐
-│[≡ ▦]  offline·GPS✓·64%  (SOS)│
+│[≡ ▦]                    (SOS)│
 │      ┌─────────────────────┐ │
 │      │ Blackout, niemowlę, │ │
 │      │ 7. piętro           │ │
@@ -78,7 +78,7 @@ AI generuje:
 
 ```
 ┌──────────────────────────────┐
-│[≡ ▦]  offline·GPS✓·64%  (SOS)│
+│[≡ ▦]                    (SOS)│
 │      ┌─────────────────────┐ │
 │      │ Jak przechować      │ │
 │      │ insulinę bez prądu? │ │
@@ -97,14 +97,15 @@ Karta RKO z przypiętym instruktorem (`origin: rescue_card`):
 
 ```
 ┌──────────────────────────────┐
-│[≡ ▦]  offline·GPS✓·64%  (SOS)│
+│[≡ ▦]                    (SOS)│
 │          ┌─────────────────┐ │
 │          │ Ktoś nie oddycha│ │
 │          └─────────────────┘ │
 │ Karta ratunkowa              │
 │ ┌ Wezwij pomoc ────────────┐ │
 │ │ [     Zadzwoń 112      ] │ │
-│ │ [999] [998] [997]        │ │
+│ │ [  Powiadom bliskich   ] │ │
+│ │ Więcej                 ▾ │ │
 │ └──────────────────────────┘ │
 │ ┌ RKO ─────────────────────┐ │
 │ │[Dorosły][Dziecko][Niem.] │ │
@@ -119,16 +120,16 @@ Karta RKO z przypiętym instruktorem (`origin: rescue_card`):
 └──────────────────────────────┘
 ```
 
-Wiadomości użytkownika: dymek po prawej. Odpowiedzi: szablony na całą szerokość, po lewej. Nad listą wiadomości jest margines na wyspę, pigułkę i SOS (treść przewija się pod nimi; pod elementami pływającymi delikatny gradient tła).
+Wiadomości użytkownika: dymek po prawej. Odpowiedzi: szablony na całą szerokość, po lewej. Nad listą wiadomości jest margines na wyspę i SOS (treść przewija się pod nimi; pod elementami pływającymi delikatny gradient tła).
 
 ## Elementy
 
 | Element | Zachowanie |
 |---|---|
-| Wyspa `NavIsland`, SOS, pigułka stanu | Jak w [README](README.md#elementy-globalne) |
+| Wyspa `NavIsland`, SOS | Jak w [README](README.md#elementy-globalne) |
 | Nagłówek pustego czatu | „Co się dzieje?” Tylko w pustym czacie |
 | Szybkie przyciski `QuickActions` | Siatka 2 × 2, każdy min. 64 dp wysokości. Dotknięcie = wysłanie etykiety jako wiadomości użytkownika i odpowiedź bez AI (tabela niżej). Znikają po pierwszej wiadomości. *Zestaw domyślny, do potwierdzenia* |
-| Lista wiadomości `MessageList` | Wirtualizowana. Po nowej odpowiedzi przewija do **początku** odpowiedzi, nie na dół. Gdy użytkownik czyta wyżej, nie przewija, tylko pokazuje pigułkę „↓ Nowa odpowiedź” |
+| Lista wiadomości `MessageList` | Wirtualizowana. Po nowej odpowiedzi przewija do **początku** odpowiedzi, nie na dół. Gdy użytkownik czyta wyżej, nie przewija, tylko pokazuje przycisk „↓ Nowa odpowiedź” |
 | Dymek użytkownika | Tekst jak wpisany. Przytrzymanie → „Kopiuj” |
 | Odpowiedź asystenta | Etykieta według `origin`, potem szablony. Szczegóły: [szablony](szablony-czatu.md) |
 | Przypięty `cpr` | Nad polem wiadomości, gdy działa instruktor RKO. Szczegóły: [`cpr`](szablony-czatu.md#cpr) |
@@ -178,10 +179,10 @@ W trakcie generowania przycisk `(➤)` zostaje aktywny obok `(■)`. Niepusta wi
 | AI generuje | Szkielet odpowiedzi z fazą „Szukam w źródłach…”, potem „Układam odpowiedź…”. Przyciski `(■)` Zatrzymaj (po lewej) i `(➤)` Wyślij. Brak odpowiedzi modelu po 20 s → odpowiedź jak w trybie bez AI z dopiskiem „Model nie odpowiedział na czas. Pokazuję fragmenty źródeł.” (*20 s domyślne, do potwierdzenia*) |
 | Zatrzymano | Wiadomość ze statusem `stopped` bez szablonów (odpowiedź niezwalidowana jest odrzucana), dopisek „Przerwano.” |
 | Tryb bez AI | Cienki baner u góry listy: „Tryb bez AI. Pokazuję fragmenty źródeł.” z powodem. Dotknięcie → E3 (sekcja AI i bateria) |
-| Offline | Bez zmian w działaniu. Pigułka pokazuje `offline` |
+| Offline | Bez zmian w działaniu. Bez osobnego wskaźnika |
 | Brak GPS | Kontekst bez pozycji. Szablony `map` i `call` pokazują własne stany. Bez banera |
-| Niska bateria (≤ `settings.lowBatteryPct`, domyślnie 20%) | Gdy w E3 ustawiono tryb automatyczny: przejście w tryb bez AI i jednorazowy toast. Pigułka bursztynowa, ≤ 10% czerwona |
-| Odmowa (`refusal`) | Zwykły dymek asystenta z jednym z dwóch tekstów: „brak w źródłach” albo „poza tematem” ([odpowiedzi tylko ze źródeł](../02-funkcje/01-czat/odpowiedzi-tylko-ze-zrodel.md#odmowa)) |
+| Niska bateria (≤ `settings.lowBatteryPct`, domyślnie 20%) | Gdy w E3 ustawiono tryb automatyczny: przejście w tryb bez AI i jednorazowy toast |
+| Odmowa (`refusal`) | Spokojny komponent `NoSource` z jednym z dwóch tekstów: „brak w źródłach” albo „poza tematem”. Obie bez 112; 112 pojawia się tylko przez szablon `call` przy frazie ryzyka ([odpowiedzi tylko ze źródeł](../02-funkcje/01-czat/odpowiedzi-tylko-ze-zrodel.md#odmowa)) |
 | Błąd: baza wiedzy niepobrana lub uszkodzona | Działają karty ratunkowe i szybkie przyciski. Inne pytania → dymek „Baza wiedzy nie jest pobrana. Działają karty ratunkowe i szybkie przyciski.” |
 | Błąd: model się nie załadował | Trwałe przejście w tryb bez AI na tę sesję, baner z powodem |
 | Błąd: zapis rozmowy | Toast „Nie mogę zapisać rozmowy. Brak miejsca w telefonie.” Rozmowa działa dalej w pamięci |
@@ -201,13 +202,13 @@ W trakcie generowania przycisk `(➤)` zostaje aktywny obok `(■)`. Niepusta wi
 | Ładowanie modelu | Uruchamiam model. Pierwsza odpowiedź trwa dłużej. |
 | Limit czasu | Model nie odpowiedział na czas. Pokazuję fragmenty źródeł. |
 | Przerwanie | Przerwano. |
-| Pigułka nowej odpowiedzi | ↓ Nowa odpowiedź |
+| Przycisk nowej odpowiedzi | ↓ Nowa odpowiedź |
 | Baner bez AI | Tryb bez AI. Pokazuję fragmenty źródeł. |
 | Powód: bateria | Niski poziom baterii. |
 | Powód: model | Model się nie załadował. |
 | Powód: ustawienia | Wyłączone w ustawieniach. |
 | Toast baterii | Bateria {n}%. Przełączam na tryb bez AI, żeby oszczędzać energię. |
-| Odmowa: brak w źródłach | Nie wiem. Moje źródła tego nie opisują. Jeśli komuś grozi niebezpieczeństwo, zadzwoń pod 112. |
+| Odmowa: brak w źródłach | Nie wiem. Moje źródła tego nie opisują. Zapytaj lekarza, farmaceutę albo właściwą instytucję. |
 | Odmowa: poza tematem | Pomagam tylko w sytuacjach kryzysowych i bezpieczeństwie. Tego nie opisują moje źródła. |
 | Brak bazy wiedzy | Baza wiedzy nie jest pobrana. Działają karty ratunkowe i szybkie przyciski. |
 | Dopisek karty ratunkowej | Ta instrukcja nie zastępuje połączenia z 112. |

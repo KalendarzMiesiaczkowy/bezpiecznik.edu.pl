@@ -4,7 +4,7 @@
 
 - Działa w pełni w trybie samolotowym: czat, mapa, trasy, kompas, pierwsza pomoc, plan 72 h.
 - Każda instrukcja ma źródło (dokument i stronę), które można otworzyć jednym dotknięciem.
-- Gdy źródła nie zawierają odpowiedzi, aplikacja odmawia tekstem „brak w źródłach” („Nie wiem. Moje źródła tego nie opisują…”, [odmowa](../02-funkcje/01-czat/odpowiedzi-tylko-ze-zrodel.md#odmowa)) i nie zgaduje.
+- Gdy źródła nie zawierają odpowiedzi, aplikacja nie zgaduje: odmawia spokojnie tekstem „brak w źródłach” („Nie wiem. Moje źródła tego nie opisują. Zapytaj lekarza, farmaceutę albo właściwą instytucję.”, [odmowa](../02-funkcje/01-czat/odpowiedzi-tylko-ze-zrodel.md#odmowa)). 112 tylko przy możliwym zagrożeniu życia.
 - Z każdego ekranu jedno dotknięcie SOS otwiera panel, w którym 112 to pierwszy i największy przycisk. Połączenie potwierdza systemowe okno telefonu. Przytrzymanie SOS od razu otwiera wybieranie 112.
 - Nic nie opuszcza telefonu bez twojej wyraźnej akcji (wysłanie SMS-a, eksport profilu).
 - Instrukcje ratujące życie działają nawet wtedy, gdy lokalne AI nie działa.
@@ -29,7 +29,7 @@
 - Jedna decyzja na ekran, krótkie zdania, czasowniki w trybie rozkazującym.
 - Duże cele dotyku, obsługa jedną ręką.
 - Ważne akcje zawsze w tym samym miejscu (przycisk SOS w prawym górnym rogu każdego ekranu).
-- Ciemny tryb kryzysowy z wysokim kontrastem i bez animacji.
-- Zawsze widoczny stan: offline, GPS, bateria (jako status pill).
+- Ciemny motyw w MVP. Tryb kryzysowy (czarne tło, wysoki kontrast, bez animacji) po MVP.
+- Stan GPS i baterii widoczny tam, gdzie ma znaczenie (mapa, karta mapy, panel SOS).
 - Uczciwość: każdy punkt na mapie i każde źródło ma datę i pochodzenie. Dane niepotwierdzone są wyraźnie oznaczone.
 - Na zewnątrz nie używamy określeń typu „AI ratownik”. Bezpiecznik to asystent, który cytuje oficjalne źródła.

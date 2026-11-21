@@ -5,7 +5,7 @@
 - Kafelki wektorowe z OpenStreetMap, w plikach MBTiles (PMTiles z lokalnego pliku nie jest potwierdzone na iOS), wyświetlane przez `maplibre_gl` (zapasowo `flutter_map` + `vector_map_tiles`). Pliki generuje Planetiler z wycinków OSM z Geofabrik.
 - **Polska uproszczona:** niskie poziomy przybliżenia, główne drogi i ulice, miejscowości.
 - **Województwo szczegółowe:** wszystkie poziomy przybliżenia, ulice, budynki, adresy.
-- Dwa style: jasny i ciemny kryzysowy.
+- MVP: jeden styl ciemny. Po MVP drugi (jasny) i ciemny kryzysowy.
 
 ## Graf tras
 

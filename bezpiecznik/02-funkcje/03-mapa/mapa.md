@@ -26,4 +26,4 @@ Pokazuje mapę z ulicami, punktami schronienia i pomocy oraz trasę do celu, bez
 
 - Punkty potwierdzone i niepotwierdzone mają różne symbole.
 - Każdy punkt pokazuje źródło i datę.
-- W trybie kryzysowym mapa ma ciemny styl i ograniczone odświeżanie, żeby oszczędzać baterię.
+- W MVP mapa ma jeden styl ciemny. Przy niskiej baterii ma ograniczone odświeżanie. Styl jasny i ciemny tryb kryzysowy: po MVP.

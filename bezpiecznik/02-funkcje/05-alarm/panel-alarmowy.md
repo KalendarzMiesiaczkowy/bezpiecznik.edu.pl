@@ -8,12 +8,18 @@ Zbiera w jednym miejscu wszystko, czego potrzeba przy wzywaniu pomocy.
 
 ## Zawartość
 
-- **112** jako duży, pierwszy przycisk.
-- Mniejsze przyciski: **999** Pogotowie Ratunkowe, **998** Straż Pożarna, **997** Policja.
-- **Twoja pozycja:** duże współrzędne w stopniach dziesiętnych i w stopniach i minutach.
-- **Najbliższy adres** z offline'owej bazy adresów województwa.
+Na wierzchu tylko dwa duże przyciski (komponent `CallPanel`, po 80 px):
+
+- **Zadzwoń 112**, pierwszy przycisk.
+- **Powiadom bliskich** (SMS z lokalizacją, patrz niżej), z przełącznikiem „Dołącz dane z profilu”.
+
+Pod nimi linia stanu GPS i wiersz **„Więcej”** (domyślnie zwinięty). Po rozwinięciu:
+
+- Przyciski: **999** Pogotowie Ratunkowe, **998** Straż Pożarna, **997** Policja.
+- **Twoja pozycja:** współrzędne w stopniach dziesiętnych i w stopniach, minutach, sekundach.
+- **Najbliższy adres** z offline'owej bazy adresów województwa (po MVP).
 - **Informacja o AML:** „Przy połączeniu z 112 telefon sam przekazuje lokalizację, jeśli ma zasięg sieci komórkowej.”
-- Wskazówka, co powiedzieć dyspozytorowi: co się stało, gdzie, ile osób, czy są przytomne.
+- „Co powiedzieć dyspozytorowi”: co się stało, gdzie, ile osób, czy są przytomne.
 
 ## Powiadom bliskich: SMS do bliskich (P1)
 

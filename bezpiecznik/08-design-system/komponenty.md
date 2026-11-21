@@ -87,11 +87,17 @@ Priorytet demo: **●** występuje w scenariuszu pokazu · **○** potrzebne w a
 
 `StepHeader` · `QuestionStep` (Tak / Nie / Pomiń) · `TextField` · `ChoiceChips` (jedno- i wielokrotny wybór) · `Segmented` (trójstanowe Tak / Nie) · `ListRow` z podsumowaniem sekcji · `Toast` z „Cofnij”. Demo: ○.
 
-## Odstępstwa od specyfikacji (do decyzji właściciela)
+## Odstępstwa od specyfikacji (rozstrzygnięte 2026-11-21)
 
 1. **Odmowa a 112.** Spec: odmowa brzmi „Nie wiem. Moje źródła tego nie opisują. Zadzwoń pod 112.”, także w scenariuszu pokazu (pytanie o dawkę leku dla psa). Decyzja z 21.11 w tym systemie: 112 tylko przy zagrożeniu życia, odmowa to spokojny `NoSource` z sugestią, gdzie szukać. Do zmiany w `ekran-1-czat.md`, `szablony-czatu.md` i `scenariusz-pokazu.md`.
+   **Rozstrzygnięcie:** 112 tylko przy możliwym zagrożeniu życia. Odmowa „brak w źródłach” jest spokojna, bez 112: „Nie wiem. Moje źródła tego nie opisują. Zapytaj lekarza, farmaceutę albo właściwą instytucję.” (`NoSource`). „Poza tematem” bez 112. Przy frazie ryzyka aplikacja dodaje `call`. Spec zaktualizowana.
 2. **Motywy.** Spec przewiduje motywy Systemowy, Jasny, Ciemny i Kryzysowy. System ma na razie tylko Ciemny. Kryzysowy (czarne tło, wyższy kontrast, bez animacji) to mała zmiana w tokenach; Jasny to osobny projekt palety.
+   **Rozstrzygnięcie:** MVP ma tylko motyw Ciemny (wiersz „Motyw” ukryty). Kryzysowy, Jasny i Systemowy po MVP.
 3. **Pigułka stanu usunięta.** Spec (elementy globalne): `StatusPill` „offline · GPS · bateria” na środku u góry E1 i E2. Decyzja 21.11: usunięta — za dużo informacji. Stan GPS pokazują tam, gdzie ma znaczenie, `MapCard`, `CallPanel` i `Notice` na mapie.
+   **Rozstrzygnięcie:** `StatusPill` usunięta ze specyfikacji. Stan GPS i baterii jest na mapie (`Notice`), w `MapCard` i w `CallPanel`.
 4. **Panel SOS: dwa przyciski.** Spec P2 ma pozycję (współrzędne, DMS, adres), 112, 999 / 998 / 997, notki, ciche zgłoszenie i sygnał. Decyzja 21.11: tylko **Zadzwoń 112** i **Powiadom bliskich** (SMS z lokalizacją). Współrzędne i numery służb usunięte — ludzie ich nie rozumieją, a 112 łączy ze wszystkimi i przekazuje lokalizację (AML). Ten sam układ ma szablon `call` w czacie.
+   **Rozstrzygnięcie:** na wierzchu dwa przyciski po 80 px (**Zadzwoń 112**, **Powiadom bliskich**) z przełącznikiem „Dołącz dane z profilu”; pod spodem zwinięty wiersz „Więcej” (domyślnie zamknięty): 999 / 998 / 997, współrzędne (dziesiętne i DMS), najbliższy adres (po MVP), notka AML, „Co powiedzieć dyspozytorowi”. Dotyczy `CallPanel` `sheet` i `inline`.
 5. **Panel boczny.** Spec P1: godzina przy każdym czacie, „Nowy czat” 56 dp, wiersz 56 dp. Decyzja 21.11: bez godzin, układ jak w ChatGPT — wiersze 44 px, bez ramek.
+   **Rozstrzygnięcie:** układ jak w ChatGPT przyjęty w `panel-1-boczny.md` (logo 36 px, „Nowy czat” jako wiersz z ikoną, wiersze 44 px bez godzin i ramek, bieżący czat zaznaczony tłem).
 6. **Podświetlenie cytatu.** Spec: „żółte tło ok. 40%”. System używa ochry `signal` (`highlight`), żeby nie dokładać koloru; na stronie PDF wygląda jak zakreślacz.
+   **Rozstrzygnięcie:** token `highlight` (ochra `signal`) zamiast „żółtego tła ok. 40%”.

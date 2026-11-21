@@ -7,7 +7,7 @@ Założenia (decyzja z 2026-11-21):
 - scenariusz pokazu na razie nie wpływa na zakres;
 - development i test na Androidzie, region zachodniopomorskie (hackathon w Szczecinie, prawdziwy GPS);
 - **paczki (model, baza wiedzy, mapa) w APK albo wgrane przez `adb push`**, bez pobierania w aplikacji;
-- jeden tymczasowy ciemny motyw do czasu design systemu.
+- jeden motyw: Ciemny (z [design systemu](../08-design-system/README.md)). Kryzysowy, Jasny i Systemowy po MVP.
 
 Kryterium przydziału: MVP to najkrótsza droga do działającej pętli „pytanie → odpowiedź ze źródłem → pomoc (112, karta, schron)” w trybie samolotowym. Po MVP trafia to, co jest kosztowne, zależy od treści, których jeszcze nie ma, albo ma tańszy zamiennik w MVP.
 
@@ -22,7 +22,7 @@ Kryterium przydziału: MVP to najkrótsza droga do działającej pętli „pytan
 | Wyszukiwanie FTS5 (bm25, bez polskich znaków, obcięte rdzenie), próg | MVP | |
 | Model pisze, walidator sprawdza (słowa, liczby, **zaprzeczenia**) | MVP | Decyzja z 2026-11-21. [Zasady walidatora](../02-funkcje/01-czat/odpowiedzi-tylko-ze-zrodel.md) |
 | Tryb bez AI (fragmenty źródeł jako `quote`) | MVP | Zapas, gdy model zawiedzie |
-| Dwie odmowy: „brak w źródłach” i „poza tematem” | MVP | [Odmowa](../02-funkcje/01-czat/odpowiedzi-tylko-ze-zrodel.md#odmowa) |
+| Dwie odmowy (spokojne, bez 112; komponent `NoSource`): „brak w źródłach” i „poza tematem” | MVP | [Odmowa](../02-funkcje/01-czat/odpowiedzi-tylko-ze-zrodel.md#odmowa) |
 | Szablony `steps`, `bullets`, `call`, `quote` (tekst, dokument, strona), `map`, `signal`, `cpr` | MVP | |
 | Intencja „schron / gdzie iść / szpital” → szablon `map` bez modelu i bez progu | MVP | Tanie przy gotowych punktach |
 | Wiele czatów: „Nowy czat”, lista w panelu bocznym, tytuł z pierwszej wiadomości | MVP | |
@@ -51,7 +51,7 @@ Kryterium przydziału: MVP to najkrótsza droga do działającej pętli „pytan
 | Funkcja | Etap | Uwagi |
 |---|---|---|
 | Przycisk SOS na każdym ekranie, przytrzymanie → 112 | MVP | |
-| Panel 2: 112, 999, 998, 997, współrzędne, informacja o AML | MVP | |
+| Panel 2 (`CallPanel`): przyciski „Zadzwoń 112” i „Powiadom bliskich” oraz zwinięte „Więcej” z numerami 999 / 998 / 997 i współrzędnymi, informacja o AML | MVP | Najbliższy adres w „Więcej”: po MVP |
 | Powiadom bliskich: SMS do kontaktów ICE z lokalizacją | MVP | Koszt mały (`sms:`) |
 | Najbliższy adres offline w Panelu 2 | Po MVP | Wymaga bazy adresów |
 | Sygnał: dźwięk i latarka SOS | MVP | |
@@ -87,7 +87,8 @@ Kryterium przydziału: MVP to najkrótsza droga do działającej pętli „pytan
 | Plan 72 h z reguł i plecak jako lista do odhaczania | Po MVP | Wymaga pliku reguł. W MVP pytania o plan obsługuje zwykła ścieżka AI ze źródeł |
 | Wydruk planu 72 h | Po MVP | |
 | Ustawienia: Profil, Tryb bez AI, Rozmiar tekstu, Głos instrukcji, Usuń wszystkie dane, O aplikacji (źródła, „nie zastępuje 112”) | MVP | |
-| Ustawienia: motywy, paczki danych, regiony, eksport profilu, historia czatów | Po MVP | Motywy po design systemie |
+| Ustawienia: paczki danych, regiony, eksport profilu, historia czatów | Po MVP | |
+| Motywy: Kryzysowy (czarne tło, wyższy kontrast, bez animacji), Jasny, Systemowy; wiersz „Motyw” w Ustawieniach | Po MVP | W MVP tylko motyw Ciemny, wiersz ukryty |
 
 ### Dane, technologia, dystrybucja
 
