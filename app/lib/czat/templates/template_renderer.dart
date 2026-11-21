@@ -10,9 +10,10 @@ import 'template_registry.dart';
 const String rescueCardFooterText = 'Ta instrukcja nie zastępuje połączenia z 112.';
 
 /// Label above a message by origin (spec "Etykieta nad wiadomoscia"); null = none.
-String? answerLabelFor(AnswerOrigin origin) => switch (origin) {
+/// Intent answers (`intent` set) carry no label.
+String? answerLabelFor(AnswerOrigin origin, [String? intent]) => switch (origin) {
   AnswerOrigin.rescueCard => 'Karta ratunkowa',
-  AnswerOrigin.rules => 'Z twojego profilu',
+  AnswerOrigin.rules => intent == null ? 'Z twojego profilu' : null,
   AnswerOrigin.noAi => 'Tryb bez AI: fragmenty źródeł',
   AnswerOrigin.ai || AnswerOrigin.refusal => null,
 };
@@ -52,7 +53,7 @@ class TemplateRenderer extends ConsumerWidget {
               ? answer.selectedVariant
               : options.first.id);
 
-    final label = answerLabelFor(answer.origin);
+    final label = answerLabelFor(answer.origin, answer.intent);
     final children = <Widget>[];
     if (label != null || answer.verify) {
       children.add(
@@ -84,6 +85,10 @@ class TemplateRenderer extends ConsumerWidget {
         onOpenSource: openSource,
       );
       children.add(KeyedSubtree(key: ValueKey('panel-$i-${panel.type}'), child: builder(context, scope)));
+    }
+    final note = answer.note;
+    if (note != null && note.isNotEmpty) {
+      children.add(Text(note, key: const Key('answer-note'), style: t.caption.copyWith(color: t.ink300)));
     }
     if (answer.origin == AnswerOrigin.rescueCard) {
       children.add(Text(rescueCardFooterText, style: t.caption.copyWith(color: t.ink300)));

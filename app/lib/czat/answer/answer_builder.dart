@@ -7,6 +7,9 @@ import '../templates/panel_model.dart';
 /// How many chunks the quote fallback shows.
 const int kFallbackQuotes = 3;
 
+/// Note under a quote fallback after the model timed out (ekran-1-czat.md).
+const String kLlmTimeoutNote = 'Model nie odpowiedział na czas. Pokazuję fragmenty źródeł.';
+
 Map<String, Object?> _sourceJson(KbChunk c) => {
   'source_id': c.id,
   'doc_id': c.docId,
@@ -58,10 +61,12 @@ AssistantAnswer buildQuoteFallback(
   List<KbChunk> chunks, {
   required bool risk,
   required bool modelOff,
+  String? note,
 }) {
   final top = chunks.take(kFallbackQuotes).toList();
   return AssistantAnswer.fromJson({
     'origin': modelOff ? 'no_ai' : 'ai',
+    'note': ?note,
     'panels': _withCall([
       for (final c in top) {'type': 'quote', 'source_id': c.id},
     ], risk),

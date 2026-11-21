@@ -435,6 +435,8 @@ class AssistantAnswer {
     this.origin = AnswerOrigin.ai,
     this.selectedVariant,
     this.done = const {},
+    this.intent,
+    this.note,
   });
 
   final List<ChatPanel> panels;
@@ -457,6 +459,13 @@ class AssistantAnswer {
   /// Checked items: key `"{panelIndex}:{variantId or ''}"` -> item indexes.
   final Map<String, Set<int>> done;
 
+  /// Intent id (`map`...) for tool answers (`origin: rules`); such answers show
+  /// no origin label (szablony-czatu.md, "Etykieta nad wiadomoscia").
+  final String? intent;
+
+  /// Short note shown under the panels (e.g. the LLM timeout note).
+  final String? note;
+
   static String doneKey(int panelIndex, String? variantId) =>
       '$panelIndex:${variantId ?? ''}';
 
@@ -471,6 +480,8 @@ class AssistantAnswer {
     AnswerOrigin? origin,
     String? selectedVariant,
     Map<String, Set<int>>? done,
+    String? intent,
+    String? note,
   }) {
     return AssistantAnswer(
       panels: panels ?? this.panels,
@@ -480,6 +491,8 @@ class AssistantAnswer {
       origin: origin ?? this.origin,
       selectedVariant: selectedVariant ?? this.selectedVariant,
       done: done ?? this.done,
+      intent: intent ?? this.intent,
+      note: note ?? this.note,
     );
   }
 
@@ -525,6 +538,8 @@ class AssistantAnswer {
       origin: AnswerOrigin.parse(_str(json['origin'])),
       selectedVariant: _str(json['selected_variant']),
       done: done,
+      intent: _str(json['intent']),
+      note: _str(json['note']),
     );
   }
 
@@ -533,6 +548,8 @@ class AssistantAnswer {
     'verify': verify,
     if (cardId != null) 'card_id': cardId,
     if (selectedVariant != null) 'selected_variant': selectedVariant,
+    if (intent != null) 'intent': intent,
+    if (note != null) 'note': note,
     'panels': [for (final p in panels) p.raw],
     'sources': {for (final e in sources.entries) e.key: e.value.toJson()},
     if (done.isNotEmpty)

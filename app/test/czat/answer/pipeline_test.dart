@@ -205,6 +205,13 @@ void main() {
     }
   });
 
+  test('only LlmTimeout adds the timeout note', () async {
+    final t = ready(await run(svc(FakeEngine([const LlmTimeout()]))));
+    expect(t.note, 'Model nie odpowiedział na czas. Pokazuję fragmenty źródeł.');
+    final d = ready(await run(svc(FakeEngine([const LlmDisabled()]))));
+    expect(d.note, isNull);
+  });
+
   test('fallback shows at most three quotes', () async {
     final many = [for (var i = 0; i < 4; i++) chunk('k$i', 'Tekst $i')];
     final a = ready(await run(svc(FakeEngine([const LlmTimeout()]), result: found(many))));

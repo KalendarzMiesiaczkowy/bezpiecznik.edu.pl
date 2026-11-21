@@ -154,7 +154,12 @@ class PipelineAnswerService implements AnswerService {
       } catch (e) {
         if (run.cancelled) return null;
         onLog?.call('llm unavailable: $e');
-        return buildQuoteFallback(prompted, risk: risk, modelOff: true);
+        return buildQuoteFallback(
+          prompted,
+          risk: risk,
+          modelOff: true,
+          note: e is LlmTimeout ? kLlmTimeoutNote : null,
+        );
       }
       if (run.cancelled) return null;
 

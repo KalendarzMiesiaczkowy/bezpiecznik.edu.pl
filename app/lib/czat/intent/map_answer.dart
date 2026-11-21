@@ -24,6 +24,7 @@ class MapAnswerService {
       ),
     ],
     origin: AnswerOrigin.rules,
+    intent: intent.target,
   );
 }
 
