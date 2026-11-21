@@ -16,7 +16,17 @@ enum AgeGroup {
   final String short;
 }
 
-/// Power-dependent device types (section 3).
+/// Pet kinds (section 3).
+const petLabels = <String, String>{
+  'dog': 'Pies',
+  'cat': 'Kot',
+  'other': 'Inne',
+};
+
+const maxNotesLength = 300;
+
+/// Legacy power-dependent device types: no longer edited or sent to the
+/// model, kept so stored data and the SMS body still read.
 const powerDeviceLabels = <String, String>{
   'oxygen_concentrator': 'Koncentrator tlenu',
   'suction': 'Ssak',
@@ -35,7 +45,8 @@ String? normalizePhone(String raw) {
   return null;
 }
 
-bool isEmergencyNumber(String raw) => emergencyNumbers.contains(raw.replaceAll(RegExp(r'[\s\-]'), ''));
+bool isEmergencyNumber(String raw) =>
+    emergencyNumbers.contains(raw.replaceAll(RegExp(r'[\s\-]'), ''));
 
 class Member {
   const Member({required this.ageGroup, this.label, this.limitedMobility});
@@ -50,7 +61,10 @@ class Member {
   };
 
   factory Member.fromJson(Map<String, dynamic> j) => Member(
-    ageGroup: AgeGroup.values.firstWhere((a) => a.name == j['ageGroup'], orElse: () => AgeGroup.adult),
+    ageGroup: AgeGroup.values.firstWhere(
+      (a) => a.name == j['ageGroup'],
+      orElse: () => AgeGroup.adult,
+    ),
     label: j['label'] as String?,
     limitedMobility: j['limitedMobility'] as bool?,
   );
@@ -61,10 +75,15 @@ class Medication {
   final String name;
   final bool? needsFridge;
 
-  Map<String, dynamic> toJson() => {'name': name, if (needsFridge != null) 'needsFridge': needsFridge};
+  Map<String, dynamic> toJson() => {
+    'name': name,
+    if (needsFridge != null) 'needsFridge': needsFridge,
+  };
 
-  factory Medication.fromJson(Map<String, dynamic> j) =>
-      Medication(name: j['name'] as String? ?? '', needsFridge: j['needsFridge'] as bool?);
+  factory Medication.fromJson(Map<String, dynamic> j) => Medication(
+    name: j['name'] as String? ?? '',
+    needsFridge: j['needsFridge'] as bool?,
+  );
 }
 
 class Home {
@@ -79,7 +98,8 @@ class Home {
     if (elevator != null) 'elevator': elevator,
   };
 
-  factory Home.fromJson(Map<String, dynamic> j) => Home(floor: j['floor'] as int?, elevator: j['elevator'] as bool?);
+  factory Home.fromJson(Map<String, dynamic> j) =>
+      Home(floor: j['floor'] as int?, elevator: j['elevator'] as bool?);
 }
 
 class IceContact {
@@ -91,8 +111,10 @@ class IceContact {
 
   Map<String, dynamic> toJson() => {'name': name, 'phone': phone};
 
-  factory IceContact.fromJson(Map<String, dynamic> j) =>
-      IceContact(name: j['name'] as String? ?? '', phone: j['phone'] as String? ?? '');
+  factory IceContact.fromJson(Map<String, dynamic> j) => IceContact(
+    name: j['name'] as String? ?? '',
+    phone: j['phone'] as String? ?? '',
+  );
 }
 
 class HouseholdProfile {
@@ -103,6 +125,8 @@ class HouseholdProfile {
     this.powerOtherText,
     this.home = const Home(),
     this.iceContacts = const [],
+    this.pets = const {},
+    this.notes,
   });
 
   static const empty = HouseholdProfile();
@@ -116,12 +140,20 @@ class HouseholdProfile {
   final Home home;
   final List<IceContact> iceContacts;
 
+  /// Keys of [petLabels].
+  final Set<String> pets;
+
+  /// Free text (illnesses, diets), max [maxNotesLength] chars.
+  final String? notes;
+
   bool get isEmpty =>
       members.isEmpty &&
       medications.isEmpty &&
       powerDevices.isEmpty &&
       home.isEmpty &&
-      iceContacts.isEmpty;
+      iceContacts.isEmpty &&
+      pets.isEmpty &&
+      (notes ?? '').trim().isEmpty;
 
   HouseholdProfile copyWith({
     List<Member>? members,
@@ -130,6 +162,8 @@ class HouseholdProfile {
     String? powerOtherText,
     Home? home,
     List<IceContact>? iceContacts,
+    Set<String>? pets,
+    String? notes,
   }) => HouseholdProfile(
     members: members ?? this.members,
     medications: medications ?? this.medications,
@@ -137,6 +171,8 @@ class HouseholdProfile {
     powerOtherText: powerOtherText ?? this.powerOtherText,
     home: home ?? this.home,
     iceContacts: iceContacts ?? this.iceContacts,
+    pets: pets ?? this.pets,
+    notes: notes ?? this.notes,
   );
 
   Map<String, dynamic> toJson() => {
@@ -146,18 +182,35 @@ class HouseholdProfile {
     if (powerOtherText != null) 'powerOtherText': powerOtherText,
     'home': home.toJson(),
     'iceContacts': [for (final c in iceContacts) c.toJson()],
+    if (pets.isNotEmpty) 'pets': pets.toList()..sort(),
+    if (notes != null) 'notes': notes,
   };
 
   factory HouseholdProfile.fromJson(Map<String, dynamic> j) {
-    List<Map<String, dynamic>> list(String k) =>
-        [for (final e in (j[k] as List? ?? const [])) Map<String, dynamic>.from(e as Map)];
+    List<Map<String, dynamic>> list(String k) => [
+      for (final e in (j[k] as List? ?? const []))
+        Map<String, dynamic>.from(e as Map),
+    ];
     return HouseholdProfile(
       members: [for (final e in list('members')) Member.fromJson(e)],
-      medications: [for (final e in list('medications')) Medication.fromJson(e)],
-      powerDevices: {for (final e in (j['powerDevices'] as List? ?? const [])) e as String},
+      medications: [
+        for (final e in list('medications')) Medication.fromJson(e),
+      ],
+      powerDevices: {
+        for (final e in (j['powerDevices'] as List? ?? const [])) e as String,
+      },
       powerOtherText: j['powerOtherText'] as String?,
-      home: Home.fromJson(Map<String, dynamic>.from(j['home'] as Map? ?? const {})),
-      iceContacts: [for (final e in list('iceContacts')) IceContact.fromJson(e)],
+      home: Home.fromJson(
+        Map<String, dynamic>.from(j['home'] as Map? ?? const {}),
+      ),
+      iceContacts: [
+        for (final e in list('iceContacts')) IceContact.fromJson(e),
+      ],
+      pets: {
+        for (final e in (j['pets'] as List? ?? const []))
+          if (e is String) e,
+      },
+      notes: j['notes'] is String ? j['notes'] as String : null,
     );
   }
 
@@ -175,28 +228,40 @@ class HouseholdProfile {
           if (counts[g] != null) '${counts[g]} ${g.short}',
       ].join(', ');
       final mobility = members.where((m) => m.limitedMobility == true).length;
-      parts.add('Domownicy: $desc${mobility > 0 ? ' (ograniczona mobilność: $mobility)' : ''}.');
+      parts.add(
+        'Domownicy: $desc${mobility > 0 ? ' (ograniczona mobilność: $mobility)' : ''}.',
+      );
     }
     if (medications.isNotEmpty) {
-      parts.add('Leki na stałe: ${medications.map((m) => m.name + (m.needsFridge == true ? ' (lodówka)' : '')).join(', ')}.');
+      parts.add(
+        'Leki na stałe: ${medications.map((m) => m.name + (m.needsFridge == true ? ' (lodówka)' : '')).join(', ')}.',
+      );
     }
-    if (powerDevices.isNotEmpty) {
-      final names = [
-        for (final k in powerDeviceLabels.keys)
-          if (powerDevices.contains(k))
-            k == 'other' && (powerOtherText ?? '').isNotEmpty ? powerOtherText! : powerDeviceLabels[k]!.toLowerCase(),
-      ];
-      parts.add('Urządzenia na prąd: ${names.join(', ')}.');
+    if (pets.isNotEmpty) {
+      parts.add(
+        'Zwierzęta: ${[for (final k in petLabels.keys)
+          if (pets.contains(k)) petLabels[k]!.toLowerCase()].join(', ')}.',
+      );
     }
     final h = <String>[
-      if (home.floor != null) home.floor == 0 ? 'parter' : '${home.floor}. piętro',
+      if (home.floor != null)
+        home.floor == 0 ? 'parter' : '${home.floor}. piętro',
       if (home.elevator != null) home.elevator! ? 'winda jest' : 'brak windy',
     ];
     if (h.isNotEmpty) parts.add('Mieszkanie: ${h.join(', ')}.');
+    final n = (notes ?? '').trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (n.isNotEmpty) parts.add('Dodatkowo: $n');
     var out = '';
     for (final p in parts) {
       final next = out.isEmpty ? p : '$out $p';
-      if (next.length > maxPromptContext) break;
+      if (next.length > maxPromptContext) {
+        // Notes are free text: keep what fits rather than drop them whole.
+        final room = maxPromptContext - out.length - 1;
+        if (p.startsWith('Dodatkowo: ') && room > 15) {
+          out = '$out ${p.substring(0, room - 1)}…';
+        }
+        break;
+      }
       out = next;
     }
     return out;

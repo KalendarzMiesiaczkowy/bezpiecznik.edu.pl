@@ -35,9 +35,47 @@ void main() {
       );
       expect(material.shape, isA<StadiumBorder>());
 
-      final headingX = tester.getTopLeft(find.text('Leki')).dx;
+      final headingX = tester
+          .getTopLeft(find.byIcon(Icons.medication_outlined))
+          .dx;
       final addLabelX = tester.getTopLeft(find.text('+ Dodaj lek')).dx;
       expect(addLabelX, closeTo(headingX, 0.5));
     },
   );
+
+  testWidgets('pets and notes are editable, no overflow at 2x text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 6000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    HouseholdProfile? last;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildBzTheme(),
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: Scaffold(
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: ProfileForm(
+                initial: HouseholdProfile.empty,
+                onChanged: (p) => last = p,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Zwierzęta'), findsOneWidget);
+    expect(find.text('Dodatkowe informacje'), findsOneWidget);
+    expect(find.byKey(const Key('device-pump')), findsNothing);
+    await tester.tap(find.byKey(const Key('pet-dog')));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('notes')), 'Astma');
+    await tester.pump();
+    expect(last!.pets, {'dog'});
+    expect(last!.notes, 'Astma');
+    expect(tester.takeException(), isNull);
+  });
 }

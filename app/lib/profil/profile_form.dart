@@ -39,8 +39,8 @@ class _ProfileFormState extends State<ProfileForm> {
   late Map<AgeGroup, int> _counts;
   late List<Member> _extraMembers; // keeps labels/mobility of existing members
   late List<TextEditingController> _meds;
-  late Set<String> _devices;
-  late TextEditingController _otherDevice;
+  late Set<String> _pets;
+  late TextEditingController _notes;
   late TextEditingController _floor;
   bool? _elevator;
   late List<_ContactDraft> _contacts;
@@ -57,8 +57,8 @@ class _ProfileFormState extends State<ProfileForm> {
     _meds = [
       for (final m in p.medications) TextEditingController(text: m.name),
     ];
-    _devices = {...p.powerDevices};
-    _otherDevice = TextEditingController(text: p.powerOtherText ?? '');
+    _pets = {...p.pets};
+    _notes = TextEditingController(text: p.notes ?? '');
     _floor = TextEditingController(text: p.home.floor?.toString() ?? '');
     _elevator = p.home.elevator;
     _contacts = [for (final c in p.iceContacts) _ContactDraft(c.name, c.phone)];
@@ -68,7 +68,7 @@ class _ProfileFormState extends State<ProfileForm> {
   void dispose() {
     for (final c in [
       ..._meds,
-      _otherDevice,
+      _notes,
       _floor,
       for (final d in _contacts) ...[d.name, d.phone],
     ]) {
@@ -131,11 +131,6 @@ class _ProfileFormState extends State<ProfileForm> {
         for (final c in _meds)
           if (c.text.trim().isNotEmpty) Medication(name: c.text.trim()),
       ],
-      powerDevices: _devices,
-      powerOtherText:
-          _devices.contains('other') && _otherDevice.text.trim().isNotEmpty
-          ? _otherDevice.text.trim()
-          : null,
       home: Home(
         floor: _floorError() == null
             ? int.tryParse(_floor.text.trim())
@@ -143,6 +138,8 @@ class _ProfileFormState extends State<ProfileForm> {
         elevator: _elevator,
       ),
       iceContacts: contacts,
+      pets: _pets,
+      notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
     );
   }
 
@@ -156,9 +153,16 @@ class _ProfileFormState extends State<ProfileForm> {
     widget.onValidityChanged?.call(_valid);
   }
 
-  Widget _section(String title) => Padding(
-    padding: const EdgeInsets.only(top: 24, bottom: 8),
-    child: Text(title, style: context.bz.step),
+  Widget _section(String title, IconData icon) => Padding(
+    padding: EdgeInsets.only(top: context.bz.space5, bottom: context.bz.space2),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: context.bz.ink200),
+        SizedBox(width: context.bz.space2),
+        Expanded(child: Text(title, style: context.bz.step)),
+      ],
+    ),
   );
 
   /// Ghost buttons carry a horizontal padding; shift left so the label lines
@@ -199,7 +203,7 @@ class _ProfileFormState extends State<ProfileForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _section('Kto mieszka w domu?'),
+        _section('Kto mieszka w domu?', Icons.group_outlined),
         for (final g in AgeGroup.values)
           ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 48),
@@ -233,7 +237,22 @@ class _ProfileFormState extends State<ProfileForm> {
               ],
             ),
           ),
-        _section('Leki'),
+        _section('Zwierzęta', Icons.pets_outlined),
+        Wrap(
+          spacing: context.bz.space2,
+          runSpacing: context.bz.space2,
+          children: [
+            for (final e in petLabels.entries)
+              BzChip(
+                key: Key('pet-${e.key}'),
+                label: e.value,
+                selected: _pets.contains(e.key),
+                onChanged: (s) =>
+                    _changed(() => s ? _pets.add(e.key) : _pets.remove(e.key)),
+              ),
+          ],
+        ),
+        _section('Leki', Icons.medication_outlined),
         for (var i = 0; i < _meds.length; i++)
           Row(
             children: [
@@ -267,34 +286,7 @@ class _ProfileFormState extends State<ProfileForm> {
                   _changed(() => _meds.add(TextEditingController())),
             ),
           ),
-        _section('Urządzenia zależne od prądu'),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final e in powerDeviceLabels.entries)
-              BzChip(
-                key: Key('device-${e.key}'),
-                label: e.value,
-                selected: _devices.contains(e.key),
-                onChanged: (s) => _changed(
-                  () => s ? _devices.add(e.key) : _devices.remove(e.key),
-                ),
-              ),
-          ],
-        ),
-        if (_devices.contains('other'))
-          TextField(
-            key: const Key('device-other-text'),
-            controller: _otherDevice,
-            maxLength: 40,
-            decoration: const InputDecoration(
-              labelText: 'Inne',
-              counterText: '',
-            ),
-            onChanged: (_) => _changed(),
-          ),
-        _section('Twoje mieszkanie'),
+        _section('Twoje mieszkanie', Icons.home_outlined),
         TextField(
           key: const Key('home-floor'),
           controller: _floor,
@@ -312,7 +304,24 @@ class _ProfileFormState extends State<ProfileForm> {
           (v) => _changed(() => _elevator = v),
           key: 'home-elevator',
         ),
-        _section('Kogo powiadomić w razie zagrożenia?'),
+        _section('Dodatkowe informacje', Icons.notes_outlined),
+        TextField(
+          key: const Key('notes'),
+          controller: _notes,
+          maxLength: maxNotesLength,
+          minLines: 2,
+          maxLines: 5,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            labelText: 'Np. choroby, diety',
+            helperText: 'Pomoże dopasować porady.',
+          ),
+          onChanged: (_) => _changed(),
+        ),
+        _section(
+          'Kogo powiadomić w razie zagrożenia?',
+          Icons.contact_phone_outlined,
+        ),
         Text(
           'Do tych osób przygotujemy SMS z twoją pozycją. Wyślesz go sam.',
           style: context.bz.caption,

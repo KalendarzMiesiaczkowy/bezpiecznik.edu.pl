@@ -8,9 +8,12 @@ void main() {
       Member(ageGroup: AgeGroup.adult, limitedMobility: true),
       Member(ageGroup: AgeGroup.child, label: 'Ola'),
     ],
-    medications: [Medication(name: 'Insulina', needsFridge: true), Medication(name: 'Euthyrox')],
-    powerDevices: {'oxygen_concentrator', 'other'},
-    powerOtherText: 'Inhalator',
+    medications: [
+      Medication(name: 'Insulina', needsFridge: true),
+      Medication(name: 'Euthyrox'),
+    ],
+    pets: {'dog', 'cat'},
+    notes: 'Cukrzyca typu 1, dieta bezglutenowa',
     home: Home(floor: 7, elevator: false),
     iceContacts: [IceContact(name: 'Anna Kowalska', phone: '+48600100200')],
   );
@@ -37,8 +40,9 @@ void main() {
     expect(c, contains('2 dorosły'));
     expect(c, contains('1 dziecko'));
     expect(c, contains('Insulina (lodówka)'));
-    expect(c, contains('koncentrator tlenu'));
-    expect(c, contains('Inhalator'));
+    expect(c, contains('Zwierzęta: pies, kot.'));
+    expect(c, contains('Dodatkowo: Cukrzyca typu 1'));
+    expect(c, isNot(contains('Urządzenia')));
     expect(c, contains('7. piętro'));
     expect(c, contains('brak windy'));
     expect(c, isNot(contains('Anna')));
@@ -48,10 +52,40 @@ void main() {
 
   test('prompt context never exceeds the limit', () {
     final p = HouseholdProfile(
-      medications: [for (var i = 0; i < 20; i++) Medication(name: 'Lek numer $i bardzo długa nazwa')],
+      medications: [
+        for (var i = 0; i < 20; i++)
+          Medication(name: 'Lek numer $i bardzo długa nazwa'),
+      ],
       home: const Home(floor: 3),
     );
     expect(p.toPromptContext().length, lessThanOrEqualTo(maxPromptContext));
+  });
+
+  test('pets and notes round trip; old JSON without them still loads', () {
+    final back = HouseholdProfile.fromJson(full.toJson());
+    expect(back.pets, {'dog', 'cat'});
+    expect(back.notes, 'Cukrzyca typu 1, dieta bezglutenowa');
+    final old = HouseholdProfile.fromJson({
+      'members': [],
+      'powerDevices': ['pump'],
+      'powerOtherText': 'x',
+      'home': {'floor': 2},
+    });
+    expect(old.pets, isEmpty);
+    expect(old.notes, isNull);
+    expect(old.toPromptContext(), 'Mieszkanie: 2. piętro.');
+    expect(const HouseholdProfile(pets: {'cat'}).isEmpty, isFalse);
+  });
+
+  test('long notes are truncated to fit the context limit', () {
+    final p = HouseholdProfile(
+      home: const Home(floor: 1),
+      notes: 'Choroba ' * 60,
+    );
+    final c = p.toPromptContext();
+    expect(c.length, lessThanOrEqualTo(maxPromptContext));
+    expect(c, contains('Dodatkowo: Choroba'));
+    expect(c, endsWith('…'));
   });
 
   test('phone normalisation and emergency numbers', () {

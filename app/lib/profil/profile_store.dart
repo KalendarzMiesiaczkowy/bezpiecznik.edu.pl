@@ -30,22 +30,32 @@ class ProfileStore {
       await dir.create(recursive: true);
       db = sqlite3.open(p.join(dir.path, 'profile.sqlite'));
     }
-    db.execute('CREATE TABLE IF NOT EXISTS profile(key TEXT PRIMARY KEY, json TEXT)');
+    db.execute(
+      'CREATE TABLE IF NOT EXISTS profile(key TEXT PRIMARY KEY, json TEXT)',
+    );
     return _db = db;
   }
 
   Future<Map<String, dynamic>?> _get(String key) async {
-    final rows = (await _open()).select('SELECT json FROM profile WHERE key = ?', [key]);
+    final rows = (await _open()).select(
+      'SELECT json FROM profile WHERE key = ?',
+      [key],
+    );
     if (rows.isEmpty) return null;
     try {
-      return Map<String, dynamic>.from(jsonDecode(rows.first['json'] as String) as Map);
+      return Map<String, dynamic>.from(
+        jsonDecode(rows.first['json'] as String) as Map,
+      );
     } catch (_) {
       return null;
     }
   }
 
   Future<void> _put(String key, Map<String, dynamic> value) async {
-    (await _open()).execute('INSERT OR REPLACE INTO profile(key, json) VALUES (?, ?)', [key, jsonEncode(value)]);
+    (await _open()).execute(
+      'INSERT OR REPLACE INTO profile(key, json) VALUES (?, ?)',
+      [key, jsonEncode(value)],
+    );
   }
 
   Future<HouseholdProfile?> loadProfile() async {
@@ -53,14 +63,17 @@ class ProfileStore {
     return j == null ? null : HouseholdProfile.fromJson(j);
   }
 
-  Future<void> saveProfile(HouseholdProfile profile) => _put('household', profile.toJson());
+  Future<void> saveProfile(HouseholdProfile profile) =>
+      _put('household', profile.toJson());
 
   Future<void> clearProfile() async =>
       (await _open()).execute("DELETE FROM profile WHERE key = 'household'");
 
-  Future<bool> isOnboardingDone() async => (await _get('onboarding'))?['completed'] == true;
+  Future<bool> isOnboardingDone() async =>
+      (await _get('onboarding'))?['completed'] == true;
 
-  Future<void> setOnboardingDone(bool done) => _put('onboarding', {'completed': done});
+  Future<void> setOnboardingDone(bool done) =>
+      _put('onboarding', {'completed': done});
 
   void close() {
     _db?.close();
@@ -91,12 +104,16 @@ class OnboardingDoneNotifier extends AsyncNotifier<bool> {
 
 /// Resolves to whether onboarding was completed. While loading (or on a
 /// storage error) the router does not redirect.
-final onboardingDoneProvider = AsyncNotifierProvider<OnboardingDoneNotifier, bool>(OnboardingDoneNotifier.new);
+final onboardingDoneProvider =
+    AsyncNotifierProvider<OnboardingDoneNotifier, bool>(
+      OnboardingDoneNotifier.new,
+    );
 
 class ProfileNotifier extends AsyncNotifier<HouseholdProfile> {
   @override
   Future<HouseholdProfile> build() async =>
-      await ref.read(profileStoreProvider).loadProfile() ?? HouseholdProfile.empty;
+      await ref.read(profileStoreProvider).loadProfile() ??
+      HouseholdProfile.empty;
 
   Future<void> save(HouseholdProfile profile) async {
     await ref.read(profileStoreProvider).saveProfile(profile);
@@ -109,4 +126,7 @@ class ProfileNotifier extends AsyncNotifier<HouseholdProfile> {
   }
 }
 
-final profileProvider = AsyncNotifierProvider<ProfileNotifier, HouseholdProfile>(ProfileNotifier.new);
+final profileProvider =
+    AsyncNotifierProvider<ProfileNotifier, HouseholdProfile>(
+      ProfileNotifier.new,
+    );

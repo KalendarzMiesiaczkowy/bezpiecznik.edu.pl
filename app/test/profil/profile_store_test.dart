@@ -18,7 +18,9 @@ void main() {
     final a = ProfileStore(() async => dir);
     expect(await a.loadProfile(), isNull);
     expect(await a.isOnboardingDone(), isFalse);
-    await a.saveProfile(const HouseholdProfile(medications: [Medication(name: 'Insulina')]));
+    await a.saveProfile(
+      const HouseholdProfile(medications: [Medication(name: 'Insulina')]),
+    );
     await a.setOnboardingDone(true);
     a.close();
 
@@ -33,11 +35,15 @@ void main() {
 
   test('providers load, save and clear', () async {
     final store = ProfileStore.inMemory();
-    final c = ProviderContainer(overrides: [profileStoreProvider.overrideWithValue(store)]);
+    final c = ProviderContainer(
+      overrides: [profileStoreProvider.overrideWithValue(store)],
+    );
     addTearDown(c.dispose);
     expect(await c.read(onboardingDoneProvider.future), isFalse);
     expect((await c.read(profileProvider.future)).isEmpty, isTrue);
-    await c.read(profileProvider.notifier).save(const HouseholdProfile(home: Home(floor: 2)));
+    await c
+        .read(profileProvider.notifier)
+        .save(const HouseholdProfile(home: Home(floor: 2)));
     expect(c.read(profileProvider).value!.home.floor, 2);
     expect((await store.loadProfile())!.home.floor, 2);
     await c.read(onboardingDoneProvider.notifier).complete();

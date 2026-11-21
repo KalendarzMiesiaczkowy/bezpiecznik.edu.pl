@@ -35,9 +35,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _pending = null;
     try {
       await _notifier.save(p);
-      _messenger.showSnackBar(const SnackBar(content: Text('Zapisano'), duration: Duration(seconds: 1)));
+      _messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Zapisano'),
+          duration: Duration(seconds: 1),
+        ),
+      );
     } catch (_) {
-      _messenger.showSnackBar(const SnackBar(content: Text('Nie udało się zapisać. Spróbuj ponownie.')));
+      _messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Nie udało się zapisać. Spróbuj ponownie.'),
+        ),
+      );
     }
   }
 
@@ -59,7 +68,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           SafeArea(
             child: profile.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => const Center(child: Text('Nie mogę odczytać profilu. Możesz utworzyć go od nowa.')),
+              error: (_, _) => const Center(
+                child: Text(
+                  'Nie mogę odczytać profilu. Możesz utworzyć go od nowa.',
+                ),
+              ),
               data: (p) => ListView(
                 padding: const EdgeInsets.fromLTRB(16, 96, 16, 32),
                 children: [
@@ -71,7 +84,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                   if (p.isEmpty) ...[
                     const SizedBox(height: 8),
-                    Text('Profil jest pusty. Uzupełnij go, żeby odpowiedzi dotyczyły twojej rodziny.', style: bz.chat),
+                    Text(
+                      'Profil jest pusty. Uzupełnij go, żeby odpowiedzi dotyczyły twojej rodziny.',
+                      style: bz.chat,
+                    ),
                   ],
                   ProfileForm(initial: p, onChanged: _onChanged),
                 ],
