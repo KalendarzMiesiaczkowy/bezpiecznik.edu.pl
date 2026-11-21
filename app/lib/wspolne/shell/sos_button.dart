@@ -77,11 +77,14 @@ class _SosButtonState extends ConsumerState<SosButton> with SingleTickerProvider
   void _fire() {
     if (_fired) return;
     _fired = true;
+    FocusManager.instance.primaryFocus?.unfocus();
     unawaited(widget.vibrate());
     unawaited(widget.launcher(Uri(scheme: 'tel', path: '112')));
   }
 
   void _openContact() {
+    // Drop the keyboard so it cannot cover "ZADZWOŃ 112" in P2.
+    FocusManager.instance.primaryFocus?.unfocus();
     final panels = ref.read(shellPanelsProvider);
     // P2 already open: tap does nothing.
     if (panels.contactOpen) return;

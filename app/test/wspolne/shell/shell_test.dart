@@ -152,6 +152,18 @@ void main() {
     expect(tester.getTopLeft(menu()).dy, lessThan(100));
   });
 
+  testWidgets('tap on SOS drops focus from the composer', (tester) async {
+    await pumpApp(tester);
+    final field = find.byType(EditableText).first;
+    await tester.tap(field);
+    await tester.pump();
+    expect(FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<EditableText>(), isNotNull);
+    await tester.tap(sos());
+    await tester.pumpAndSettle();
+    expect(FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<EditableText>(), isNull);
+    expect(find.text('Kontakt ze służbami'), findsOneWidget);
+  });
+
   testWidgets('tap on SOS opens P2; second tap does nothing', (tester) async {
     final h = await pumpApp(tester);
     await tester.tap(sos());
