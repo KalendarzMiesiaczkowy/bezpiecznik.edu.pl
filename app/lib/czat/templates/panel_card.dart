@@ -60,42 +60,69 @@ class PanelCard extends StatelessWidget {
   }
 }
 
-/// DS `SourceChip`: `▸ {doc_short}, s. {page_label}` on `verified-tint`. The
-/// visual is 28 dp high, the hit area at least 48 dp.
-class SourceChip extends StatelessWidget {
+/// DS `SourceChip`: book icon + `{doc_short}, s. {page_label}` in `verified`
+/// on `verified-tint`. One line is a 28 dp pill; a long title wraps to more
+/// lines instead of being cut, and "s. N" never breaks apart, so the page
+/// number is always readable. The hit area is at least 48 dp high.
+class SourceChip extends StatefulWidget {
   const SourceChip({super.key, required this.source, this.onTap});
 
   final SourceRecord source;
   final VoidCallback? onTap;
 
   @override
+  State<SourceChip> createState() => _SourceChipState();
+}
+
+class _SourceChipState extends State<SourceChip> {
+  bool _pressed = false;
+
+  void _press(bool v) {
+    if (widget.onTap != null && mounted) setState(() => _pressed = v);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final t = context.bz;
+    final s = widget.source;
     return Semantics(
       button: true,
-      label: source.semanticLabel,
+      label: s.semanticLabel,
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onTap,
+        onTap: widget.onTap,
+        onTapDown: (_) => _press(true),
+        onTapUp: (_) => _press(false),
+        onTapCancel: () => _press(false),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: t.minTouchTarget),
           child: Align(
             alignment: Alignment.centerLeft,
             widthFactor: 1,
-            child: Container(
-              height: 28,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: AnimatedContainer(
+              duration: t.durationFast,
+              curve: t.easeInOut,
+              constraints: const BoxConstraints(minHeight: 28),
+              padding: EdgeInsets.symmetric(horizontal: t.space3, vertical: t.space1),
               decoration: BoxDecoration(
-                color: t.verifiedTint,
-                borderRadius: BorderRadius.circular(t.radiusFull),
+                color: _pressed ? Color.alphaBlend(t.overlayPress, t.verifiedTint) : t.verifiedTint,
+                // radius-lg: a full pill on one line, a rounded box when wrapped.
+                borderRadius: BorderRadius.circular(t.radiusLg),
               ),
-              alignment: Alignment.center,
-              child: Text(
-                source.chipLabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: t.source.copyWith(color: t.verified),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.bookOpen, size: 16, color: t.verified),
+                  SizedBox(width: t.space2),
+                  Flexible(
+                    child: Text(
+                      // No-break space keeps "s. 33" on one line.
+                      '${s.docShort}, s.\u00A0${s.pageLabel}',
+                      style: t.source.copyWith(color: t.verified),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -130,12 +157,13 @@ class BzCheck extends StatelessWidget {
           child: Center(
             child: AnimatedContainer(
               duration: t.durationFast,
+              curve: t.easeInOut,
               width: 24,
               height: 24,
               decoration: BoxDecoration(
                 color: value ? t.action : null,
                 border: Border.all(color: value ? t.action : t.line200, width: 1.5),
-                borderRadius: BorderRadius.circular(7),
+                borderRadius: BorderRadius.circular(t.radiusSm),
               ),
               child: value ? Icon(LucideIcons.check, size: 16, color: t.onAction) : null,
             ),

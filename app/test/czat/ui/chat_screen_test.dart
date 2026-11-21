@@ -111,7 +111,7 @@ void main() {
         ),
       );
       expect(find.text('Przykładowy krok pierwszy'), findsOneWidget);
-      expect(find.text('▸ Przykład, s. 14'), findsOneWidget);
+      expect(find.text('Przykład, s.\u00A014'), findsOneWidget);
       // The input is cleared after sending.
       expect(
         tester

@@ -52,8 +52,8 @@ void main() {
     expect(find.text('Przykładowy krok 1'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('3'), findsOneWidget);
-    expect(find.text('▸ Przykład, s. 14'), findsNWidgets(2));
-    expect(find.text('▸ Przykład, s. 22'), findsOneWidget);
+    expect(find.text('Przykład, s.\u00A014'), findsNWidgets(2));
+    expect(find.text('Przykład, s.\u00A022'), findsOneWidget);
     final first = tester.widget<Text>(find.text('Przykładowy krok 1'));
     final second = tester.widget<Text>(find.text('Przykładowy krok 2'));
     expect(first.style!.fontWeight, FontWeight.w700);
@@ -127,7 +127,7 @@ void main() {
         overrides: [sourceOpenerProvider.overrideWithValue((_, s) => opened.add(s.pageLabel))],
       ),
     );
-    await tester.tap(find.text('▸ Przykład, s. 22'));
+    await tester.tap(find.text('Przykład, s.\u00A022'));
     expect(opened, ['22']);
   });
 

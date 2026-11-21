@@ -40,7 +40,7 @@ void main() {
     await pumpApp(tester);
     final sw = Stopwatch()..start();
     await ask(tester, 'Co spakować do plecaka ewakuacyjnego?');
-    final chip = find.textContaining('▸ ');
+    final chip = find.textContaining(', s.\u00A0');
     final ok = await pumpUntil(tester, chip, timeout: const Duration(seconds: 40));
     // ignore: avoid_print
     print('sourced answer shown after ${sw.elapsedMilliseconds} ms (host LLM)');

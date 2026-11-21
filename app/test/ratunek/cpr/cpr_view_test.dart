@@ -98,14 +98,14 @@ Future<(Rig, ProviderContainer)> pumpCard(
 void main() {
   testWidgets('source chip follows the selected variant', (tester) async {
     await pumpCard(tester);
-    expect(find.text('▸ ERC 2025, BLS krok po kroku, s. 3'), findsOneWidget);
+    expect(find.text('ERC 2025, BLS krok po kroku, s.\u00A03'), findsOneWidget);
     await tester.tap(find.text('Niemowlę'));
     await tester.pump();
-    expect(find.text('▸ ERC 2025, podsumowanie zmian, s. 67'), findsOneWidget);
-    expect(find.text('▸ ERC 2025, BLS krok po kroku, s. 3'), findsNothing);
+    expect(find.text('ERC 2025, podsumowanie zmian, s.\u00A067'), findsOneWidget);
+    expect(find.text('ERC 2025, BLS krok po kroku, s.\u00A03'), findsNothing);
     await tester.tap(find.text('Dorosły'));
     await tester.pump();
-    expect(find.text('▸ ERC 2025, BLS krok po kroku, s. 3'), findsOneWidget);
+    expect(find.text('ERC 2025, BLS krok po kroku, s.\u00A03'), findsOneWidget);
   });
 
   testWidgets('card: variant switch, summary, start shows the pinned panel', (tester) async {

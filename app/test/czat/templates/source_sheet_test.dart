@@ -43,7 +43,7 @@ void main() {
     'chip opens source sheet with title, page, text; Zamknij closes',
     (t) async {
       await pumpApp(t, 'steps');
-      await t.tap(find.text('▸ Przykład, s. 22'));
+      await t.tap(find.text('Przykład, s.\u00A022'));
       await t.pumpAndSettle();
       expect(find.text('Strona 22'), findsOneWidget);
       expect(find.text('Zamknij'), findsOneWidget);
