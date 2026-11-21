@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../wspolne/theme/bz_buttons.dart';
 import '../wspolne/theme/bz_theme.dart';
 import 'profile_model.dart';
+import 'section_card.dart';
 
 /// Editable form shared by E4 (edit) and the E0 wizard step. Reports only
 /// valid data through [onChanged]; invalid entries show an error and are not
@@ -154,52 +155,11 @@ class _ProfileFormState extends State<ProfileForm> {
     widget.onValidityChanged?.call(_valid);
   }
 
-  /// Section card (ref `profil.png`): `bg-100`, 1 px `line-100`, `radius-lg`,
-  /// icon + title header like `PanelCard`.
-  Widget _section(String title, IconData icon, List<Widget> children) {
-    final bz = context.bz;
-    return Padding(
-      padding: EdgeInsets.only(top: bz.space4),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: bz.bg100,
-          border: Border.all(color: bz.line100),
-          borderRadius: BorderRadius.circular(bz.radiusLg),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(bz.space4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Semantics(
-                header: true,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(icon, size: 20, color: bz.ink200),
-                    SizedBox(width: bz.space2),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: bz.label.copyWith(
-                          fontSize: 16,
-                          height: 22 / 16,
-                          fontWeight: FontWeight.w700,
-                          color: bz.ink100,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: bz.space3),
-              ...children,
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _section(String title, IconData icon, List<Widget> children) =>
+      Padding(
+        padding: EdgeInsets.only(top: context.bz.space4),
+        child: SectionCard(title: title, icon: icon, children: children),
+      );
 
   /// Ghost buttons carry a horizontal padding; shift left so the label lines
   /// up with the section headings.
