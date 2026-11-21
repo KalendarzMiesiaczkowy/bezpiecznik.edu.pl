@@ -12,3 +12,6 @@ __pycache__/
 polish/tools/emu-*.log
 polish/tools/prof-*
 polish/tools/*-sheet*.png
+polish/compare/frames/
+polish/tools/*.log
+polish/tools/_*.png
