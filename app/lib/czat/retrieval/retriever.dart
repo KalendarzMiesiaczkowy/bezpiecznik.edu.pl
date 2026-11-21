@@ -4,6 +4,7 @@ library;
 import 'dart:convert';
 
 import '../../ratunek/detect/normalize.dart';
+import '../../ratunek/detect/risk_detector.dart' show editDistanceWithin;
 import 'kb_database.dart';
 import 'query_builder.dart';
 import 'safety_vocabulary.dart';
@@ -161,6 +162,13 @@ class Retriever {
     for (final e in extraVocabulary) {
       _addWords(vocab, e);
     }
+    // BG91: every word the KB or the query pipeline knows, for typo repair.
+    final known = <String>{...vocab, ...stopwords, ...kAmbiguousDomainWords};
+    for (final r in _kb.db.select('SELECT text_norm FROM chunks')) {
+      _addWords(known, r['text_norm'] as String);
+    }
+    _known = known;
+    _stopwords = stopwords;
     vocab.removeWhere(
       (w) => stopwords.contains(w) || kAmbiguousDomainWords.contains(w),
     );
@@ -168,6 +176,13 @@ class Retriever {
       if (w.length >= 3) (_buckets[w.substring(0, 3)] ??= []).add(w);
     }
     _vocab = vocab;
+    for (final w in known) {
+      if (w.length >= 3 &&
+          !kAmbiguousDomainWords.contains(w) &&
+          (stopwords.contains(w) || _isDomainWord(w))) {
+        (_targets[w[0]] ??= []).add(w);
+      }
+    }
     _builder = QueryBuilder(synonyms: syn, stopwords: stopwords);
   }
 
@@ -180,6 +195,11 @@ class Retriever {
   late final Set<String> _vocab;
   final Map<String, List<String>> _buckets = {};
   late final Set<String> _safety;
+  late final Set<String> _known;
+  late final Set<String> _stopwords;
+
+  /// Typo-repair targets by first letter: domain words and stopwords.
+  final Map<String, List<String>> _targets = {};
 
   /// A question word may be generic when its FTS match spans at least this
   /// many documents (e.g. "przy", "podczas"): it cannot ground a hit.
@@ -229,10 +249,84 @@ class Retriever {
   /// Whether [question] contains at least one domain word.
   bool isDomainQuery(String question) => domainTokens(question).isNotEmpty;
 
+  /// Searches [question]; when that finds nothing, retries once with typos
+  /// repaired (BG91, [_correctTypos]). The retry is kept when it is a hit, or
+  /// a "no source" for a question that was off-topic only through its typos
+  /// ("ugryzenie weza"); it never turns a refusal into off-topic.
   Future<RetrievalResult> search(
     String question, {
     int k = kDefaultTopK,
   }) async {
+    final exact = _search(question, k);
+    if (exact.decision == RetrievalDecision.found) return exact;
+    final fixed = _correctTypos(question);
+    if (fixed == null) return exact;
+    final retry = _search(fixed, k);
+    return retry.decision == RetrievalDecision.offTopic ? exact : retry;
+  }
+
+  /// [question] normalised with unknown words replaced by their closest KB
+  /// word ([_repair]), or null when nothing was repaired.
+  String? _correctTypos(String question) {
+    final toks = QueryBuilder.tokens(question);
+    final fixed = [for (final t in toks) _repair(t) ?? t].join(' ');
+    return fixed == toks.join(' ') ? null : fixed;
+  }
+
+  /// Domain word (or stopword) that an unknown [t] is a typo of, or null.
+  /// Only typo shapes that inflection does not produce are accepted, so a
+  /// real word missing from the KB ("bloku", "kinie", "pranie") is not
+  /// rewritten: a Polish nasal spelled phonetically ("prundu" -> "pradu"),
+  /// missing letters (1 for 4-6 letters, 2 for 7+; "prdu" -> "pradu"), an
+  /// adjacent swap ("robci" -> "robic"), and for 7+ letters any single edit
+  /// ("krwotik"). The first letter must match. Several candidates resolve
+  /// only when all are stopwords; otherwise the word stays and the query is
+  /// refused as before (when in doubt: no source).
+  String? _repair(String t) {
+    if (t.length < 4 || _known.contains(t) || _isDomainWord(t)) return null;
+    for (final m in RegExp('[ou][nm]|e[nm]').allMatches(t)) {
+      final v = t.replaceRange(m.start, m.end, t[m.start] == 'e' ? 'e' : 'a');
+      if (_vocab.contains(v)) return v;
+    }
+    final cands = [
+      for (final w in _targets[t[0]] ?? const <String>[])
+        if (_isInsertion(t, w, t.length >= 7 ? 2 : 1) ||
+            _isSwap(t, w) ||
+            (t.length >= 7 && editDistanceWithin(t, w, 1)))
+          w,
+    ];
+    if (cands.length == 1) return cands.first;
+    if (cands.isNotEmpty && cands.every(_stopwords.contains)) {
+      return cands.first;
+    }
+    return null;
+  }
+
+  /// [w] is [t] with 1..[max] letters inserted.
+  static bool _isInsertion(String t, String w, int max) {
+    final extra = w.length - t.length;
+    if (extra < 1 || extra > max) return false;
+    var i = 0;
+    for (var j = 0; j < w.length && i < t.length; j++) {
+      if (w.codeUnitAt(j) == t.codeUnitAt(i)) i++;
+    }
+    return i == t.length;
+  }
+
+  /// [w] is [t] with two adjacent letters swapped.
+  static bool _isSwap(String t, String w) {
+    if (t.length != w.length) return false;
+    var i = 0;
+    while (i < t.length && t.codeUnitAt(i) == w.codeUnitAt(i)) {
+      i++;
+    }
+    return i + 1 < t.length &&
+        t[i] == w[i + 1] &&
+        t[i + 1] == w[i] &&
+        t.substring(i + 2) == w.substring(i + 2);
+  }
+
+  RetrievalResult _search(String question, int k) {
     if (!isDomainQuery(question)) {
       return const RetrievalResult(
         decision: RetrievalDecision.offTopic,

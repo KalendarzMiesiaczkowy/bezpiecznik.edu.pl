@@ -298,6 +298,57 @@ void main() {
       }
     }, skip: _hasKb ? false : _skip);
 
+    test('BG91: typos in normal questions are repaired', () async {
+      // question -> chunk id expected among the hits
+      const cases = {
+        'nie ma prundu co robci': 'rcb-poradnik-2025-s33-f1', // nasal, swap
+        'co zrbic jak nie ma prdu i wdy w bloku': 'rcb-poradnik-2025-s33-f1',
+        'brak prdu': 'rcb-poradnik-2025-s33-f1', // missing letter
+        'jak zatamowac krwawinie': 'erc-2025-pierwsza-pomoc-s12-f1',
+        'jak zatamowac krowtok': 'erc-2025-pierwsza-pomoc-s12-f1', // swap
+      };
+      for (final e in cases.entries) {
+        final res = await r.search(e.key);
+        expect(res.decision, RetrievalDecision.found, reason: e.key);
+        expect(res.chunks.map((c) => c.id), contains(e.value), reason: e.key);
+      }
+      // The repaired question ranks like the correctly spelled one.
+      final fixed = await r.search('nie ma prundu co robci');
+      final exact = await r.search('nie ma pradu co robic');
+      expect(fixed.chunks.first.id, exact.chunks.first.id);
+    }, skip: _hasKb ? false : _skip);
+
+    test('BG91: typo repair keeps refusals', () async {
+      for (final q in [
+        'przepis na pierogi',
+        'kto wygra mecz w sobotę',
+        'ile kosztuje bitcoin',
+        'przepis na ciasto', // "ciasto" is not rewritten to "ciało"
+        'co obejrzec w kinie', // real words missing from the KB stay
+        'jak zrobic pranie',
+        'jak sie ubrac na wesele',
+        'zakupy na sobote',
+      ]) {
+        expect(
+          (await r.search(q)).decision,
+          RetrievalDecision.offTopic,
+          reason: q,
+        );
+      }
+      for (final q in [
+        'ugryzienie węża',
+        'Co robić przy ugryzieniu węża?',
+        'ugryzenie weza', // typo of an absent safety topic: no source
+        'trzęsenie zimi co robic',
+      ]) {
+        expect(
+          (await r.search(q)).decision,
+          RetrievalDecision.noSource,
+          reason: q,
+        );
+      }
+    }, skip: _hasKb ? false : _skip);
+
     test('in-domain but absent topics (documented behaviour)', () async {
       // "agregat" is a keyword of rcb-poradnik-2025-s33 (power cut), so the
       // question is in-domain and retrieval is found (-4.43 on this build);

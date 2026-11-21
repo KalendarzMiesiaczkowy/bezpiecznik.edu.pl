@@ -1,0 +1,1584 @@
+{
+  "timestamp": "2026-11-21T06-55-51",
+  "llm": false,
+  "rows": [
+    {
+      "id": "a01",
+      "q": "Co spakować do plecaka ewakuacyjnego?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s26-f1",
+        "rcb-poradnik-2025-s27-f1",
+        "psp-plecak-ewakuacyjny-lista-s2-f1",
+        "psp-plecak-ewakuacyjny-lista-s2-f2"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s26-f1",
+        "psp-plecak-ewakuacyjny-lista-s2-f2",
+        "psp-plecak-ewakuacyjny-lista-s2-f1",
+        "rcb-poradnik-2025-s28-f1"
+      ],
+      "best_score": -6.7675543297899665,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a02",
+      "q": "Jak szybko uciskać klatkę piersiową podczas RKO?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s26-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s29-f3",
+        "rcb-poradnik-2025-s43-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s43-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s26-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s25-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s38-f3"
+      ],
+      "best_score": -15.818496994631678,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a03",
+      "q": "Jak postępować przy oparzeniach?",
+      "kind": "answer",
+      "expect": [
+        "akademia-nim-nadejdzie-dzien-s135-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "akademia-nim-nadejdzie-dzien-s135-f1",
+        "rcb-poradnik-2025-s21-f1"
+      ],
+      "best_score": -10.095283190641787,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a04",
+      "q": "Jak użyć defibrylatora AED?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s30-f3",
+        "rcb-poradnik-2025-s43-f2"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s43-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f2",
+        "rcb-poradnik-2025-s42-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f1"
+      ],
+      "best_score": -13.583651731657058,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a05",
+      "q": "Gdzie przykleić elektrody AED?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s28-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s30-f3"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s38-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s28-f1"
+      ],
+      "best_score": -12.962368171477596,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a06",
+      "q": "Co zrobić, gdy ktoś się zadławił?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-pierwsza-pomoc-s9-f1",
+        "erc-2025-pierwsza-pomoc-s10-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s60-f2"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s60-f2",
+        "erc-2025-pierwsza-pomoc-s10-f1",
+        "erc-2025-pierwsza-pomoc-s9-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f3"
+      ],
+      "best_score": -5.32113808600215,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a07",
+      "q": "Jak zatamować silne krwawienie?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-pierwsza-pomoc-s12-f1",
+        "erc-2025-pierwsza-pomoc-s13-f1",
+        "rcb-poradnik-2025-s44-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-pierwsza-pomoc-s12-f1",
+        "rcb-poradnik-2025-s44-f1",
+        "erc-2025-pierwsza-pomoc-s13-f1",
+        "erc-2025-kluczowe-pierwsza-pomoc-s1-f1"
+      ],
+      "best_score": -15.63712575976553,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a08",
+      "q": "Co to jest pozycja bezpieczna?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s57-f1",
+        "erc-2025-pierwsza-pomoc-s7-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-pierwsza-pomoc-s7-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s57-f1",
+        "rcb-poradnik-2025-s42-f1",
+        "psp-plecak-ewakuacyjny-lista-s2-f2"
+      ],
+      "best_score": -11.561270867766549,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a09",
+      "q": "Jak rozpoznać zatrzymanie krążenia?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s24-f1",
+        "erc-2025-kluczowe-bls-s1-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s24-f3",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s24-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s24-f2",
+        "erc-2025-kluczowe-bls-s1-f1"
+      ],
+      "best_score": -10.13195758547649,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a10",
+      "q": "Jak wykonać RKO u dziecka?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s36-f3",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s37-f1",
+        "erc-2025-kluczowe-dzieci-s1-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s26-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s38-f3",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s36-f3"
+      ],
+      "best_score": -9.578720044408978,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a11",
+      "q": "Ile oddechów ratowniczych robić podczas resuscytacji?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s26-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s30-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s29-f3"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s30-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s39-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s30-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s36-f3"
+      ],
+      "best_score": -8.517365500045045,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a12",
+      "q": "Jakie są objawy zawału serca?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s60-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s60-f1",
+        "rcb-powodz-poradnik-2024-s30-f1",
+        "psp-plecak-ewakuacyjny-lista-s1-f1"
+      ],
+      "best_score": -10.11159568970919,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a13",
+      "q": "Jak pomóc osobie, która tonie?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s61-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s61-f2"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s61-f1",
+        "erc-2025-kluczowe-pierwsza-pomoc-s1-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s61-f2",
+        "rcb-powodz-poradnik-2024-s25-f1"
+      ],
+      "best_score": -7.834113994758991,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a14",
+      "q": "Jak się zachować podczas powodzi, gdy jestem w domu?",
+      "kind": "answer",
+      "expect": [
+        "rcb-powodz-poradnik-2024-s23-f1",
+        "rcb-poradnik-2025-s32-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-powodz-poradnik-2024-s19-f1",
+        "rcb-powodz-poradnik-2024-s12-f1",
+        "rcb-powodz-poradnik-2024-s23-f1",
+        "rcb-powodz-poradnik-2024-s28-f1"
+      ],
+      "best_score": -7.51669995066025,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a15",
+      "q": "Jak wezwać pomoc w czasie powodzi, jeśli nie mam telefonu?",
+      "kind": "answer",
+      "expect": [
+        "rcb-powodz-poradnik-2024-s24-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-powodz-poradnik-2024-s24-f1",
+        "rcb-poradnik-2025-s3-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s29-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s24-f2"
+      ],
+      "best_score": -7.742023350224427,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a16",
+      "q": "Ile wody na osobę zgromadzić na 3 dni?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s21-f1",
+        "rcb-poradnik-2025-s20-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s20-f1",
+        "rcb-poradnik-2025-s21-f1",
+        "rcb-powodz-poradnik-2024-s15-f1",
+        "rcb-poradnik-2025-s17-f1"
+      ],
+      "best_score": -17.71741286236162,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a17",
+      "q": "Co oznacza ciągły dźwięk syreny trwający 3 minuty?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s53-f1",
+        "rcb-poradnik-2025-s24-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s53-f1",
+        "rcb-poradnik-2025-s24-f1",
+        "rcb-poradnik-2025-s44-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s29-f2"
+      ],
+      "best_score": -28.360888059168406,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a18",
+      "q": "Jaką gaśnicą gasić pożar?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s30-f1",
+        "rcb-poradnik-2025-s31-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s30-f1",
+        "rcb-poradnik-2025-s31-f1",
+        "rcb-poradnik-2025-s18-f1",
+        "rcb-poradnik-2025-s16-f1"
+      ],
+      "best_score": -25.77532324598993,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a19",
+      "q": "Czy w czasie pożaru można jechać windą?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s31-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s31-f1",
+        "rcb-poradnik-2025-s30-f1"
+      ],
+      "best_score": -11.375913269963977,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a20",
+      "q": "Co robić podczas długotrwałego braku prądu?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s33-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s33-f1",
+        "rcb-poradnik-2025-s17-f1",
+        "rcb-poradnik-2025-s45-f1",
+        "rcb-powodz-poradnik-2024-s23-f1"
+      ],
+      "best_score": -7.775440578852823,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a21",
+      "q": "Jak się zachować w czasie ataku z powietrza?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s34-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s34-f1",
+        "rcb-poradnik-2025-s31-f1",
+        "rcb-poradnik-2025-s38-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s30-f2"
+      ],
+      "best_score": -10.05663124755265,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a22",
+      "q": "Jakie są numery alarmowe?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s3-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s3-f1",
+        "rcb-poradnik-2025-s31-f1",
+        "rcb-powodz-poradnik-2024-s11-f1",
+        "rcb-powodz-poradnik-2024-s21-f1"
+      ],
+      "best_score": -6.5692749485792135,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a23",
+      "q": "Jak przygotować rodzinny plan na wypadek kryzysu?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s47-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s47-f1",
+        "rcb-powodz-poradnik-2024-s11-f1",
+        "rcb-poradnik-2025-s52-f1",
+        "rcb-powodz-poradnik-2024-s12-f1"
+      ],
+      "best_score": -15.908279248698395,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a24",
+      "q": "Gdzie znajdę miejsce schronienia?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s29-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s29-f1",
+        "rcb-poradnik-2025-s34-f1",
+        "rcb-poradnik-2025-s52-f1"
+      ],
+      "best_score": -16.152601135250222,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a25",
+      "q": "Co zrobić po powodzi przed powrotem do domu?",
+      "kind": "answer",
+      "expect": [
+        "rcb-powodz-poradnik-2024-s29-f1",
+        "rcb-powodz-poradnik-2024-s30-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-powodz-poradnik-2024-s29-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s30-f4",
+        "rcb-powodz-poradnik-2024-s17-f1",
+        "rcb-powodz-poradnik-2024-s23-f1"
+      ],
+      "best_score": -9.599263283848646,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a26",
+      "q": "Jak zabezpieczyć zwierzęta domowe na wypadek kryzysu?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s14-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s15-f1",
+        "rcb-poradnik-2025-s14-f1",
+        "rcb-poradnik-2025-s47-f1",
+        "rcb-poradnik-2025-s52-f1"
+      ],
+      "best_score": -11.903617220610894,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a27",
+      "q": "Jak zabezpieczyć dom przed powodzią?",
+      "kind": "answer",
+      "expect": [
+        "rcb-powodz-poradnik-2024-s17-f1",
+        "rcb-powodz-poradnik-2024-s15-f1",
+        "rcb-poradnik-2025-s32-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-powodz-poradnik-2024-s19-f1",
+        "rcb-poradnik-2025-s32-f1",
+        "rcb-powodz-poradnik-2024-s26-f1",
+        "rcb-powodz-poradnik-2024-s15-f1"
+      ],
+      "best_score": -6.795311282704288,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a28",
+      "q": "Co robić, gdy mój samochód utknął na zalanej drodze?",
+      "kind": "answer",
+      "expect": [
+        "rcb-powodz-poradnik-2024-s28-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-powodz-poradnik-2024-s28-f1",
+        "rcb-powodz-poradnik-2024-s27-f1",
+        "rcb-powodz-poradnik-2024-s21-f1",
+        "rcb-poradnik-2025-s16-f1"
+      ],
+      "best_score": -7.993076378973982,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a29",
+      "q": "Co powinno być w apteczce w domowych zapasach?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s21-f1",
+        "psp-plecak-ewakuacyjny-lista-s2-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s16-f1",
+        "rcb-poradnik-2025-s26-f1",
+        "rcb-poradnik-2025-s21-f1"
+      ],
+      "best_score": -5.769583519326739,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a30",
+      "q": "Jak bezpiecznie zachować się w tłumie na koncercie?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s28-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s28-f1",
+        "rcb-powodz-poradnik-2024-s19-f1",
+        "rcb-poradnik-2025-s20-f1",
+        "rcb-poradnik-2025-s31-f1"
+      ],
+      "best_score": -6.351634668271442,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a31",
+      "q": "Co robić po komunikacie o zagrożeniu chemicznym?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s35-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s35-f1"
+      ],
+      "best_score": -9.017178702393792,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a32",
+      "q": "Czy udzielając pierwszej pomocy ponoszę odpowiedzialność za błędy?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s41-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s41-f1",
+        "erc-2025-kluczowe-pierwsza-pomoc-s1-f1"
+      ],
+      "best_score": -15.103293434340166,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "a33",
+      "q": "Na czym polega ocena ABCDE?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f3"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f1",
+        "erc-2025-kluczowe-dzieci-s1-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f3"
+      ],
+      "best_score": -8.639698430474118,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "t01",
+      "q": "jak uzyc defibrylatora",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s30-f3",
+        "rcb-poradnik-2025-s43-f2"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f2",
+        "rcb-poradnik-2025-s43-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s38-f1",
+        "rcb-poradnik-2025-s42-f1"
+      ],
+      "best_score": -5.106489798800451,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "t02",
+      "q": "zadlawienie co robic",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-pierwsza-pomoc-s9-f1",
+        "erc-2025-pierwsza-pomoc-s10-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s60-f2"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-pierwsza-pomoc-s9-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s60-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f3",
+        "erc-2025-pierwsza-pomoc-s10-f1"
+      ],
+      "best_score": -16.281588072771232,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "t03",
+      "q": "plecak ewakuacyjny co zapakowac",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s26-f1",
+        "rcb-poradnik-2025-s27-f1",
+        "psp-plecak-ewakuacyjny-lista-s2-f1",
+        "psp-plecak-ewakuacyjny-lista-s2-f2"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s26-f1",
+        "psp-plecak-ewakuacyjny-lista-s2-f1",
+        "psp-plecak-ewakuacyjny-lista-s1-f1",
+        "rcb-poradnik-2025-s34-f1"
+      ],
+      "best_score": -11.298192115805413,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "t04",
+      "q": "krwotuk jak zatamowac",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-pierwsza-pomoc-s12-f1",
+        "erc-2025-pierwsza-pomoc-s13-f1",
+        "rcb-poradnik-2025-s44-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s44-f1",
+        "erc-2025-kluczowe-pierwsza-pomoc-s1-f1",
+        "erc-2025-pierwsza-pomoc-s12-f1",
+        "erc-2025-pierwsza-pomoc-s13-f1"
+      ],
+      "best_score": -5.111015272946011,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "t05",
+      "q": "oparzenia pierwsza pomoc",
+      "kind": "answer",
+      "expect": [
+        "akademia-nim-nadejdzie-dzien-s135-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "akademia-nim-nadejdzie-dzien-s135-f1",
+        "rcb-poradnik-2025-s21-f1",
+        "erc-2025-kluczowe-pierwsza-pomoc-s1-f1",
+        "rcb-poradnik-2025-s41-f1"
+      ],
+      "best_score": -7.341516811326162,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "t06",
+      "q": "rko dziecko oddechy",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s36-f3",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s37-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s39-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s39-f1",
+        "rcb-poradnik-2025-s43-f1"
+      ],
+      "best_score": -11.452981445223728,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "t07",
+      "q": "powodz co robic w domu",
+      "kind": "answer",
+      "expect": [
+        "rcb-powodz-poradnik-2024-s23-f1",
+        "rcb-poradnik-2025-s32-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s32-f1",
+        "rcb-powodz-poradnik-2024-s27-f1",
+        "rcb-powodz-poradnik-2024-s25-f1",
+        "rcb-powodz-poradnik-2024-s21-f1"
+      ],
+      "best_score": -14.234935382003925,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "t08",
+      "q": "czy w pozarze mozna uzywac windy",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s31-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s31-f1",
+        "rcb-poradnik-2025-s30-f1"
+      ],
+      "best_score": -13.252436569982066,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "t09",
+      "q": "ile minimum zapasow jedzenia na kryzys",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s20-f1",
+        "rcb-poradnik-2025-s21-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s21-f1",
+        "rcb-poradnik-2025-s20-f1",
+        "rcb-poradnik-2025-s22-f1",
+        "rcb-poradnik-2025-s52-f1"
+      ],
+      "best_score": -11.42856395152554,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "r01",
+      "q": "Mój tata nie oddycha, co robić?",
+      "kind": "answer",
+      "expect": [
+        "rcb-poradnik-2025-s43-f1",
+        "rcb-poradnik-2025-s42-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s29-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f3",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s24-f1",
+        "rcb-poradnik-2025-s42-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s29-f2"
+      ],
+      "best_score": -8.638877874108799,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "r02",
+      "q": "Ktoś się dusi, nie może mówić!",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-pierwsza-pomoc-s9-f1",
+        "erc-2025-pierwsza-pomoc-s10-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s60-f2"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-pierwsza-pomoc-s9-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s56-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s36-f1"
+      ],
+      "best_score": -4.398206513112457,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "r03",
+      "q": "Ranny mocno krwawi, jak mu pomóc?",
+      "kind": "answer",
+      "expect": [
+        "erc-2025-pierwsza-pomoc-s12-f1",
+        "erc-2025-pierwsza-pomoc-s13-f1",
+        "rcb-poradnik-2025-s44-f1"
+      ],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-pierwsza-pomoc-s12-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s56-f1"
+      ],
+      "best_score": -11.150355873796642,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n01",
+      "q": "Co robić przy ugryzieniu węża?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n02",
+      "q": "Zatrucie grzybami, co robić?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n03",
+      "q": "Jak zachować się podczas trzęsienia ziemi?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n04",
+      "q": "Jaka jest dawka ibuprofenu?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n05",
+      "q": "Jaką dawkę ibuprofenu dać psu?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n06",
+      "q": "Jak leczyć grypę w domu?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n07",
+      "q": "Jak usunąć kleszcza?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n08",
+      "q": "Co robić przy udarze słonecznym?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n09",
+      "q": "Jak pomóc osobie podczas ataku padaczki?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n10",
+      "q": "Jak unieruchomić złamaną nogę?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "found",
+      "top": [
+        "akademia-nim-nadejdzie-dzien-s135-f1"
+      ],
+      "best_score": -3.587686195523599,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n11",
+      "q": "Jaką dawkę paracetamolu dać dziecku?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n12",
+      "q": "Co robić po użądleniu przez osę, gdy mam alergię?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n13",
+      "q": "Gdzie się schować podczas burzy z piorunami?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n14",
+      "q": "Jak pomóc osobie z niskim cukrem przy cukrzycy?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n15",
+      "q": "Co zrobić przy odmrożeniach palców?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "found",
+      "top": [
+        "erc-2025-pierwsza-pomoc-s10-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s58-f2",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s30-f1",
+        "erc-2025-broszura-resuscytacja-dla-kazdego-s29-f2"
+      ],
+      "best_score": -3.8099217094653555,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n16",
+      "q": "Jak rozpoznać udar mózgu?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n17",
+      "q": "Co robić w razie lawiny?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n18",
+      "q": "zatrucie czadem objawy",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "no_source",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "o01",
+      "q": "Jak naprawić zmywarkę?",
+      "kind": "offTopic",
+      "expect": [],
+      "retrieval": "off_topic",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "o02",
+      "q": "Przepis na pierogi",
+      "kind": "offTopic",
+      "expect": [],
+      "retrieval": "off_topic",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "o03",
+      "q": "Kto wygra mecz w sobotę?",
+      "kind": "offTopic",
+      "expect": [],
+      "retrieval": "off_topic",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "o04",
+      "q": "Ile kosztuje bitcoin?",
+      "kind": "offTopic",
+      "expect": [],
+      "retrieval": "off_topic",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "o05",
+      "q": "Jak zdobyć prawo jazdy?",
+      "kind": "offTopic",
+      "expect": [],
+      "retrieval": "off_topic",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "o06",
+      "q": "Jaki jest najlepszy film na wieczór?",
+      "kind": "offTopic",
+      "expect": [],
+      "retrieval": "off_topic",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "o07",
+      "q": "Jak zainstalować Windowsa na laptopie?",
+      "kind": "offTopic",
+      "expect": [],
+      "retrieval": "off_topic",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "o08",
+      "q": "Opowiedz mi dowcip",
+      "kind": "offTopic",
+      "expect": [],
+      "retrieval": "off_topic",
+      "top": [],
+      "best_score": null,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    },
+    {
+      "id": "n19",
+      "q": "Jak naprawić agregat?",
+      "kind": "noSource",
+      "expect": [],
+      "retrieval": "found",
+      "top": [
+        "rcb-poradnik-2025-s33-f1",
+        "rcb-poradnik-2025-s22-f1"
+      ],
+      "best_score": -4.498009837031239,
+      "pipeline": null,
+      "cited": [],
+      "call": false,
+      "fallback": false,
+      "model_refused": false,
+      "latency_ms": null,
+      "error": null,
+      "logs": []
+    }
+  ]
+}
