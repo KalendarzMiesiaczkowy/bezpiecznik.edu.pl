@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../profil/profile_form.dart';
 import '../profil/profile_model.dart';
 import '../profil/profile_store.dart';
+import '../wspolne/shell/nav_island.dart';
 import '../wspolne/theme/bz_buttons.dart';
 import '../wspolne/theme/bz_theme.dart';
 import 'location_gateway.dart';
@@ -64,6 +66,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
+  /// Status row with a fixed 24 dp icon column so all labels align.
+  Widget _statusRow(String label, {required bool done}) {
+    final bz = context.bz;
+    return Row(
+      children: [
+        SizedBox(
+          width: 24,
+          child: Icon(
+            done ? LucideIcons.check : LucideIcons.minus,
+            key: Key(done ? 'onb-status-done' : 'onb-status-skipped'),
+            size: 20,
+            color: done ? bz.verified : bz.ink300,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(child: Text(label, style: bz.chat)),
+      ],
+    );
+  }
+
+  OnboardingStep? get _previous => switch (_step) {
+    OnboardingStep.intro => null,
+    OnboardingStep.location => OnboardingStep.intro,
+    OnboardingStep.profileAsk => OnboardingStep.location,
+    OnboardingStep.profileForm => OnboardingStep.profileAsk,
+    OnboardingStep.done => OnboardingStep.profileAsk,
+  };
+
   List<Widget> _body() {
     final bz = context.bz;
     switch (_step) {
@@ -77,8 +107,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(border: Border.all(color: bz.line150), borderRadius: BorderRadius.circular(12)),
-            child: Text('Nie zastępuje 112. W zagrożeniu życia dzwoń pod 112.', style: bz.step),
+            decoration: BoxDecoration(color: bz.signalTint, borderRadius: BorderRadius.circular(12)),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(LucideIcons.triangleAlert, key: const Key('onb-notice-icon'), size: 24, color: bz.signal),
+                const SizedBox(width: 12),
+                Expanded(child: Text('Nie zastępuje 112. W zagrożeniu życia dzwoń pod 112.', style: bz.step)),
+              ],
+            ),
           ),
           const Spacer(),
           BzButton(
@@ -182,8 +219,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       case OnboardingStep.done:
         return [
           _title('Gotowe'),
-          Text('✓ SOS i karty ratunkowe', style: bz.chat),
-          Text(_profileSaved ? '✓ Profil domu' : 'Profil domu: pominięto', style: bz.chat),
+          _statusRow('SOS i karty ratunkowe', done: true),
+          const SizedBox(height: 12),
+          _statusRow(_profileSaved ? 'Profil domu' : 'Profil domu: pominięto', done: _profileSaved),
           const Spacer(),
           BzButton(
             key: const Key('onb-start'),
@@ -199,14 +237,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final prev = _previous;
+    final top = MediaQuery.paddingOf(context).top;
     return Scaffold(
       backgroundColor: context.bz.bg000,
-      body: SafeArea(
-        child: Padding(
-          // Leaves room for the floating shell controls (SOS).
-          padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: _body()),
-        ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: SafeArea(
+              child: Padding(
+                // Leaves room for the floating shell controls (Back, SOS).
+                padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: _body()),
+              ),
+            ),
+          ),
+          // Same slot as the shell Back button (RootOverlay): left 16, top max(48, inset + 8).
+          if (prev != null)
+            Positioned(
+              left: 16,
+              top: top + 8 > 48 ? top + 8 : 48,
+              child: BzBackButton(onBack: () => _go(prev)),
+            ),
+        ],
       ),
     );
   }

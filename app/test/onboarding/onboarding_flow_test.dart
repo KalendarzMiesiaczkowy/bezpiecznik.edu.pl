@@ -41,6 +41,7 @@ Future<void> pumpOnboarding(WidgetTester tester, ProfileStore store, FakeGateway
 }
 
 void main() {
+  onboardingVisualTests();
   testWidgets('skip path: no profile saved, onboarding completed, chat opens', (tester) async {
     final store = ProfileStore.inMemory();
     final gw = FakeGateway(false);
@@ -88,7 +89,8 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('onb-profile-save')));
     await tester.pumpAndSettle();
-    expect(find.text('✓ Profil domu'), findsOneWidget);
+    expect(find.text('Profil domu'), findsOneWidget);
+    expect(find.byKey(const Key('onb-status-done')), findsNWidgets(2));
     final saved = (await store.loadProfile())!;
     expect(saved.members.length, 1);
     expect(saved.medications.single.name, 'Insulina');
@@ -121,5 +123,55 @@ void main() {
     await tester.pumpAndSettle();
     expect((await store.loadProfile())!.home.floor, 3);
     expect(find.text('Zapisano'), findsOneWidget);
+  });
+}
+
+void onboardingVisualTests() {
+  testWidgets('back button: absent on step 1, present on step 2 and goes back', (tester) async {
+    await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(false));
+    expect(find.bySemanticsLabel('Wróć'), findsNothing);
+    await tester.tap(find.byKey(const Key('onb-next')));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Wróć'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Wróć'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('onb-next')), findsOneWidget);
+  });
+
+  testWidgets('back from profile form returns to the profile prompt', (tester) async {
+    await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(false));
+    await tester.tap(find.byKey(const Key('onb-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onb-later')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onb-profile-fill')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Wróć'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('onb-profile-fill')), findsOneWidget);
+  });
+
+  testWidgets('112 notice has the warning icon and tint background', (tester) async {
+    await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(false));
+    expect(find.byKey(const Key('onb-notice-icon')), findsOneWidget);
+    final box = tester.widget<Container>(
+      find.ancestor(of: find.byKey(const Key('onb-notice-icon')), matching: find.byType(Container)).first,
+    );
+    expect((box.decoration! as BoxDecoration).color, isNotNull);
+  });
+
+  testWidgets('Gotowe rows share one label x', (tester) async {
+    await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(false));
+    await tester.tap(find.byKey(const Key('onb-next')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onb-later')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('onb-profile-later')));
+    await tester.pumpAndSettle();
+    final a = tester.getTopLeft(find.text('SOS i karty ratunkowe')).dx;
+    final b = tester.getTopLeft(find.text('Profil domu: pominięto')).dx;
+    expect(a, b);
+    expect(find.byKey(const Key('onb-status-done')), findsOneWidget);
+    expect(find.byKey(const Key('onb-status-skipped')), findsOneWidget);
   });
 }
