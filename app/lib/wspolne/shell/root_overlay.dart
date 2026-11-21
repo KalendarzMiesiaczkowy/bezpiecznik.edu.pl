@@ -44,10 +44,10 @@ const _edgeSwipeWidth = 20.0;
 ///  1. [child] (the Navigator: screen content, pinned CPR, composer)
 ///  2. left-edge swipe strip (E1 only)
 ///  3. island / Back / CPR indicator
-///  4. P1 drawer with dimmed scrim
-///  5. P2 contact panel with scrim
-///  6. app dialog (see [ShellPanels.openDialog])
-///  7. SOS (always topmost of the app layers)
+///  4. P2 contact panel with scrim
+///  5. app dialog (see [ShellPanels.openDialog])
+///  6. SOS (above P2 and dialogs)
+///  7. P1 drawer with dimmed scrim (covers SOS while open)
 ///
 /// The overlay ignores `viewInsets`, so the keyboard never moves SOS/island.
 class RootOverlay extends ConsumerStatefulWidget {
@@ -200,15 +200,6 @@ class _RootOverlayState extends ConsumerState<RootOverlay> with WidgetsBindingOb
                     ),
                   Positioned.fill(
                     child: PanelHost(
-                      key: const Key('panel-drawer'),
-                      open: panels.drawerOpen,
-                      edge: PanelEdge.left,
-                      onClose: notifier.closeDrawer,
-                      child: const ChatDrawer(),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: PanelHost(
                       key: const Key('panel-contact'),
                       open: panels.contactOpen,
                       edge: PanelEdge.bottom,
@@ -233,6 +224,16 @@ class _RootOverlayState extends ConsumerState<RootOverlay> with WidgetsBindingOb
                       top: topInset,
                       child: SosButton(launcher: widget.sosLauncher),
                     ),
+                  // P1 covers SOS: the history drawer is a full-height sheet.
+                  Positioned.fill(
+                    child: PanelHost(
+                      key: const Key('panel-drawer'),
+                      open: panels.drawerOpen,
+                      edge: PanelEdge.left,
+                      onClose: notifier.closeDrawer,
+                      child: const ChatDrawer(),
+                    ),
+                  ),
                 ],
               ),
             ),
