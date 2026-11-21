@@ -309,8 +309,80 @@ void main() {
       // domain gate cannot see it as in-domain => offTopic (KB-only vocabulary;
       // the coordinator can extend it via Retriever.extraVocabulary).
       final dog = await r.search('jaką dawkę ibuprofenu dać psu');
-      expect(dog.decision, RetrievalDecision.offTopic);
+      expect(dog.decision, RetrievalDecision.noSource);
     }, skip: _hasKb ? false : _skip);
+
+    test('BG03: safety questions absent from the KB are noSource', () async {
+      for (final q in [
+        'ugryzienie węża',
+        'ugryzienie weza',
+        'co zrobić po ugryzieniu węża',
+        'zatrucie grzybami',
+        'zatrucie grzybami co robic',
+        'zatrucie grzybow',
+        'trzęsienie ziemi',
+        'trzesienie ziemi',
+        'co robić podczas trzęsienia ziemi',
+        'dawka ibuprofenu',
+        'jaka dawka paracetamolu dla dziecka',
+        'DAWKA IBUPROFENU',
+        'oparzenie chemiczne',
+        'ukaszenie zmii',
+        'atak epilepsji drgawki',
+      ]) {
+        final res = await r.search(q);
+        expect(res.decision, isNot(RetrievalDecision.offTopic), reason: q);
+        if (res.decision != RetrievalDecision.found) {
+          expect(res.chunks, isEmpty, reason: q);
+        }
+      }
+      for (final q in [
+        'ugryzienie węża',
+        'zatrucie grzybami',
+        'trzęsienie ziemi',
+        'dawka ibuprofenu',
+      ]) {
+        expect(
+          (await r.search(q)).decision,
+          RetrievalDecision.noSource,
+          reason: q,
+        );
+      }
+    }, skip: _hasKb ? false : _skip);
+
+    test('BG03: truly off-topic stays offTopic', () async {
+      for (final q in [
+        'przepis na pierogi',
+        'kto wygra mecz',
+        'ile kosztuje bitcoin',
+        'prawo jazdy kategoria b',
+        'jak zrobić szarlotkę',
+        'jaka jest stolica francji',
+        'kiedy gra reprezentacja polski',
+      ]) {
+        expect(
+          (await r.search(q)).decision,
+          RetrievalDecision.offTopic,
+          reason: q,
+        );
+      }
+    }, skip: _hasKb ? false : _skip);
+
+    test('BG03: synthetic DB, safety word without chunk is noSource', () async {
+      final rr = Retriever(_synthetic(), stopwords: _stopwords(), floor: 0);
+      expect(
+        (await rr.search('ugryzienie węża')).decision,
+        RetrievalDecision.noSource,
+      );
+      expect(
+        (await rr.search('dawka ibuprofenu')).decision,
+        RetrievalDecision.noSource,
+      );
+      expect(
+        (await rr.search('przepis na pierogi')).decision,
+        RetrievalDecision.offTopic,
+      );
+    });
 
     test('real DB: injection strings do not throw', () async {
       for (final q in [

@@ -6,6 +6,7 @@ import 'dart:convert';
 import '../../ratunek/detect/normalize.dart';
 import 'kb_database.dart';
 import 'query_builder.dart';
+import 'safety_vocabulary.dart';
 
 /// Default bm25 floor: a best score above (i.e. weaker than) this value means
 /// "no source". bm25 in SQLite is negative, more negative = better.
@@ -26,6 +27,7 @@ const int kDefaultTopK = 4;
 /// such as "alert pogodowy" is still in-domain through "alert". Normalised.
 const Set<String> kAmbiguousDomainWords = {
   'mecz',
+  'prawo',
   'koncert',
   'pogoda',
   'pogody',
@@ -125,6 +127,10 @@ class Retriever {
         }
       }
     }
+    // Health/safety words: in-domain even when the KB has no chunk (BG03).
+    for (final e in kSafetyVocabulary) {
+      _addWords(vocab, e);
+    }
     for (final e in extraVocabulary) {
       _addWords(vocab, e);
     }
@@ -181,8 +187,10 @@ class Retriever {
   }
 
   /// Query tokens (after stopwords) that are domain words.
-  List<String> domainTokens(String question) =>
-      _builder.contentTokens(question).where(_isDomainWord).toList();
+  List<String> domainTokens(String question) => _builder
+      .contentTokens(question)
+      .where((t) => !kAmbiguousDomainWords.contains(t) && _isDomainWord(t))
+      .toList();
 
   /// Whether [question] contains at least one domain word.
   bool isDomainQuery(String question) => domainTokens(question).isNotEmpty;
@@ -214,10 +222,28 @@ class Retriever {
     final chunks = [
       for (final r in rows) _chunk(r, (r['score'] as num).toDouble()),
     ];
-    final ok = chunks.isNotEmpty && chunks.first.score <= floor;
+    // BG03: a hit produced only by a non-domain token (e.g. "weza" -> "wezwij")
+    // is not a source: keep chunks that match a domain token (or its synonyms).
+    final domainMatch = _builder.build(domainTokens(question).join(' '));
+    final grounded = <String>{};
+    if (domainMatch != null && chunks.isNotEmpty) {
+      final marks = List.filled(chunks.length, '?').join(',');
+      for (final r in _kb.db.select(
+        'SELECT c.id FROM chunks_fts JOIN chunks c ON c.rowid = chunks_fts.rowid '
+        'WHERE chunks_fts MATCH ? AND c.id IN ($marks)',
+        [domainMatch, for (final c in chunks) c.id],
+      )) {
+        grounded.add(r['id'] as String);
+      }
+    }
+    final kept = [
+      for (final c in chunks)
+        if (grounded.contains(c.id)) c,
+    ];
+    final ok = kept.isNotEmpty && kept.first.score <= floor;
     return RetrievalResult(
       decision: ok ? RetrievalDecision.found : RetrievalDecision.noSource,
-      chunks: ok ? chunks : const [],
+      chunks: ok ? kept : const [],
       matchQuery: match,
     );
   }
