@@ -108,12 +108,64 @@ void main() {
       }
     });
 
-    test('call panel is first and appears once', () {
+    test('files have no call panel, the parser puts it first once', () {
       for (final c in repo.cards) {
         expect(c.panels.first, isA<CallPanel>());
         expect(c.panels.whereType<CallPanel>(), hasLength(1));
-        final raw = (cardJson[c.id]!['panels'] as List).first as Map;
-        expect(raw['type'], 'call', reason: '${c.id}: file has call first');
+        final raw = (cardJson[c.id]!['panels'] as List).cast<Map>();
+        expect(
+          raw.map((p) => p['type']),
+          isNot(contains('call')),
+          reason: '${c.id}: the app adds call (contract)',
+        );
+      }
+    });
+
+    test('every step is at most 120 characters (one action per step)', () {
+      var count = 0;
+      for (final c in repo.cards) {
+        for (final p in c.panels.whereType<StepsPanel>()) {
+          for (final item in [
+            ...p.items,
+            for (final v in p.variants) ...v.items,
+          ]) {
+            count++;
+            expect(
+              item.text.length,
+              lessThanOrEqualTo(120),
+              reason: '${c.id}: "${item.text}"',
+            );
+          }
+        }
+      }
+      expect(count, greaterThan(100));
+    });
+
+    test('card source ids never equal a content/knowledge chunk id', () {
+      final chunkIds = <String>{};
+      for (final d in Directory('../content/knowledge').listSync()) {
+        if (d is! Directory) continue;
+        for (final f in d.listSync()) {
+          if (f is! File || !f.path.endsWith('.md')) continue;
+          final name = f.uri.pathSegments.last;
+          if (name == 'README.md') continue;
+          chunkIds.add(name.substring(0, name.length - 3));
+        }
+      }
+      expect(chunkIds, isNotEmpty, reason: 'content/knowledge is readable');
+      final collisions = <String>[
+        for (final s in repo.sources)
+          if (chunkIds.contains(s.sourceId)) s.sourceId,
+      ];
+      expect(collisions, isEmpty);
+      // The convention that keeps the ranges apart: card fragments are
+      // numbered from 101 on each page.
+      for (final s in repo.sources) {
+        expect(
+          int.parse(s.sourceId.split('-f').last),
+          greaterThanOrEqualTo(101),
+          reason: s.sourceId,
+        );
       }
     });
 
@@ -166,7 +218,10 @@ void main() {
       () {
         final u = repo.card('unconscious')!;
         final first = u.stepsFor(null).first;
-        expect(first.text, startsWith('Sprawdź oddech'));
+        expect(
+          first.text,
+          'Udrożnij drogi oddechowe i sprawdź oddech: patrz, słuchaj, czuj do 10 s',
+        );
         expect(first.cardLink?.cardId, 'rko');
         expect(first.cardLink?.label, 'Nie oddycha → RKO');
       },
@@ -188,7 +243,7 @@ void main() {
         expect(steps, hasLength(2));
         expect(steps[1].title, 'Gdy straci przytomność');
         for (final v in c.variantIds) {
-          expect(steps[1].itemsFor(v).last.cardLink?.cardId, 'rko');
+          expect(steps[1].itemsFor(v)!.last.cardLink?.cardId, 'rko');
         }
       },
     );
@@ -339,16 +394,11 @@ void main() {
     test('cpr numbers come from the cited originals', () {
       final cpr = repo.card('rko')!.cpr!;
       String orig(String id) => repo.source(id)!.original;
-      expect(
-        cpr.rateBpm,
-        isNull,
-        reason: 'sources give a range, not one tempo',
-      );
+      expect(cpr.rateBpm, 110, reason: 'midpoint of the cited range');
+      expect(cpr.rateNote, contains('środek'));
       expect(cpr.rateBpmMin, 100);
       expect(cpr.rateBpmMax, 120);
-      final rateOrig = orig(
-        cardJson['rko']!['panels'][2]['rate_source_id'] as String,
-      );
+      final rateOrig = orig(cpr.rateSourceId!);
       expect(rateOrig, contains('100–120'));
       expect(cpr.effectiveRateBpm, 110);
       for (final v in cpr.variants) {
@@ -364,12 +414,193 @@ void main() {
       }
     });
 
-    test('values the sources do not give stay null (human fills them in)', () {
+    test('cpr has no null except child/infant breath_phase_s', () {
+      final raw = (cardJson['rko']!['panels'] as List)
+          .cast<Map<String, dynamic>>()
+          .firstWhere((p) => p['type'] == 'cpr');
+      final nulls = <String>[];
+      void scan(String path, Object? v) {
+        if (v == null) nulls.add(path);
+        if (v is Map) v.forEach((k, x) => scan('$path.$k', x));
+        if (v is List) {
+          for (var i = 0; i < v.length; i++) {
+            scan('$path[$i]', v[i]);
+          }
+        }
+      }
+
+      scan('cpr', raw);
+      expect(nulls, [
+        'cpr.variants[1].breath_phase_s',
+        'cpr.variants[2].breath_phase_s',
+      ]);
       final cpr = repo.card('rko')!.cpr!;
-      expect(cpr.rescuerChangeS, isNull);
-      expect(cpr.voice['change'], isNull);
       expect(cpr.variant('child')!.breathPhaseS, isNull);
       expect(cpr.variant('infant')!.breathPhaseS, isNull);
+      expect(cpr.variant('adult')!.breathPhaseS, 10);
+    });
+
+    test('rescuer change is 2 minutes, from the cited sentence', () {
+      final cpr = repo.card('rko')!.cpr!;
+      expect(cpr.rescuerChangeS, 120);
+      final src = repo.source(cpr.rescuerChangeSourceId!)!;
+      expect(src.docId, 'erc-2025-podsumowanie');
+      expect(src.pdfPage, 72);
+      expect(src.original, contains('zmieniaj co najmniej co 2 minuty'));
+      expect(cpr.verifyNote, contains('zaawansowanych'));
+      expect(cpr.voice['change'], isNotEmpty);
+      expect(
+        repo.card('rko')!.sourceIds,
+        contains(src.sourceId),
+        reason: 'source_ids lists it',
+      );
+    });
+
+    test('the aed button is hidden: no aed card is shipped', () {
+      expect(repo.card('aed'), isNull);
+      expect(repo.card('rko')!.cpr!.aedCardId, isNull);
+    });
+  });
+
+  group('fixes from the fidelity review', () {
+    List<String> texts(String card, String variant, [int panel = 0]) {
+      final p = repo.card(card)!.panels.whereType<StepsPanel>().toList()[panel];
+      return [for (final i in p.itemsFor(variant)!) i.text];
+    }
+
+    test('rko child/infant: lay 5 breaths then 30:2, PBLS 15:2 apart', () {
+      for (final v in ['child', 'infant']) {
+        final t = texts('rko', v);
+        final lay = t.indexOf(
+          'Wykonaj 5 oddechów ratowniczych, potem uciskaj klatkę piersiową 30 razy i wykonaj 2 oddechy (30:2).',
+        );
+        expect(lay, isNonNegative, reason: v);
+        final pbls = t.indexWhere(
+          (x) => x.startsWith('Jeśli masz przeszkolenie PBLS: po 5 oddechach'),
+        );
+        expect(pbls, lay + 1, reason: v);
+        expect(t[pbls], contains('15:2'));
+        // 15 appears only in PBLS-labelled steps about the ratio.
+        for (final x in t.where((x) => x.contains('15'))) {
+          expect(x, contains('PBLS'), reason: '$v: $x');
+        }
+        final cpr = repo.card('rko')!.cpr!.variant(v)!;
+        expect(cpr.compressions, 30);
+        expect(cpr.breaths, 2);
+        expect(cpr.initialBreaths, 5);
+        expect(cpr.compressionsPblsTrained, 15);
+        expect(
+          repo.source(cpr.sourceId)!.original,
+          allOf(contains('30:2'), contains('15:2')),
+        );
+      }
+    });
+
+    test('rko infant: no head-tilt step before the neutral-head step', () {
+      final t = texts('rko', 'infant');
+      expect(t.any((x) => x.contains('odgięciem głowy')), isFalse);
+      expect(t.first, isNot(contains('odgięciem')));
+      expect(
+        t,
+        contains(
+          'Udrożnij drogi oddechowe i oceń oddech oraz oznaki życia maks. 10 s.',
+        ),
+      );
+      expect(t.any((x) => x.contains('pozycji neutralnej')), isTrue);
+      // The child keeps the PBLS head-tilt step.
+      expect(
+        texts('rko', 'child').any((x) => x.contains('odgięciem głowy')),
+        isTrue,
+      );
+    });
+
+    test('rko adult: AED unavailable and no-shock steps', () {
+      final t = texts('rko', 'adult');
+      expect(
+        t,
+        contains(
+          'Jeśli defibrylacja nie jest zalecana, natychmiast wróć do RKO.',
+        ),
+      );
+      expect(
+        t,
+        contains(
+          'Jeśli AED jest niedostępne lub czekasz na nie, kontynuuj RKO.',
+        ),
+      );
+      final items = repo
+          .card('rko')!
+          .panels
+          .whereType<StepsPanel>()
+          .first
+          .itemsFor('adult')!;
+      for (final i in items.where(
+        (i) =>
+            i.text.startsWith('Jeśli defibrylacja nie jest zalecana') ||
+            i.text.startsWith('Jeśli AED jest niedostępne'),
+      )) {
+        final s = repo.source(i.sourceId)!;
+        expect(s.docId, 'erc-2025-bls-algorytmy');
+        expect(s.pdfPage, 3);
+      }
+    });
+
+    test('unconscious: agonal breathing goes to rko, trauma stays supine', () {
+      final u = repo.card('unconscious')!;
+      final items = u.stepsFor(null);
+      final agonal = items.firstWhere(
+        (i) => i.text.startsWith('Przy oddechu agonalnym'),
+      );
+      expect(
+        agonal.text,
+        'Przy oddechu agonalnym (nieprawidłowym) nie układaj na boku – rozpocznij RKO.',
+      );
+      expect(agonal.cardLink?.cardId, 'rko');
+      final trauma = items.firstWhere((i) => i.text.startsWith('Po urazie'));
+      expect(
+        trauma.text,
+        'Po urazie zostaw poszkodowanego leżącego na plecach.',
+      );
+      final src = repo.source(trauma.sourceId)!;
+      expect(src.docId, 'erc-2025-pierwsza-pomoc');
+      expect(src.pdfPage, 18);
+      expect(
+        src.original,
+        contains('należy zachować ułożenie w pozycji leżącej na plecach'),
+      );
+      expect(
+        items.any(
+          (i) => i.text.startsWith('Nie układaj w pozycji bezpiecznej'),
+        ),
+        isFalse,
+      );
+      final first = repo.source(items.first.sourceId)!;
+      expect(first.docId, 'erc-2025-pierwsza-pomoc-algorytmy');
+      expect(first.pdfPage, 3);
+    });
+
+    test('choking: "lub karmienia" and the 112 call right after step 1', () {
+      for (final v in ['child', 'infant']) {
+        expect(
+          texts('choking', v).any((x) => x.contains('jedzenia lub karmienia')),
+          isTrue,
+          reason: v,
+        );
+      }
+      final adult = texts('choking', 'adult');
+      expect(adult[3], 'Zadzwoń pod numer ratunkowy 112/999.');
+      final firstBlows = adult.indexWhere((x) => x.contains('uderzeń'));
+      expect(
+        adult.indexOf('Zadzwoń pod numer ratunkowy 112/999.'),
+        lessThan(firstBlows),
+      );
+      final call = repo
+          .card('choking')!
+          .panels
+          .whereType<StepsPanel>()
+          .first
+          .itemsFor('adult')![3];
+      expect(repo.source(call.sourceId)!.pdfPage, 93);
     });
   });
 }

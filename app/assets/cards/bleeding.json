@@ -21,41 +21,42 @@
   ],
   "panels": [
     {
-      "type": "call"
-    },
-    {
       "type": "steps",
       "title": "Tamowanie krwawienia",
       "read_aloud": true,
       "items": [
         {
           "text": "Na krwawiące miejsce zastosuj silny, bezpośredni ucisk ręką.",
-          "source_id": "erc-2025-pierwsza-pomoc-s12-f1"
+          "source_id": "erc-2025-pierwsza-pomoc-s12-f101"
         },
         {
-          "text": "Przyłóż standardowy opatrunek lub opatrunek hemostatyczny bezpośrednio na krwawiące miejsce, a następnie zastosuj silny, bezpośredni ucisk ręką.",
-          "source_id": "erc-2025-pierwsza-pomoc-s12-f2"
+          "text": "Przyłóż opatrunek standardowy lub hemostatyczny bezpośrednio na krwawiące miejsce.",
+          "source_id": "erc-2025-pierwsza-pomoc-s12-f102"
+        },
+        {
+          "text": "Następnie zastosuj silny, bezpośredni ucisk ręką.",
+          "source_id": "erc-2025-pierwsza-pomoc-s12-f102"
         },
         {
           "text": "Po opanowaniu krwawienia załóż opatrunek uciskowy.",
-          "source_id": "erc-2025-pierwsza-pomoc-s13-f1"
+          "source_id": "erc-2025-pierwsza-pomoc-s13-f101"
         },
         {
-          "text": "Jeśli krwawienie z kończyny zagraża życiu i nie zostało opanowane bezpośrednim uciskiem ręką, jak najszybciej załóż opaskę uciskową.",
-          "source_id": "erc-2025-pierwsza-pomoc-s13-f2"
+          "text": "Jeśli krwawienie z kończyny zagraża życiu i trwa mimo ucisku ręką, jak najszybciej załóż opaskę uciskową.",
+          "source_id": "erc-2025-pierwsza-pomoc-s13-f102"
         },
         {
           "text": "Zanotuj czas założenia opaski uciskowej.",
-          "source_id": "erc-2025-pierwsza-pomoc-s13-f3"
+          "source_id": "erc-2025-pierwsza-pomoc-s13-f103"
         }
       ]
     }
   ],
   "source_ids": [
-    "erc-2025-pierwsza-pomoc-s12-f1",
-    "erc-2025-pierwsza-pomoc-s12-f2",
-    "erc-2025-pierwsza-pomoc-s13-f1",
-    "erc-2025-pierwsza-pomoc-s13-f2",
-    "erc-2025-pierwsza-pomoc-s13-f3"
+    "erc-2025-pierwsza-pomoc-s12-f101",
+    "erc-2025-pierwsza-pomoc-s12-f102",
+    "erc-2025-pierwsza-pomoc-s13-f101",
+    "erc-2025-pierwsza-pomoc-s13-f102",
+    "erc-2025-pierwsza-pomoc-s13-f103"
   ]
 }
