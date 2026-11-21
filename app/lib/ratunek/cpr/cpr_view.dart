@@ -92,9 +92,9 @@ class CprCard extends ConsumerWidget {
     final config = CprConfig.tryParse(panel.raw);
     if (config == null) return const SizedBox.shrink();
     final session = ref.watch(cprSessionProvider);
-    final source = panel.sourceId == null
-        ? null
-        : scope.answer.source(panel.sourceId!);
+    // Variant source (child/infant) wins over the adult panel-level one.
+    final sourceId = config.variant(scope.variant)?.sourceId ?? panel.sourceId;
+    final source = sourceId == null ? null : scope.answer.source(sourceId);
     return ListenableBuilder(
       listenable: session,
       builder: (context, _) {

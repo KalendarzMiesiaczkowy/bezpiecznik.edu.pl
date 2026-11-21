@@ -24,6 +24,10 @@ import 'package:material_ui/material_ui.dart';
 import 'cpr_fakes.dart';
 
 AssistantAnswer cprAnswer({bool withAed = true}) => AssistantAnswer(
+  sources: {
+    'erc-2025-bls-algorytmy-s3-f112': const SourceRecord(sourceId: 'erc-2025-bls-algorytmy-s3-f112', docShort: 'ERC 2025, BLS krok po kroku', pageLabel: '3'),
+    'erc-2025-podsumowanie-s67-f107': const SourceRecord(sourceId: 'erc-2025-podsumowanie-s67-f107', docShort: 'ERC 2025, podsumowanie zmian', pageLabel: '67'),
+  },
   panels: [
     ChatPanel.fromJson({
       ...rkoCprPanelJson(),
@@ -92,6 +96,18 @@ Future<(Rig, ProviderContainer)> pumpCard(
 }
 
 void main() {
+  testWidgets('source chip follows the selected variant', (tester) async {
+    await pumpCard(tester);
+    expect(find.text('▸ ERC 2025, BLS krok po kroku, s. 3'), findsOneWidget);
+    await tester.tap(find.text('Niemowlę'));
+    await tester.pump();
+    expect(find.text('▸ ERC 2025, podsumowanie zmian, s. 67'), findsOneWidget);
+    expect(find.text('▸ ERC 2025, BLS krok po kroku, s. 3'), findsNothing);
+    await tester.tap(find.text('Dorosły'));
+    await tester.pump();
+    expect(find.text('▸ ERC 2025, BLS krok po kroku, s. 3'), findsOneWidget);
+  });
+
   testWidgets('card: variant switch, summary, start shows the pinned panel', (tester) async {
     final (rig, _) = await pumpCard(tester);
     expect(find.text('Dorosły'), findsOneWidget);

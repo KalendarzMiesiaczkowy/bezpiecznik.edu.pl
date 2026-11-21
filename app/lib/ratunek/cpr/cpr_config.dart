@@ -28,6 +28,7 @@ class CprVariantConfig {
     required this.breaths,
     required this.initialBreaths,
     required this.breathPhase,
+    this.sourceId,
   });
 
   final String id;
@@ -44,6 +45,9 @@ class CprVariantConfig {
 
   /// Length of the breath phase; null = wait for the rescuer's tap.
   final Duration? breathPhase;
+
+  /// Variant-specific source (child/infant differ from the adult panel one).
+  final String? sourceId;
 }
 
 class CprConfig {
@@ -108,6 +112,7 @@ class CprConfig {
             breaths: br,
             initialBreaths: init,
             breathPhase: phase == null || phase <= 0 ? null : Duration(seconds: phase),
+            sourceId: _str(e['source_id']),
           ),
         );
       }
