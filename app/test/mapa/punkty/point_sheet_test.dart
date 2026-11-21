@@ -69,14 +69,16 @@ void main() {
     expect(picked?.id, 1);
   });
 
-  test('confirmed and unconfirmed circles differ; hit test uses 48 dp', () {
-    const green = Color(0xFF00FF00);
-    const grey = Color(0xFF888888);
-    final c = circleFor(pt(confirmed: true), confirmed: green, unconfirmed: grey);
-    final u = circleFor(pt(), confirmed: green, unconfirmed: grey);
-    expect(c.circleOpacity, 1);
-    expect(u.circleOpacity, 0);
-    expect(u.circleStrokeColor, '#888888');
+  test('marker style: confirmed vs unconfirmed, kind glyphs; hit test uses 48 dp', () {
+    final c = markerStyleFor(pt(confirmed: true));
+    final u = markerStyleFor(pt());
+    expect(c.imageName, 'bz-marker-S-c');
+    expect(c.glyph, 'S');
+    expect(u.imageName, 'bz-marker-S-u');
+    expect(u.glyph, '?');
+    expect(allMarkerStyles.map((m) => m.imageName).toSet().length, 6);
+    expect(allMarkerStyles, contains(c));
+    expect(symbolFor(pt()).iconImage, 'bz-marker-S-u');
     final a = pt();
     expect(hitTest([a], 53.43, 14.55, 14), same(a));
     expect(hitTest([a], 53.5, 14.55, 14), isNull);

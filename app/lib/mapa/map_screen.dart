@@ -80,6 +80,12 @@ Widget defaultMapViewBuilder(BuildContext context, MapViewParams p) {
     // Heading cone from the device compass (works offline).
     myLocationRenderMode:
         p.myLocationEnabled ? MyLocationRenderMode.compass : MyLocationRenderMode.normal,
+    // UserDot: `info` token dot and accuracy circle (not the default blue).
+    myLocationStyle: MyLocationStyle(
+      fillColor: context.bz.info,
+      bearingColor: context.bz.info,
+      accuracyColor: context.bz.info,
+    ),
     onCameraTrackingDismissed: p.onTrackingDismissed,
     onMapClick: p.onMapClick,
     onStyleLoadedCallback: p.onStyleLoaded,
@@ -119,7 +125,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   bool _searchLong = false;
   bool _sheltersOn = true;
   List<ShelterPoint> _points = const [];
-  List<Circle> _circles = const [];
+  List<Symbol> _symbols = const [];
+  bool _markerImagesAdded = false;
   int? _focusId;
   bool _focusResolved = false;
   bool _focusDone = false;
@@ -176,8 +183,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final c = _controller;
     if (c == null) return;
     try {
-      if (_circles.isNotEmpty) await c.removeCircles(_circles);
-      _circles = const [];
+      if (_symbols.isNotEmpty) await c.removeSymbols(_symbols);
+      _symbols = const [];
       if (!_sheltersOn) {
         _points = const [];
         return;
@@ -192,10 +199,23 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       );
       if (!mounted) return;
       final bz = context.bz;
-      _circles = await c.addCircles([
-        for (final p in _points)
-          circleFor(p, confirmed: bz.verified, unconfirmed: bz.ink300),
-      ]);
+      if (!_markerImagesAdded) {
+        for (final st in allMarkerStyles) {
+          final png = await renderMarkerPng(
+            st,
+            confirmed: bz.verified,
+            unconfirmedInk: bz.ink300,
+            unconfirmedGlyph: bz.ink200,
+            border: bz.bg000,
+          );
+          await c.addImage(st.imageName, png, false, markerScale);
+        }
+        // Two close points must both show (no collision hiding).
+        await c.setSymbolIconAllowOverlap(true);
+        await c.setSymbolIconIgnorePlacement(true);
+        _markerImagesAdded = true;
+      }
+      _symbols = await c.addSymbols([for (final p in _points) symbolFor(p)]);
     } on Object {
       // Layer is optional: the map stays usable if points or annotations fail.
     }
