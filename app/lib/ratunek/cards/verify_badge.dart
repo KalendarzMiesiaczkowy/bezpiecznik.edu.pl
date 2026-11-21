@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../wspolne/theme/bz_tokens.g.dart';
@@ -18,10 +19,12 @@ class VerifyBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.extension<BzTokens>();
-    final fg = tokens?.signal ?? theme.colorScheme.tertiary;
+    // Pill (ref): amber icon carries the warning, the text stays high-contrast.
+    final icon = tokens?.signal ?? theme.colorScheme.tertiary;
+    final fg = tokens?.ink100 ?? theme.colorScheme.onTertiaryContainer;
     final bg = tokens?.signalTint ?? theme.colorScheme.tertiaryContainer;
-    final radius = tokens?.radiusSm ?? 8.0;
-    final padH = tokens?.space2 ?? 8.0;
+    final radius = tokens?.radiusFull ?? 9999.0;
+    final padH = tokens?.space3 ?? 12.0;
     final padV = tokens?.space1 ?? 4.0;
     return Semantics(
       label: 'Treść do weryfikacji przez ratownika. Nie została jeszcze sprawdzona.',
@@ -30,7 +33,6 @@ class VerifyBadge extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: bg,
-          border: Border.all(color: fg),
           borderRadius: BorderRadius.circular(radius),
         ),
         child: Padding(
@@ -38,8 +40,8 @@ class VerifyBadge extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(Icons.warning_amber_rounded, size: 16, color: fg),
-              const SizedBox(width: 4),
+              Icon(LucideIcons.triangleAlert, size: 16, color: icon),
+              SizedBox(width: padV + 2),
               Flexible(
                 child: Text(
                   verifyBadgeText,

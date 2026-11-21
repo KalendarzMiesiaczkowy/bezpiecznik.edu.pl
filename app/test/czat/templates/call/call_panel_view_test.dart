@@ -55,7 +55,7 @@ Future<void> pump(
 }
 
 void main() {
-  testWidgets('title, two 80 px full-radius buttons, "Więcej" collapsed', (
+  testWidgets('title, two 80 px radius-lg buttons, "Więcej" collapsed', (
     tester,
   ) async {
     await pump(tester, []);
@@ -75,7 +75,7 @@ void main() {
     );
     expect(
       (material.shape! as RoundedRectangleBorder).borderRadius,
-      BorderRadius.circular(9999),
+      BorderRadius.circular(18),
     );
   });
 
@@ -110,7 +110,7 @@ void main() {
         iceContacts: const [IceContact(name: 'Mama', phone: '+48600100200')],
       ),
     );
-    expect(find.text('Do: Mama'), findsOneWidget);
+    expect(find.text('SMS z lokalizacją do: Mama'), findsOneWidget);
     expect(find.text('Nie masz kontaktów alarmowych.'), findsNothing);
   });
 
