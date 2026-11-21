@@ -127,19 +127,64 @@ class _ChunkFacts {
   late final Set<String> words;
 }
 
-/// Small models sometimes split one panel into two sibling objects:
-/// `{"type":"steps","title":"X"}, {"items":[...]}`. An untyped object that
-/// carries `items` directly after a typed panel without `items` is merged into
-/// it. Every item is still validated against its cited chunk afterwards.
+/// Small models sometimes mis-shape panels. Normalised here, before any
+/// check (every item is still validated against its cited chunk afterwards):
+/// - `{"type":"steps","title":"X"}, {"items":[...]}`: the untyped `items`
+///   object is merged into the title-only panel before it;
+/// - flat panels `{"type":"bullets","text":"..","source_id":".."}` become
+///   one-item panels, and consecutive flat panels of the same type merge into
+///   one (the first title wins; a title-only panel right before supplies it).
 List<Object?> _mergeSplitPanels(List<Object?> raw) {
+  bool titleOnly(Object? p) =>
+      p is Map &&
+      (p['type'] == 'steps' || p['type'] == 'bullets') &&
+      p['items'] == null &&
+      p['text'] == null;
+  bool flat(Object? p) =>
+      p is Map &&
+      (p['type'] == 'steps' || p['type'] == 'bullets') &&
+      p['items'] == null &&
+      p['text'] is String &&
+      p['source_id'] is String;
+
   final out = <Object?>[];
+  // Types of panels created from flat items (only those may absorb more).
+  final flatMade = <int>{};
   for (final p in raw) {
     if (p is Map && p['type'] == null && p['items'] is List && out.isNotEmpty) {
       final prev = out.last;
-      if (prev is Map && prev['type'] is String && prev['items'] == null) {
-        out[out.length - 1] = {...prev, 'items': p['items']};
+      if (titleOnly(prev)) {
+        out[out.length - 1] = {...(prev as Map), 'items': p['items']};
         continue;
       }
+    }
+    if (flat(p)) {
+      final m = p as Map;
+      final item = {'text': m['text'], 'source_id': m['source_id']};
+      if (out.isNotEmpty) {
+        final prev = out.last;
+        if (flatMade.contains(out.length - 1) &&
+            prev is Map &&
+            prev['type'] == m['type']) {
+          out[out.length - 1] = {
+            ...prev,
+            'items': [...(prev['items'] as List), item],
+          };
+          continue;
+        }
+        if (titleOnly(prev)) {
+          out[out.length - 1] = {
+            'type': m['type'],
+            'title': (prev as Map)['title'] ?? m['title'],
+            'items': [item],
+          };
+          flatMade.add(out.length - 1);
+          continue;
+        }
+      }
+      out.add({'type': m['type'], 'title': m['title'], 'items': [item]});
+      flatMade.add(out.length - 1);
+      continue;
     }
     out.add(p);
   }

@@ -53,6 +53,31 @@ void main() {
     expect(r.rejected, hasLength(1));
   });
 
+  test('flat panels merge into one panel, items still validated', () {
+    final r = v.validate({
+      'panels': [
+        {'type': 'bullets', 'title': 'Do plecaka'},
+        {'type': 'bullets', 'text': 'Zapakuj wodę i latarkę.', 'source_id': 'c3'},
+        {'type': 'bullets', 'text': 'Zapakuj generator.', 'source_id': 'c3'},
+        {'type': 'bullets', 'text': 'Zapakuj apteczkę.', 'source_id': 'c3'},
+      ],
+    }, [bag]);
+    expect(r.panels, hasLength(1));
+    expect(r.panels.single['title'], 'Do plecaka');
+    expect((r.panels.single['items'] as List), hasLength(2));
+    expect(r.rejected.single.reason, RejectReason.lowOverlap);
+  });
+
+  test('flat panels without a title panel and of different types stay apart', () {
+    final r = v.validate({
+      'panels': [
+        {'type': 'bullets', 'text': 'Zapakuj wodę.', 'source_id': 'c3'},
+        {'type': 'steps', 'text': 'Zapakuj apteczkę.', 'source_id': 'c3'},
+      ],
+    }, [bag]);
+    expect(r.panels.map((p) => p['type']), ['bullets', 'steps']);
+  });
+
   test('untyped items panel without a preceding typed panel is dropped', () {
     final r = v.validate({
       'panels': [

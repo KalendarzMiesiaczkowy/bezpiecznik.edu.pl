@@ -165,6 +165,23 @@ void main() {
     expect(types(a), contains('steps'));
   });
 
+  test('retry answering with flat panels still yields a steps answer', () async {
+    final e = FakeEngine([
+      ['{"panels":[{"type":"steps","title":"x"},"items:[{"]}'],
+      [
+        jsonEncode({
+          'panels': [
+            {'type': 'steps', 'title': 'x'},
+            {'type': 'steps', 'text': 'Nie wchodź do windy.', 'source_id': 'c1'},
+          ],
+        }),
+      ],
+    ]);
+    final a = ready(await run(svc(e)));
+    expect(e.requests.length, 2);
+    expect(types(a), ['steps']);
+  });
+
   test('partially valid answer keeps only covered items', () async {
     final e = FakeEngine([
       [
