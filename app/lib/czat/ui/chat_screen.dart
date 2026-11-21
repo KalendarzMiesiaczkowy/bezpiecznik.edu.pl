@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../ratunek/cpr/cpr_view.dart';
 import '../../wspolne/theme/bz_theme.dart';
+import '../llm/llm_provider.dart';
 import 'chat_controller.dart';
 import 'composer.dart';
 import 'message_view.dart';
@@ -25,6 +26,15 @@ class ChatScreen extends ConsumerStatefulWidget {
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Start loading the model once the first frame is on screen.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(llmWarmUpProvider);
+    });
+  }
+
   final _scroll = ScrollController();
   final _keys = <String, GlobalKey>{};
   bool _atBottom = true;
