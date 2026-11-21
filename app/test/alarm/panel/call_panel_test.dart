@@ -71,7 +71,7 @@ void main() {
     expect(launched, isEmpty);
     expect(find.byKey(const Key('call-999')), findsOneWidget);
     expect(find.byKey(const Key('call-coords')), findsNothing);
-    expect(find.text('Do: Mama'), findsOneWidget);
+    expect(find.text('SMS z lokalizacją do: Mama'), findsOneWidget);
     expect(find.text('GPS ±12 m'), findsOneWidget);
   });
 
@@ -104,9 +104,9 @@ void main() {
 
   testWidgets('999/998/997 tappable without More; More expands coordinates, AML note; copy gives a toast', (tester) async {
     final launched = await _pump(tester, profile);
-    expect(find.text('999 · Pogotowie'), findsOneWidget);
-    expect(find.text('998 · Straż'), findsOneWidget);
-    expect(find.text('997 · Policja'), findsOneWidget);
+    expect(find.bySemanticsLabel('Zadzwoń: 999 Pogotowie'), findsOneWidget);
+    expect(find.bySemanticsLabel('Zadzwoń: 998 Straż'), findsOneWidget);
+    expect(find.bySemanticsLabel('Zadzwoń: 997 Policja'), findsOneWidget);
     await tester.tap(find.byKey(const Key('call-more')));
     await tester.pump();
     expect(find.textContaining('52°13'), findsOneWidget);

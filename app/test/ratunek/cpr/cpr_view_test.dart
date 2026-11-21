@@ -132,16 +132,17 @@ void main() {
     await tester.tap(find.text(cprStartLabel));
     await tester.pump();
     expect(find.text(cprCompressLabel), findsOneWidget);
-    expect(find.text('1 / 30'), findsOneWidget);
-    expect(find.text('Czas 00:00'), findsOneWidget);
-    expect(find.text('Zmiana za 2:00'), findsOneWidget);
+    expect(tester.widget<Text>(find.byKey(const ValueKey('cpr-counter'))).data, '1');
+    expect(find.text(' z 30'), findsOneWidget);
+    expect(find.text('00:00'), findsOneWidget);
+    expect(find.text('zmiana za 2:00'), findsOneWidget);
     expect(find.text('RKO · Dorosły'), findsOneWidget);
     expect(find.text('112'), findsOneWidget);
 
     rig.advance(const Duration(seconds: 17));
     await tester.pump();
-    expect(find.text('Czas 00:17'), findsOneWidget);
-    expect(find.text('Zmiana za 1:43'), findsOneWidget);
+    expect(find.text('00:17'), findsOneWidget);
+    expect(find.text('zmiana za 1:43'), findsOneWidget);
     // 17 s = 1 cycle (16.4 s) + breath phase -> breaths label from the card.
     expect(find.text('Dwa oddechy · 0:10'), findsOneWidget);
     expect(find.text(cprBreathsDoneLabel), findsOneWidget);
@@ -196,7 +197,7 @@ void main() {
     addTearDown(tester.view.resetViewInsets);
     await tester.pump();
     expect(find.byKey(const ValueKey('cpr-pinned-compact')), findsOneWidget);
-    expect(find.textContaining(RegExp(r'^UCISKAJ \d+/30 · 00:\d\d$')), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^Uciskaj \d+/30 · 00:\d\d$')), findsOneWidget);
     expect(find.text(cprPauseLabel), findsOneWidget);
     rig.session.stop();
   });
@@ -446,7 +447,7 @@ void main() {
     rig.session.stop();
   });
 
-  testWidgets('pinned panel: bg-200, radius-lg top corners, float shadow; AED outlined and left-aligned; 112 hit >= 48', (tester) async {
+  testWidgets('pinned panel: bg-200, radius-lg card, 1 px line-150, float shadow; AED outlined and left-aligned; 112 hit >= 48', (tester) async {
     final (rig, _) = await pumpCard(tester);
     await tester.tap(find.text(cprStartLabel));
     await tester.pump();
@@ -454,9 +455,9 @@ void main() {
     final box = tester.widget<DecoratedBox>(find.byKey(const ValueKey('cpr-pinned')));
     final deco = box.decoration as BoxDecoration;
     expect(deco.color, t.bg200);
-    expect(deco.borderRadius, BorderRadius.vertical(top: Radius.circular(t.radiusLg)));
+    expect(deco.borderRadius, BorderRadius.circular(t.radiusLg));
     expect(deco.boxShadow, t.shadowFloat);
-    expect(deco.border, isNull);
+    expect(deco.border, Border.all(color: t.line150));
 
     final aed = find.byKey(const ValueKey('cpr-aed-how'));
     expect(tester.widget<BzButton>(aed).variant, BzButtonVariant.ghost);
