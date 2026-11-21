@@ -106,10 +106,6 @@ Widget defaultMapViewBuilder(BuildContext context, MapViewParams p) {
 /// Focus point id from the route query `?point=<id>` (chat `map` card).
 int? parseFocusPointId(Map<String, String>? query) => int.tryParse(query?['point'] ?? '');
 
-/// `?guide=1`: open the compass to the focused point instead of its sheet
-/// (BG75: chat MapCard "Prowadź" goes straight to guidance).
-bool parseGuide(Map<String, String>? query) => query?['guide'] == '1';
-
 /// Installs the map files; overridable in tests.
 final mapInstallerProvider = FutureProvider<MapAssetInstaller>((ref) => createDefaultMapInstaller());
 
@@ -142,7 +138,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   int? _focusId;
   bool _focusResolved = false;
   bool _focusDone = false;
-  bool _guide = false;
   bool _styleReady = false;
   bool _markerLayersAdded = false;
   Timer? _ageTimer;
@@ -153,9 +148,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     super.didChangeDependencies();
     if (_focusResolved) return;
     _focusResolved = true;
-    final query = GoRouter.maybeOf(context)?.routeInformationProvider.value.uri.queryParameters;
-    _focusId = widget.focusPointId ?? parseFocusPointId(query);
-    _guide = parseGuide(query);
+    _focusId = widget.focusPointId ??
+        parseFocusPointId(GoRouter.maybeOf(context)?.routeInformationProvider.value.uri.queryParameters);
     if (_focusId != null) _tracking = false; // do not snap back to the user
   }
 
@@ -168,13 +162,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     try {
       final db = await ref.read(pointsDbProvider.future);
       final p = db.byId(id);
-      if (p == null || !mounted) return;
-      if (_guide) {
-        await _controller?.animateCamera(CameraUpdate.newLatLng(LatLng(p.lat, p.lon)));
-        if (mounted) _openCompass(p);
-      } else {
-        await _focus(p);
-      }
+      if (p != null && mounted) await _focus(p);
     } on Object {
       // Unknown id or DB error: stay on the normal map.
     }
