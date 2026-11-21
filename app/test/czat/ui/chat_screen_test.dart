@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bezpiecznik/czat/data/chat_store.dart';
 import 'package:bezpiecznik/czat/ui/answer_service.dart';
 import 'package:bezpiecznik/czat/ui/chat_controller.dart';
+import 'package:bezpiecznik/czat/templates/panel_model.dart';
 import 'package:bezpiecznik/czat/ui/chat_screen.dart';
 import 'package:bezpiecznik/ratunek/cpr/cpr_session.dart';
 import 'package:bezpiecznik/ratunek/cpr/cpr_view.dart';
@@ -211,5 +212,55 @@ void main() {
     rig.session.stop();
     await tester.pump();
     expect(find.byType(CprPinned), findsNothing);
+  });
+
+  testWidgets('new answer scrolls its start just below the island band', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final service = FakeAnswerService(
+      script: (q, c) async* {
+        yield const AnswerThinking();
+        yield AnswerReady(AssistantAnswer.fromJson({
+          'origin': 'ai',
+          'panels': [
+            {
+              'type': 'steps',
+              'title': 'Teraz $q',
+              'items': [
+                for (var i = 0; i < 25; i++)
+                  {'text': 'Krok $q-$i', 'source_id': 'fake-s1-f1'},
+              ],
+            },
+          ],
+          'sources': {
+            'fake-s1-f1': {
+              'source_id': 'fake-s1-f1',
+              'doc_id': 'fake',
+              'doc_title': 'Dokument przykładowy',
+              'doc_short': 'Przykład',
+              'page_label': '14',
+              'pdf_page': 16,
+              'text': 'Przykładowy fragment źródła.',
+            },
+          },
+        }));
+      },
+    );
+    await pumpChat(tester, service);
+    for (final q in ['A', 'B', 'C']) {
+      await tester.enterText(find.byKey(const Key('composer-field')), q);
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('composer-send')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    // Island band: 48 dp inset + 48 dp island + space2 (no status bar here).
+    final bandBottom = 48 + 48 + BzTokens.dark.space2;
+    final top = tester.getTopLeft(find.text('Teraz C')).dy;
+    expect(top, greaterThanOrEqualTo(bandBottom - 0.5), reason: 'header under island');
+    // And it is the start of the answer, not stranded far below.
+    expect(top, lessThan(bandBottom + 60));
   });
 }

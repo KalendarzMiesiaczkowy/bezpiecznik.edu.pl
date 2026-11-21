@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../ratunek/cpr/cpr_view.dart';
@@ -26,6 +27,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scroll = ScrollController();
   final _keys = <String, GlobalKey>{};
   bool _atBottom = true;
+
+  /// Height of the band covered by the island/SOS; set in build.
+  double _listTop = 0;
 
   /// Id of an answer that arrived while the user was reading higher up.
   String? _unseenAnswerId;
@@ -61,13 +65,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
   }
 
+  /// Scrolls so the top of the message [id] lands just below the floating
+  /// island/SOS band (`_listTop`), not at the raw viewport top where the
+  /// island would cover the first line.
   void _toStartOf(String id) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctx = _keys[id]?.currentContext;
-      if (!mounted || ctx == null) return;
-      Scrollable.ensureVisible(
-        ctx,
-        alignment: 0,
+      if (!mounted || ctx == null || !_scroll.hasClients) return;
+      final box = ctx.findRenderObject();
+      if (box == null) return;
+      final viewport = RenderAbstractViewport.maybeOf(box);
+      if (viewport == null) return;
+      final messages = ref.read(chatControllerProvider).messages;
+      final index = messages.indexWhere((m) => m.id == id);
+      // Every item but the first carries a top gap; the card itself should
+      // start at the band edge.
+      final gap = index > 0 ? context.bz.space5 : 0.0;
+      final reveal = viewport.getOffsetToReveal(box, 0).offset;
+      final pos = _scroll.position;
+      final target = (reveal + gap - _listTop).clamp(
+        pos.minScrollExtent,
+        pos.maxScrollExtent,
+      );
+      _scroll.animateTo(
+        target,
         duration: context.bz.durationBase,
         curve: context.bz.easeOut,
       );
@@ -115,6 +136,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final statusBar = MediaQuery.paddingOf(context).top;
     final topInset = statusBar + 8 > 48 ? statusBar + 8 : 48.0;
     final listTop = topInset + 48 + t.space2;
+    _listTop = listTop;
 
     return Scaffold(
       backgroundColor: t.bg000,
