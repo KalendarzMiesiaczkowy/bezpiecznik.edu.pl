@@ -42,6 +42,14 @@ void main() {
   });
   tearDown(() => mem.close());
 
+  test('bounds spans all points', () {
+    final b = PointsDb(mem).bounds()!;
+    expect(b.south, closeTo(53.4286, 1e-4)); // R*Tree stores float32
+    expect(b.north, closeTo(53.9, 1e-4));
+    expect(b.west, closeTo(14.55, 1e-4));
+    expect(b.east, closeTo(14.9, 1e-4));
+  });
+
   test('nearest returns 3 sorted by distance, widening the box', () {
     final r = PointsDb(mem).nearest(szczecinLat, szczecinLon);
     expect(r.map((e) => e.id), [1, 2, 3]);
@@ -85,5 +93,13 @@ void main() {
     final d = r.map((e) => e.distanceM!).toList();
     expect(d, [...d]..sort());
     expect(r.every((e) => !e.confirmed && e.source == 'OpenStreetMap'), isTrue);
+  });
+
+  test('region bounds: south of the voivodeship is inside, Warsaw outside', () {
+    expect(isOutsideRegion(53.17, 15.42), isFalse); // Choszczno
+    expect(isOutsideRegion(53.16, 14.88), isFalse); // Pyrzyce
+    expect(isOutsideRegion(53.4285, 14.5528), isFalse); // Szczecin
+    expect(isOutsideRegion(52.2297, 21.0122), isTrue); // Warszawa
+    expect(isOutsideRegion(52.40, 16.92), isTrue); // Poznań
   });
 }

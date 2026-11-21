@@ -164,6 +164,8 @@ void main() {
     await tester.tap(layers);
     await tester.pumpAndSettle();
     expect(find.text('Schrony i ukrycia'), findsOneWidget);
+    expect(find.text('Warstwy'), findsNWidgets(2)); // button + sheet title
+    expect(find.byType(Switch), findsOneWidget);
   });
 
   testWidgets('Najbliższy schron is full width minus 16 dp margins, below Warstwy and recenter', (tester) async {

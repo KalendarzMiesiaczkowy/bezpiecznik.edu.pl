@@ -167,8 +167,11 @@ class NearestList extends StatelessWidget {
     required this.onSelect,
     this.fromLat,
     this.fromLon,
+    this.outside = false,
   });
 
+  /// Position lies outside the bundled region: honest notice, no download.
+  final bool outside;
   final List<ShelterPoint> points;
   final double? fromLat;
   final double? fromLon;
@@ -185,7 +188,7 @@ class NearestList extends StatelessWidget {
         children: [
           Text(nearestTitleText, style: bz.title),
           SizedBox(height: bz.space2),
-          if (points.isEmpty) Text(noDataText, style: bz.chat),
+          if (points.isEmpty) Text(outside ? outsideRegionText : noDataText, style: bz.chat),
           for (final p in points) _row(context, p),
         ],
       ),
@@ -232,7 +235,7 @@ class NearestList extends StatelessWidget {
   }
 }
 
-/// Layer toggle, >= 48 dp, label `map.layers.shelters`.
+/// Layer row (DS ListRow + Switch), >= 48 dp, label `map.layers.shelters`.
 class ShelterLayerToggle extends StatelessWidget {
   const ShelterLayerToggle({super.key, required this.on, required this.onChanged});
 
@@ -248,25 +251,15 @@ class ShelterLayerToggle extends StatelessWidget {
       label: layerShelterLabel,
       onTap: () => onChanged(!on),
       excludeSemantics: true,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: bz.minTouchTarget, minWidth: bz.minTouchTarget),
-        child: Material(
-          color: on ? bz.signalTint : bz.bg200,
-          borderRadius: BorderRadius.circular(bz.radiusLg),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(bz.radiusLg),
-            onTap: () => onChanged(!on),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: bz.space3),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(on ? Icons.visibility : Icons.visibility_off, size: 20, color: bz.ink100),
-                  SizedBox(width: bz.space2),
-                  Text(layerShelterLabel, style: bz.label),
-                ],
-              ),
-            ),
+      child: InkWell(
+        onTap: () => onChanged(!on),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: bz.minTouchTarget),
+          child: Row(
+            children: [
+              Expanded(child: Text(layerShelterLabel, style: bz.label)),
+              ExcludeSemantics(child: Switch(value: on, onChanged: onChanged)),
+            ],
           ),
         ),
       ),

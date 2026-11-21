@@ -112,6 +112,20 @@ class PointsDb {
     return rows.isEmpty ? null : _row(rows.first);
   }
 
+  /// Bounding box (south, west, north, east) of all points, or null when empty.
+  ({double south, double west, double north, double east})? bounds() {
+    final r = _db.select(
+      'SELECT MIN(min_lat) a, MIN(min_lon) b, MAX(max_lat) c, MAX(max_lon) d FROM points_rtree',
+    ).first;
+    if (r['a'] == null) return null;
+    return (
+      south: (r['a'] as num).toDouble(),
+      west: (r['b'] as num).toDouble(),
+      north: (r['c'] as num).toDouble(),
+      east: (r['d'] as num).toDouble(),
+    );
+  }
+
   /// Points inside the bounds, for the map layer.
   List<ShelterPoint> inBounds(
     double south,
@@ -189,3 +203,32 @@ final nearestSheltersProvider = FutureProvider<List<ShelterPoint>>((ref) async {
   final pos = ref.watch(positionProvider).value;
   return db.nearest(pos?.latitude ?? szczecinLat, pos?.longitude ?? szczecinLon);
 });
+
+/// Honest copy for a position outside the bundled region (no download in MVP).
+const outsideRegionText =
+    'Poza mapą szczegółową. Mapa i schrony obejmują woj. zachodniopomorskie.'; // map.detailed.out
+const detailedMapText = 'Mapa szczegółowa'; // map.detailed.in
+
+/// Bounds of the bundled detailed map = `bounds` in the metadata of
+/// app/assets/generated/zachodniopomorskie.mbtiles (west, south, east, north).
+/// The shelter points end at ~53.25° N, so their box would wrongly flag the
+/// south of the voivodeship (Choszczno, Pyrzyce) as "outside" (main-session
+/// review of BG78).
+// ponytail: constant copied from the MBTiles metadata; read it at runtime
+// when region packs (Po MVP) make the bundled region variable.
+const _regionWest = 13.25892, _regionSouth = 52.61742;
+const _regionEast = 16.98847, _regionNorth = 55.09767;
+
+/// True when the device position lies outside the bundled detailed map;
+/// null without a position (indicator hidden).
+final outsideRegionProvider = FutureProvider<bool?>((ref) async {
+  final pos = ref.watch(positionProvider).value;
+  if (pos == null) return null;
+  return isOutsideRegion(pos.latitude, pos.longitude);
+});
+
+bool isOutsideRegion(double lat, double lon) =>
+    lat < _regionSouth ||
+    lat > _regionNorth ||
+    lon < _regionWest ||
+    lon > _regionEast;

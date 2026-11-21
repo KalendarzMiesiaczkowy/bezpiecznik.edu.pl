@@ -84,6 +84,26 @@ Future<List<String>> pump(
 }
 
 void main() {
+  testWidgets('empty result outside the region shows the honest notice', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          nearestSheltersProvider.overrideWith((ref) async => <ShelterPoint>[]),
+          outsideRegionProvider.overrideWith((ref) async => true),
+          positionProvider.overrideWith((ref) => Stream.value(pos())),
+        ],
+        child: MaterialApp(
+          theme: buildBzTheme(),
+          home: const Scaffold(body: MapCardView(target: 'nearest_shelter')),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.text(outsideRegionText), findsOneWidget);
+    expect(find.text(mapNoPointsText), findsNothing);
+  });
+
   final three = [
     point(1, name: 'Schron A'),
     point(2, confirmed: true, name: 'Schron B', lat: 53.44),

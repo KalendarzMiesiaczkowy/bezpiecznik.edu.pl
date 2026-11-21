@@ -51,12 +51,13 @@ class MapCardView extends ConsumerWidget {
     } else {
       final nearest = ref.watch(nearestSheltersProvider);
       final pos = ref.watch(positionProvider).value;
+      final outside = ref.watch(outsideRegionProvider).value ?? false;
       body = nearest.when(
         loading: () =>
             Text(mapLoadingText, style: bz.chat.copyWith(color: bz.ink200)),
         error: (_, _) => Text(mapNoPointsText, style: bz.chat),
         data: (points) => points.isEmpty
-            ? Text(mapNoPointsText, style: bz.chat)
+            ? Text(outside ? outsideRegionText : mapNoPointsText, style: bz.chat)
             : _Points(
                 points: points,
                 fromLat: pos?.latitude,

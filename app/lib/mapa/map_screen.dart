@@ -400,6 +400,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         points: points,
         fromLat: pos?.latitude,
         fromLon: pos?.longitude,
+        outside: ref.read(outsideRegionProvider).value ?? false,
         onSelect: (p) {
           Navigator.of(sheetContext).pop();
           _focus(p);
@@ -409,21 +410,29 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   Future<void> _showLayers() async {
+    final bz = context.bz;
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: context.bz.bg200,
+      backgroundColor: bz.bg200,
       builder: (sheetContext) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
-          padding: EdgeInsets.all(context.bz.space4),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: ShelterLayerToggle(
-              on: _sheltersOn,
-              onChanged: (v) {
-                setState(() => _sheltersOn = v);
-                setSheetState(() {});
-                _refreshShelters();
-              },
+        builder: (context, setSheetState) => SafeArea(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(bz.space4, bz.space4, bz.space4, bz.space2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(layersButtonText, style: bz.title), // map.layers.title
+                SizedBox(height: bz.space2),
+                ShelterLayerToggle(
+                  on: _sheltersOn,
+                  onChanged: (v) {
+                    setState(() => _sheltersOn = v);
+                    setSheetState(() {});
+                    _refreshShelters();
+                  },
+                ),
+              ],
             ),
           ),
         ),
@@ -542,7 +551,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: bz.space3),
+                SizedBox(height: bz.space2),
+                _detailIndicator(),
+                SizedBox(height: bz.space2),
                 ConstrainedBox(
                   constraints: BoxConstraints(minHeight: bz.minTouchTarget),
                   child: FilledButton(
@@ -559,6 +570,28 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// DS DetailIndicator: pill above the nearest button; hidden without GPS.
+  Widget _detailIndicator() {
+    final outside = ref.watch(outsideRegionProvider).value;
+    if (outside == null) return const SizedBox.shrink();
+    final bz = context.bz;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        key: const ValueKey('detail-indicator'),
+        padding: EdgeInsets.symmetric(horizontal: bz.space3, vertical: bz.space2),
+        decoration: BoxDecoration(
+          color: bz.bg200,
+          borderRadius: BorderRadius.circular(bz.radiusLg),
+        ),
+        child: Text(
+          outside ? outsideRegionText : '● $detailedMapText',
+          style: bz.caption.copyWith(color: bz.ink100),
+        ),
       ),
     );
   }
