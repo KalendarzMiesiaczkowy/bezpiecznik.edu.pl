@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ratunek/ui/rescue_answer.dart';
@@ -18,14 +19,25 @@ class RoutedAnswerService implements AnswerService {
 
   @override
   Stream<AnswerEvent> answer(String question, ChatContext ctx) async* {
-    final card = await (await rescue()).tryAnswer(question);
+    // A broken card bundle must not block the whole chat: fall through to the
+    // pipeline, which adds `call` for risk phrases on its own.
+    RescueAnswerService? cards;
+    try {
+      cards = await rescue();
+    } on Object catch (e) {
+      debugPrint('Rescue cards unavailable: $e');
+    }
+    final card = await cards?.tryAnswer(question);
     if (card != null) {
       yield AnswerReady(card);
       return;
     }
     final mapAnswer = await map.tryAnswer(question);
     if (mapAnswer != null) {
-      yield AnswerReady(mapAnswer);
+      // Risk phrase + place ("pożar, gdzie uciekać") still gets `call` first
+      // (szablony-czatu.md, rule 2).
+      final risky = cards?.isRisk(question) ?? false;
+      yield AnswerReady(risky ? RescueAnswerService.withCallFirst(mapAnswer) : mapAnswer);
       return;
     }
     yield* pipeline.answer(question, ctx);

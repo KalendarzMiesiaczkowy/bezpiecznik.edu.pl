@@ -31,6 +31,7 @@ void main() {
 
   Future<void> ask(WidgetTester tester, String q) async {
     await tester.enterText(find.byKey(const Key('composer-field')), q);
+    await tester.pump(); // send button appears after the rebuild
     await tester.tap(find.byKey(const Key('composer-send')));
     await tester.pump();
   }

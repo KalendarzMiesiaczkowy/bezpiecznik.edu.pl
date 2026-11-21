@@ -32,6 +32,7 @@ void main() {
     expect(find.text('Co się dzieje?'), findsOneWidget);
 
     await tester.enterText(find.byKey(const Key('composer-field')), 'Jak przechować insulinę bez prądu?');
+    await tester.pump(); // send button appears after the rebuild
     await tester.tap(find.byKey(const Key('composer-send')));
     await tester.pump();
     expect(find.text('Szukam w źródłach…'), findsOneWidget);
@@ -59,6 +60,7 @@ void main() {
     );
     await pumpUntil(tester, find.byKey(const Key('composer-field')));
     await tester.enterText(find.byKey(const Key('composer-field')), 'Pytanie');
+    await tester.pump(); // send button appears after the rebuild
     await tester.tap(find.byKey(const Key('composer-send')));
     await tester.pump();
     await tester.tap(find.byKey(const Key('composer-stop')));

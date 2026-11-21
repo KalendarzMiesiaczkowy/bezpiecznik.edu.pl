@@ -71,4 +71,13 @@ void main() {
     final c = container(FakeEngine([]));
     expect(c.read(pipelineAnswerServiceProvider), isNotNull);
   });
+
+  test('risk phrase + place -> map answer with call first', () async {
+    final engine = FakeEngine([]);
+    final e = await last(container(engine), 'pożar, gdzie uciekać');
+    final panels = (e as AnswerReady).answer.panels;
+    expect(panels.first, isA<CallPanel>());
+    expect(panels.whereType<MapPanel>(), hasLength(1));
+    expect(engine.requests, isEmpty);
+  });
 }
