@@ -3,6 +3,7 @@ import 'package:flutter_edge_ai_litertlm/flutter_edge_ai_litertlm.dart'
     show LiteRtLmEngine;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ustawienia/settings_store.dart';
 import '../../wspolne/config.dart';
 import 'llm_engine.dart';
 import 'llm_engine_edge.dart';
@@ -45,4 +46,13 @@ final llmEngineProvider = Provider<LlmEngine>((ref) {
   );
   ref.onDispose(engine.dispose);
   return engine;
+});
+
+/// Loads the model in the background before the first question, so the first
+/// answer does not wait for it. Skipped in "Tryb bez AI" (and re-run when the
+/// mode is switched off). A failure stays in this provider's state: `generate`
+/// retries the load and reports the error in the chat.
+final llmWarmUpProvider = FutureProvider<void>((ref) async {
+  if ((await ref.watch(settingsProvider.future)).noAiMode) return;
+  await ref.read(llmEngineProvider).warmUp();
 });
