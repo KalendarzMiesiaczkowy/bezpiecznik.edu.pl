@@ -330,7 +330,8 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
             borderRadius: BorderRadius.circular(bz.radiusLg),
           ),
           child: Padding(
-            padding: EdgeInsets.all(bz.space4),
+            // The GPS / "Zmień" row already carries a 48 dp target: less bottom pad.
+            padding: EdgeInsets.fromLTRB(bz.space4, bz.space4, bz.space4, bz.space2),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
