@@ -32,7 +32,7 @@ class BulletsPanelView extends StatelessWidget {
           for (var i = 0; i < panel.items.length; i++)
             _BulletRow(
               item: panel.items[i],
-              source: scope.answer.source(panel.items[i].sourceId),
+              source: _chipSource(scope, panel.items, i),
               checkable: panel.checkable,
               checked: done.contains(i),
               onChanged: (v) => scope.onDoneChanged(i, v),
@@ -42,6 +42,20 @@ class BulletsPanelView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Source for item [i]'s chip, or null when it equals the previous item's
+/// (same rule as steps, BG18/BG38: no repeated chips; first item keeps it).
+SourceRecord? _chipSource(PanelScope scope, List<PanelItem> items, int i) {
+  final s = scope.answer.source(items[i].sourceId);
+  if (s == null || i == 0) return s;
+  final p = scope.answer.source(items[i - 1].sourceId);
+  final same =
+      p != null &&
+      p.docId == s.docId &&
+      p.pageLabel == s.pageLabel &&
+      p.chipLabel == s.chipLabel;
+  return same ? null : s;
 }
 
 class _BulletRow extends StatelessWidget {
