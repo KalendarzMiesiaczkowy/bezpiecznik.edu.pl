@@ -29,6 +29,10 @@ void main() {
     await pumpUntil(tester, find.byKey(const Key('composer-field')));
 
     Future<void> ask(String q) async {
+      // The composer unfocuses after each send (67f7e7e), so tap it first
+      // like a user would before typing the next question.
+      await tester.tap(find.byKey(const Key('composer-field')));
+      await tester.pump();
       await tester.enterText(find.byKey(const Key('composer-field')), q);
       await tester.pump(); // send button appears after the rebuild
       await tester.tap(find.byKey(const Key('composer-send')));
