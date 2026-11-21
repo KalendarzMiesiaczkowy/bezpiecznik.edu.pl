@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,6 +9,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../wspolne/theme/bz_buttons.dart';
 import '../../wspolne/theme/bz_theme.dart';
+import '../map_screen.dart' show MapNotice;
 import '../position_provider.dart';
 import '../punkty/geo.dart';
 import '../punkty/point_sheet.dart';
@@ -97,20 +99,19 @@ class _CompassScreenState extends ConsumerState<CompassScreen> {
       color: bz.bg000,
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(bz.space4, 72, bz.space4, bz.space4),
+          // Clears the global Back / SOS row.
+          padding: EdgeInsets.fromLTRB(bz.space4, bz.space7 + bz.space5, bz.space4, bz.space4),
           child: Column(
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  compassToText(kindLabel(t.kind), pointTitle(t)),
-                  style: bz.title,
-                ),
+              Text(
+                compassToText(kindLabel(t.kind), pointTitle(t)),
+                textAlign: TextAlign.center,
+                style: bz.step,
               ),
               if (notice != null)
                 Padding(
                   padding: EdgeInsets.only(top: bz.space3),
-                  child: Text(notice, key: const Key('compass-notice'), style: bz.chat.copyWith(color: bz.signal)),
+                  child: MapNotice(key: const Key('compass-notice'), text: notice),
                 ),
               Expanded(
                 child: LayoutBuilder(
@@ -119,8 +120,8 @@ class _CompassScreenState extends ConsumerState<CompassScreen> {
                       constraints: BoxConstraints(minHeight: box.maxHeight),
                       child: Center(
                         child: fix == null
-                            ? Text(compassNoPositionText, textAlign: TextAlign.center, style: bz.title)
-                            : _body(bz, dist!, bearing!, angleDeg, noSensor, fix),
+                            ? Text(compassNoPositionText, textAlign: TextAlign.center, style: bz.step)
+                            : _body(bz, box, dist!, bearing!, angleDeg, noSensor, fix),
                       ),
                     ),
                   ),
@@ -131,14 +132,15 @@ class _CompassScreenState extends ConsumerState<CompassScreen> {
                 builder: (context) {
                   final map = BzButton(
                     label: compassShowMapText,
+                    icon: LucideIcons.map,
                     onPressed: widget.onShowMap,
-                    size: BzButtonSize.xl,
+                    size: BzButtonSize.lg,
                     fullWidth: true,
                   );
                   final end = BzButton(
                     label: compassEndText,
                     onPressed: widget.onEnd,
-                    size: BzButtonSize.xl,
+                    size: BzButtonSize.lg,
                     fullWidth: true,
                   );
                   if (MediaQuery.textScalerOf(context).scale(1) > 1.15) {
@@ -162,36 +164,116 @@ class _CompassScreenState extends ConsumerState<CompassScreen> {
     );
   }
 
-  Widget _body(BzTokens bz, double dist, double bearing, double? angleDeg, bool noSensor, Position fix) {
+  Widget _body(
+    BzTokens bz,
+    BoxConstraints box,
+    double dist,
+    double bearing,
+    double? angleDeg,
+    bool noSensor,
+    Position fix,
+  ) {
     final dir = cardinalName(bearing);
+    const tabular = [FontFeature.tabularFigures()];
+    // Ref dial ~2/3 of the width; shrinks when large text leaves less room.
+    final dial = math.min(260.0, math.min(box.maxWidth * 0.66, box.maxHeight * 0.45));
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (angleDeg != null)
-          Semantics(
-            label: '${formatDistance(dist)}, $dir',
-            child: Transform.rotate(
-              key: const Key('compass-arrow'),
-              angle: angleDeg * 3.141592653589793 / 180,
-              child: Icon(LucideIcons.arrowUp, size: 200, color: bz.ink100),
+        Semantics(
+          label: angleDeg == null ? null : '${formatDistance(dist)}, $dir',
+          child: SizedBox.square(
+            dimension: dial,
+            child: CustomPaint(
+              painter: _DialPainter(ring: bz.line150, tick: bz.line200),
+              child: angleDeg == null
+                  ? null
+                  : Transform.rotate(
+                      key: const Key('compass-arrow'),
+                      angle: angleDeg * math.pi / 180,
+                      child: CustomPaint(painter: _ArrowPainter(bz.signal)),
+                    ),
             ),
           ),
-        SizedBox(height: bz.space4),
-        Text(formatDistance(dist), key: const Key('compass-distance'), style: bz.display),
-        SizedBox(height: bz.space2),
-        Text(dir, key: const Key('compass-cardinal'), style: bz.title),
+        ),
+        SizedBox(height: bz.space6),
+        Text(
+          formatDistance(dist),
+          key: const Key('compass-distance'),
+          textAlign: TextAlign.center,
+          style: bz.display.copyWith(fontFeatures: tabular),
+        ),
+        SizedBox(height: bz.space3),
+        Text(dir, key: const Key('compass-cardinal'), style: bz.step.copyWith(color: bz.ink200)),
         if (noSensor && angleDeg == null)
           Padding(
             padding: EdgeInsets.only(top: bz.space3),
             child: Text(compassNoSensorText(dir), textAlign: TextAlign.center, style: bz.chat),
           ),
-        SizedBox(height: bz.space3),
+        SizedBox(height: bz.space5),
         Text(
           '${fix.latitude.toStringAsFixed(5)}, ${fix.longitude.toStringAsFixed(5)}',
           key: const Key('compass-coords'),
-          style: bz.caption.copyWith(color: bz.ink200),
+          style: bz.caption.copyWith(color: bz.ink200, fontFeatures: tabular),
         ),
       ],
     );
   }
+}
+
+/// Ring with four fixed ticks (ref `kompas.png`); the arrow turns inside it.
+class _DialPainter extends CustomPainter {
+  _DialPainter({required this.ring, required this.tick});
+
+  final Color ring, tick;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.shortestSide / 2 - 1;
+    canvas.drawCircle(
+      c,
+      r,
+      Paint()
+        ..color = ring
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
+    );
+    final p = Paint()
+      ..color = tick
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    for (var i = 0; i < 4; i++) {
+      final a = i * math.pi / 2;
+      final d = Offset(math.sin(a), -math.cos(a));
+      canvas.drawLine(c + d * (r - 6), c + d * (r - 18), p);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DialPainter o) => o.ring != ring || o.tick != tick;
+}
+
+/// Filled kite arrow pointing up (rotation comes from the parent).
+class _ArrowPainter extends CustomPainter {
+  _ArrowPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final h = size.shortestSide * 0.30;
+    final w = h * 0.62;
+    final path = Path()
+      ..moveTo(c.dx, c.dy - h)
+      ..lineTo(c.dx + w, c.dy + h * 0.85)
+      ..lineTo(c.dx, c.dy + h * 0.45)
+      ..lineTo(c.dx - w, c.dy + h * 0.85)
+      ..close();
+    canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(_ArrowPainter o) => o.color != color;
 }
