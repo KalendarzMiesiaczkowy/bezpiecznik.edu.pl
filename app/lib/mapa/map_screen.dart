@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:material_ui/material_ui.dart';
@@ -88,15 +89,21 @@ Widget defaultMapViewBuilder(BuildContext context, MapViewParams p) {
   );
 }
 
+/// Focus point id from the route query `?point=<id>` (chat `map` card).
+int? parseFocusPointId(Map<String, String>? query) => int.tryParse(query?['point'] ?? '');
+
 /// Installs the map files; overridable in tests.
 final mapInstallerProvider = FutureProvider<MapAssetInstaller>((ref) => createDefaultMapInstaller());
 
 /// E2 map screen (MVP subset: map, own position + heading, recenter,
 /// attribution, GPS notices). Back and SOS come from `RootOverlay`.
 class MapScreen extends ConsumerStatefulWidget {
-  const MapScreen({super.key, this.mapBuilder = defaultMapViewBuilder});
+  const MapScreen({super.key, this.mapBuilder = defaultMapViewBuilder, this.focusPointId});
 
   final MapViewBuilder mapBuilder;
+
+  /// Point to centre on and open; when null it is read from `?point=`.
+  final int? focusPointId;
 
   @override
   ConsumerState<MapScreen> createState() => _MapScreenState();
@@ -112,6 +119,34 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   bool _sheltersOn = true;
   List<ShelterPoint> _points = const [];
   List<Circle> _circles = const [];
+  int? _focusId;
+  bool _focusResolved = false;
+  bool _focusDone = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_focusResolved) return;
+    _focusResolved = true;
+    _focusId = widget.focusPointId ??
+        parseFocusPointId(GoRouter.maybeOf(context)?.routeInformationProvider.value.uri.queryParameters);
+    if (_focusId != null) _tracking = false; // do not snap back to the user
+  }
+
+  /// Centres on the route's point and opens its sheet, once.
+  Future<void> _applyFocus() async {
+    final id = _focusId;
+    final c = _controller;
+    if (id == null || c == null || _focusDone) return;
+    _focusDone = true;
+    try {
+      final db = await ref.read(pointsDbProvider.future);
+      final p = db.byId(id);
+      if (p != null && mounted) await _focus(p);
+    } on Object {
+      // Unknown id or DB error: stay on the normal map.
+    }
+  }
 
   @override
   void initState() {
@@ -255,7 +290,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ? MyLocationTrackingMode.tracking
                       : MyLocationTrackingMode.none,
                   onMapCreated: (c) => _controller = c,
-                  onStyleLoaded: _refreshShelters,
+                  onStyleLoaded: () async {
+                    await _refreshShelters();
+                    await _applyFocus();
+                  },
                   onCameraIdle: _refreshShelters,
                   onMapClick: _onMapClick,
                   onTrackingDismissed: () {

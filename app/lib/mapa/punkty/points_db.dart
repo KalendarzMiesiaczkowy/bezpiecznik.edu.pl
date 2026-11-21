@@ -106,6 +106,12 @@ class PointsDb {
     return rows.map(_row).toList();
   }
 
+  /// The point with [id], or null when unknown.
+  ShelterPoint? byId(int id) {
+    final rows = _db.select('SELECT $_cols FROM points p WHERE p.id = ?', [id]);
+    return rows.isEmpty ? null : _row(rows.first);
+  }
+
   /// Points inside the bounds, for the map layer.
   List<ShelterPoint> inBounds(
     double south,
