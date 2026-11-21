@@ -9,7 +9,7 @@ import 'mapa/map_screen.dart';
 import 'onboarding/onboarding_screen.dart';
 import 'profil/profile_screen.dart';
 import 'profil/profile_store.dart';
-import 'wspolne/shell/placeholder_screen.dart';
+import 'ustawienia/settings_screen.dart';
 import 'wspolne/theme/gallery_screen.dart';
 
 /// Key of the app `Navigator`. Dialogs/sheets opened through it stay below
@@ -60,10 +60,7 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: 'ustawienia',
-            builder: (context, state) => const PlaceholderScreen(
-              title: 'Ustawienia',
-              links: [PlaceholderLink('Profil', profileRoutePath)],
-            ),
+            builder: (context, state) => const SettingsScreen(),
             routes: [
               GoRoute(
                 path: 'profil',

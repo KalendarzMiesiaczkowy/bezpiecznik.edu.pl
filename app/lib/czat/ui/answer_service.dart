@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../answer_router.dart';
 import '../templates/panel_model.dart';
 
 /// What the chat controller gives the service besides the question.
@@ -144,8 +145,8 @@ class EchoQuoteAnswerService implements AnswerService {
   }
 }
 
-/// The answer pipeline. Later tasks override (A06 real pipeline, D03 rescue
-/// cards in front of it).
+/// The production answer path: rescue card → map intent → sourced pipeline
+/// (see `RoutedAnswerService`). Tests override it with [FakeAnswerService].
 final answerServiceProvider = Provider<AnswerService>(
-  (ref) => const EchoQuoteAnswerService(),
+  (ref) => ref.watch(routedAnswerServiceProvider),
 );

@@ -15,7 +15,10 @@ import 'package:material_ui/material_ui.dart';
 
 Widget host(Widget child, {List overrides = const []}) => ProviderScope(
   key: UniqueKey(),
-  overrides: [...overrides],
+  // Core renderer tests: placeholders for module templates.
+  overrides: overrides.isEmpty
+      ? [templateRegistryProvider.overrideWithValue(TemplateRegistry.withDefaults())]
+      : [...overrides],
   child: MaterialApp(
     theme: buildBzTheme(),
     home: Scaffold(body: SingleChildScrollView(child: child)),
@@ -185,6 +188,7 @@ void main() {
     await tester.pumpWidget(host(const SizedBox.shrink()));
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [templateRegistryProvider.overrideWithValue(TemplateRegistry.withDefaults())],
         child: MaterialApp(theme: buildBzTheme(), home: const TemplateGalleryScreen()),
       ),
     );

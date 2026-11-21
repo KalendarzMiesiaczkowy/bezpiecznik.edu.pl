@@ -207,14 +207,14 @@ void main() {
     tester,
   ) async {
     final h = await pumpApp(tester);
-    expect(find.text('Panel boczny'), findsNothing);
+    expect(find.text('Nowy czat'), findsNothing);
     await tester.tap(menu());
     await tester.pumpAndSettle();
-    expect(find.text('Panel boczny'), findsOneWidget);
+    expect(find.text('Nowy czat'), findsOneWidget);
     await tester.tapAt(const Offset(780, 400)); // scrim, right of the drawer
     await tester.pumpAndSettle();
     expect(h.container.read(shellPanelsProvider).drawerOpen, isFalse);
-    expect(find.text('Panel boczny'), findsNothing);
+    expect(find.text('Nowy czat'), findsNothing);
   });
 
   testWidgets('left-edge swipe on E1 opens the drawer', (tester) async {
@@ -230,7 +230,7 @@ void main() {
       final h = await pumpApp(tester);
       h.panels.openDrawer();
       await tester.pumpAndSettle();
-      expect(find.text('Panel boczny'), findsOneWidget);
+      expect(find.text('Nowy czat'), findsOneWidget);
       expect(find.byIcon(LucideIcons.settings), findsOneWidget);
       await tester.tap(find.bySemanticsLabel('Ustawienia'));
       await tester.pumpAndSettle();

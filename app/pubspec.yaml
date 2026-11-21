@@ -78,6 +78,7 @@ flutter:
     - assets/phrases/
     - assets/cards/
     - assets/kb/
+    - assets/audio/
     - assets/map/glyphs/AtkinsonHyperlegibleNext-Regular/
     - assets/map/glyphs/AtkinsonHyperlegibleNext-Bold/
 

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'app_router.dart';
+import 'ustawienia/app_text_scale.dart';
 import 'wspolne/shell/root_overlay.dart';
 import 'wspolne/theme/bz_theme.dart';
 
@@ -21,7 +22,7 @@ class BezpiecznikApp extends ConsumerWidget {
       theme: buildBzTheme(),
       locale: const Locale('pl'),
       routerConfig: ref.watch(appRouterProvider),
-      builder: (context, child) => RootOverlay(child: child!),
+      builder: (context, child) => AppTextScale(child: RootOverlay(child: child!)),
     );
   }
 }

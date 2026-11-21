@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../alarm/panel/contact_panel.dart';
 import '../../app_router.dart';
+import '../../czat/drawer/chat_drawer.dart';
 import 'cpr_indicator.dart';
 import 'cpr_state.dart';
 import 'nav_island.dart';
 import 'panel_host.dart';
-import 'panel_placeholders.dart';
 import 'shell_panels.dart';
 import 'sos_button.dart';
 
@@ -196,7 +197,7 @@ class _RootOverlayState extends ConsumerState<RootOverlay> with WidgetsBindingOb
                       open: panels.drawerOpen,
                       edge: PanelEdge.left,
                       onClose: notifier.closeDrawer,
-                      child: const DrawerPlaceholder(),
+                      child: const ChatDrawer(),
                     ),
                   ),
                   Positioned.fill(
@@ -205,7 +206,7 @@ class _RootOverlayState extends ConsumerState<RootOverlay> with WidgetsBindingOb
                       open: panels.contactOpen,
                       edge: PanelEdge.bottom,
                       onClose: notifier.closeContactPanel,
-                      child: const ContactPanelPlaceholder(),
+                      child: const ContactPanel(),
                     ),
                   ),
                   if (panels.dialog != null)

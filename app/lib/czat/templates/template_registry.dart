@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'app_templates.dart';
 import 'bullets_panel.dart';
 import 'no_source.dart';
 import 'panel_model.dart';
@@ -78,7 +79,7 @@ class TemplateRegistry {
 }
 
 final templateRegistryProvider = Provider<TemplateRegistry>(
-  (ref) => TemplateRegistry.withDefaults(),
+  (ref) => buildAppTemplateRegistry(),
 );
 
 /// Called when a source chip / "Powiększ" is tapped. The PDF preview task
