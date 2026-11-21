@@ -30,6 +30,7 @@ void main() {
 
     Future<void> ask(String q) async {
       await tester.enterText(find.byKey(const Key('composer-field')), q);
+      await tester.pump(); // send button appears after the rebuild
       await tester.tap(find.byKey(const Key('composer-send')));
       await pumpUntil(tester, find.text('Przykładowy krok pierwszy'));
     }

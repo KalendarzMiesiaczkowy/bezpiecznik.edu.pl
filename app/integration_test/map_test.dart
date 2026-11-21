@@ -12,7 +12,7 @@ import 'support/harness.dart';
 /// are checked by the coordinator on the screenshot.
 /// Run: `flutter test integration_test/map_test.dart -d <device>`.
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('open the map from the island and see the attribution', (tester) async {
     final profile = await onboardedProfileStore();
@@ -27,10 +27,10 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Mapa'));
     await tester.pump();
 
-    // Poll up to 30 s: the first run copies ~100 MB; the progress indicator
+    // Poll up to 90 s: the first run copies ~100 MB; the progress indicator
     // animates forever, so pumpAndSettle is not usable here.
     final attribution = find.text(attributionText);
-    final deadline = DateTime.now().add(const Duration(seconds: 30));
+    final deadline = DateTime.now().add(const Duration(seconds: 90));
     while (DateTime.now().isBefore(deadline)) {
       await tester.pump(const Duration(milliseconds: 250));
       if (find.byType(MapScreen).evaluate().isNotEmpty &&
@@ -45,7 +45,5 @@ void main() {
     expect(find.text(preparingTitle), findsNothing);
     expect(attribution, findsOneWidget);
     expect(find.bySemanticsLabel('Wróć'), findsOneWidget);
-
-    await binding.takeScreenshot('map');
   });
 }

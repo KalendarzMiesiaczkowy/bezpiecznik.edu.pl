@@ -11,6 +11,7 @@ import 'package:material_ui/material_ui.dart';
 import '../wspolne/shell/shell_icon_button.dart';
 import '../wspolne/shell/sos_button.dart';
 import '../wspolne/theme/bz_theme.dart';
+import 'kompas/compass_screen.dart';
 import 'map_assets.dart';
 import 'position_provider.dart';
 import 'punkty/point_sheet.dart';
@@ -211,10 +212,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: context.bz.bg200,
-      builder: (_) => PointSheet(
+      builder: (sheetContext) => PointSheet(
         point: p,
         fromLat: pos?.latitude,
         fromLon: pos?.longitude,
+        onCompass: () {
+          Navigator.of(sheetContext).pop();
+          _openCompass(p);
+        },
+      ),
+    );
+  }
+
+  /// B05: compass to the point (straight-line direction and distance).
+  void _openCompass(ShelterPoint p) {
+    final nav = Navigator.of(context);
+    nav.push(
+      MaterialPageRoute<void>(
+        builder: (_) => CompassScreen(target: p, onShowMap: nav.pop, onEnd: nav.pop),
       ),
     );
   }

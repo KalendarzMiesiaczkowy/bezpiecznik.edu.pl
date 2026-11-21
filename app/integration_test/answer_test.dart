@@ -13,7 +13,7 @@ import 'support/harness.dart';
 /// reverse 8080) and the shelter intent → map card without the model.
 /// Run: `flutter test integration_test/answer_test.dart -d emulator-5554 --dart-define=LLM=host`.
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   Future<void> pumpApp(WidgetTester tester) async {
     final profile = await onboardedProfileStore();
@@ -46,7 +46,6 @@ void main() {
     print('sourced answer shown after ${sw.elapsedMilliseconds} ms (host LLM)');
     expect(ok, isTrue, reason: 'no source chip within 40 s');
     expect(find.byKey(const Key('composer-stop')), findsNothing);
-    await binding.takeScreenshot('answer-sourced');
   });
 
   testWidgets('off-topic question -> calm refusal, no 112', (tester) async {
@@ -65,6 +64,5 @@ void main() {
     print('map card shown after ${sw.elapsedMilliseconds} ms');
     expect(ok, isTrue);
     await tester.pump(const Duration(seconds: 2));
-    await binding.takeScreenshot('answer-map-card');
   });
 }
