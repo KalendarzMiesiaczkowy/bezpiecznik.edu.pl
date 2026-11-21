@@ -126,7 +126,7 @@ class CprCard extends ConsumerWidget {
                   variant: BzButtonVariant.secondary,
                   size: BzButtonSize.xl,
                   fullWidth: true,
-                  onPressed: session.dismissSummary,
+                  onPressed: () => session.start(config, scope.variant),
                 ),
               ],
             ),
@@ -380,6 +380,15 @@ class CprPinned extends ConsumerWidget {
                   style: t.label.copyWith(color: t.ink100),
                 ),
               ),
+              // Same "Dalej" as the full view: untimed breath phases (child /
+              // infant) wait for it.
+              if (breathing)
+                BzButton(
+                  label: cprBreathsDoneLabel,
+                  variant: BzButtonVariant.secondary,
+                  size: BzButtonSize.md,
+                  onPressed: session.breathsDone,
+                ),
               BzButton(
                 label: paused ? cprResumeLabel : cprPauseLabel,
                 variant: BzButtonVariant.ghost,

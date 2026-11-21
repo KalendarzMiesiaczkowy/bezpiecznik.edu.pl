@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../ratunek/cpr/cpr_session.dart';
 import '../data/chat_store.dart';
 import '../templates/panel_model.dart';
 import 'answer_service.dart';
@@ -214,12 +215,14 @@ class ChatController extends Notifier<ChatState> {
   /// Starts a new empty chat (not saved until the first message).
   void newChat() {
     stop();
+    ref.read(cprSessionProvider).dismissSummary();
     state = const ChatState();
   }
 
   /// Opens a saved chat from the list.
   Future<void> openChat(String chatId) async {
     stop();
+    ref.read(cprSessionProvider).dismissSummary();
     try {
       final stored = await ref.read(chatStoreProvider).loadMessages(chatId);
       state = ChatState(chatId: chatId, messages: [for (final m in stored) ChatMessage.fromStored(m)]);

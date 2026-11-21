@@ -11,6 +11,7 @@ import 'package:bezpiecznik/ustawienia/settings_store.dart' show voiceEnabledPro
 import 'package:bezpiecznik/czat/templates/panel_model.dart';
 import 'package:bezpiecznik/czat/templates/template_registry.dart';
 import 'package:bezpiecznik/czat/templates/template_renderer.dart';
+import 'package:bezpiecznik/ratunek/cpr/cpr_engine.dart' show CprPhase;
 import 'package:bezpiecznik/ratunek/cpr/cpr_session.dart';
 import 'package:bezpiecznik/ratunek/cpr/cpr_view.dart';
 import 'package:bezpiecznik/wspolne/shell/cpr_state.dart';
@@ -158,7 +159,8 @@ void main() {
     expect(find.textContaining('Zakończono · czas '), findsOneWidget);
     await tester.tap(find.text(cprRestartLabel));
     await tester.pump();
-    expect(find.text(cprStartLabel), findsOneWidget);
+    expect(rig.session.running, isTrue);
+    rig.session.stop();
   });
 
   test('summary text pluralises "cykl"', () {
@@ -180,6 +182,47 @@ void main() {
     expect(find.byKey(const ValueKey('cpr-pinned-compact')), findsOneWidget);
     expect(find.textContaining(RegExp(r'^UCISKAJ \d+/30 · 00:\d\d$')), findsOneWidget);
     expect(find.text(cprPauseLabel), findsOneWidget);
+    rig.session.stop();
+  });
+
+  testWidgets('summary: cleared by start, one-tap restart, dropped on new chat', (tester) async {
+    final (rig, container) = await pumpCard(tester);
+    await tester.tap(find.text(cprStartLabel));
+    await tester.pump();
+    rig.session.stop();
+    await tester.pump();
+    expect(find.byKey(const ValueKey('cpr-summary-end')), findsOneWidget);
+    // One tap on "Zacznij od nowa" starts the instructor again.
+    await tester.tap(find.text(cprRestartLabel));
+    await tester.pump();
+    expect(rig.session.running, isTrue);
+    expect(rig.session.summary, isNull);
+    rig.session.stop();
+    await tester.pump();
+    expect(rig.session.summary, isNotNull);
+    container.read(chatControllerProvider.notifier).newChat();
+    await tester.pump();
+    expect(rig.session.summary, isNull);
+    expect(find.byKey(const ValueKey('cpr-summary-end')), findsNothing);
+    expect(find.text(cprStartLabel), findsOneWidget);
+  });
+
+  testWidgets('keyboard open, child breaths phase: compact line has "Dalej"', (tester) async {
+    final (rig, _) = await pumpCard(tester);
+    await tester.tap(find.text('Dziecko'));
+    await tester.pump();
+    await tester.tap(find.text(cprStartLabel));
+    await tester.pump();
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('cpr-pinned-compact')), findsOneWidget);
+    expect(find.text(cprBreathsDoneLabel), findsOneWidget);
+    expect(find.text(cprPauseLabel), findsOneWidget);
+    await tester.tap(find.text(cprBreathsDoneLabel));
+    await tester.pump();
+    expect(rig.session.snapshot!.phase, CprPhase.compressing);
+    expect(find.text(cprBreathsDoneLabel), findsNothing);
     rig.session.stop();
   });
 

@@ -104,6 +104,7 @@ class CprSession extends ChangeNotifier {
     if (running) return;
     final v = config.variant(variantId);
     if (v == null) return;
+    _summary = null;
     _config = config;
     final engine = CprEngine(config: config, variant: v, clock: clock);
     _engine = engine;
