@@ -17,7 +17,8 @@ import '../template_registry.dart';
 
 // Spec: szablony-czatu.md, `map` (states table).
 const mapCardTitle = 'Najbliższy schron'; // diagram title
-const mapHospitalCardTitle = 'Najbliższy szpital'; // verify:true (spec: no title)
+const mapHospitalCardTitle =
+    'Najbliższy szpital'; // verify:true (spec: no title)
 const mapNoPositionText = 'Nie znam twojej pozycji.'; // state: no position
 const mapUnknownDistancesText =
     'Odległości nieznane. Poniżej schrony najbliżej centrum Szczecina.'; // verify:true
@@ -71,6 +72,39 @@ class MapCardView extends ConsumerWidget {
   }
 }
 
+/// Average walking speed used for the walk-time estimate (assumption: spec
+/// gives 450 m -> 6 min, i.e. ~5 km/h rounded up; no other speed is given).
+const walkingSpeedKmh = 5.0;
+
+/// Walk time in whole minutes (rounded up, at least 1) for [metres].
+int walkMinutes(double metres) =>
+    math.max(1, (metres / (walkingSpeedKmh * 1000 / 60)).ceil());
+
+/// "Dane sprzed {n} mies." for a point older than the stale threshold.
+String staleMonthsText(int months) => 'Dane sprzed $months mies.';
+
+/// Whole months between [verifiedAt] (ISO date) and [now]; null if unparsable.
+int? monthsSince(String verifiedAt, DateTime now) {
+  final d = DateTime.tryParse(verifiedAt);
+  if (d == null) return null;
+  var m = (now.year - d.year) * 12 + now.month - d.month;
+  if (now.day < d.day) m -= 1;
+  return math.max(0, m);
+}
+
+/// Source chip label: "OSM · zweryf. 03.2026" (DS example "KG PSP · zweryf. 03.2026").
+String sourceChipText(String source, String verifiedAt) {
+  final d = DateTime.tryParse(verifiedAt);
+  if (d == null) return source;
+  final mm = d.month.toString().padLeft(2, '0');
+  return '$source · zweryf. $mm.${d.year}';
+}
+
+/// Straight-line distance text: the MVP has no street routing, so the distance
+/// is always the spec's `straight_line = true` form.
+String distanceLineText(double metres) =>
+    '${formatDistance(metres)} w linii prostej · ok. ${walkMinutes(metres)} min';
+
 class _Points extends StatelessWidget {
   const _Points({required this.points, this.fromLat, this.fromLon});
 
@@ -83,6 +117,36 @@ class _Points extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bz = context.bz;
+    // DS: one nearest point per card.
+    final point = points.first;
+    double? distance;
+    double? bearing;
+    if (_hasPosition) {
+      distance = haversineM(fromLat!, fromLon!, point.lat, point.lon);
+      bearing = bearingDeg(fromLat!, fromLon!, point.lat, point.lon);
+    }
+    final name = point.name?.trim();
+    final hasName = name != null && name.isNotEmpty;
+    final address = point.address?.trim();
+    final hasAddress = address != null && address.isNotEmpty;
+    // Never an invented name: an unnamed point is titled by its kind and the
+    // address (if any) becomes the subtitle.
+    final title = hasName ? name : kindLabel(point.kind);
+    final subtitle = [
+      if (hasName) kindLabel(point.kind),
+      if (hasAddress) address,
+    ].join(' · ');
+    final months = isStale(point.verifiedAt, DateTime.now())
+        ? monthsSince(point.verifiedAt, DateTime.now())
+        : null;
+    void focus() => context.push(mapPointLocation(point.id));
+    final label = [
+      title,
+      if (subtitle.isNotEmpty) subtitle,
+      if (distance != null) distanceLineText(distance),
+      if (!point.confirmed) unconfirmedShortText,
+    ].join(', ');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -94,88 +158,46 @@ class _Points extends StatelessWidget {
           ),
           SizedBox(height: bz.space2),
         ],
-        for (final p in points)
-          _PointRow(point: p, fromLat: fromLat, fromLon: fromLon),
-        SizedBox(height: bz.space3),
-        ConstrainedBox(
-          constraints: BoxConstraints(minHeight: bz.minTouchTarget),
-          child: FilledButton(
-            key: const ValueKey('map-card-open'),
-            onPressed: () => context.push(mapRoutePath),
-            child: Text(_hasPosition ? mapOpenMapText : mapShowOnMapText),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PointRow extends StatelessWidget {
-  const _PointRow({required this.point, this.fromLat, this.fromLon});
-
-  final ShelterPoint point;
-  final double? fromLat;
-  final double? fromLon;
-
-  @override
-  Widget build(BuildContext context) {
-    final bz = context.bz;
-    final from = fromLat != null && fromLon != null;
-    String? distance;
-    double? bearing;
-    if (from) {
-      final d = haversineM(fromLat!, fromLon!, point.lat, point.lon);
-      bearing = bearingDeg(fromLat!, fromLon!, point.lat, point.lon);
-      distance = formatDistance(d);
-    }
-    final address = point.address?.trim();
-    final hasAddress = address != null && address.isNotEmpty;
-    final name = point.name?.trim();
-    final hasName = name != null && name.isNotEmpty;
-    // Never an invented name: an unnamed point is titled by its kind and the
-    // address (if any) becomes the subtitle.
-    final title = hasName ? name : kindLabel(point.kind);
-    final subtitle = [
-      if (hasName) kindLabel(point.kind),
-      if (hasAddress) address,
-    ].join(' · ');
-    final label = [
-      title,
-      if (subtitle.isNotEmpty) subtitle,
-      ?distance,
-      if (!point.confirmed) unconfirmedShortText,
-    ].join(', ');
-    return Semantics(
-      button: true,
-      label: label,
-      excludeSemantics: true,
-      child: InkWell(
-        key: ValueKey('map-card-point-${point.id}'),
-        borderRadius: BorderRadius.circular(bz.radiusMd),
-        onTap: () => context.push(mapPointLocation(point.id)),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: bz.minTouchTarget + 8),
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: bz.space2),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 32,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: bearing == null
-                        ? Icon(LucideIcons.mapPin, size: 20, color: bz.ink200)
-                        : Transform.rotate(
-                            key: ValueKey('map-card-bearing-${point.id}'),
-                            angle: bearing * math.pi / 180,
-                            child: Icon(
-                              LucideIcons.navigation2,
-                              size: 20,
-                              color: bz.ink100,
-                            ),
-                          ),
+        // Non-interactive mini map; a tap opens E2 centred on the point.
+        Semantics(
+          button: true,
+          label: 'Mini mapa. Pokaż punkt na mapie',
+          excludeSemantics: true,
+          child: GestureDetector(
+            key: const ValueKey('map-card-minimap'),
+            behavior: HitTestBehavior.opaque,
+            onTap: focus,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(bz.radiusMd),
+              child: SizedBox(
+                height: 96,
+                child: CustomPaint(
+                  painter: MiniMapPainter(
+                    bearing: bearing,
+                    confirmed: point.confirmed,
+                    land: bz.bg200,
+                    grid: bz.line150,
+                    link: bz.signal,
+                    you: bz.info,
+                    target: bz.ink100,
+                    halo: bz.bg000,
                   ),
                 ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: bz.space2),
+        Semantics(
+          label: label,
+          excludeSemantics: true,
+          child: ConstrainedBox(
+            key: ValueKey('map-card-point-${point.id}'),
+            constraints: BoxConstraints(minHeight: bz.minTouchTarget),
+            child: Row(
+              children: [
+                _KindMarker(confirmed: point.confirmed),
+                SizedBox(width: bz.space3),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,15 +208,132 @@ class _PointRow extends StatelessWidget {
                           subtitle,
                           style: bz.caption.copyWith(color: bz.ink200),
                         ),
+                      if (distance != null)
+                        Text(
+                          distanceLineText(distance),
+                          style: bz.label.copyWith(color: bz.ink100),
+                        ),
                       if (!point.confirmed)
                         Text(
                           unconfirmedShortText,
                           style: bz.caption.copyWith(color: bz.ink200),
                         ),
+                      if (months != null)
+                        Text(
+                          staleMonthsText(months),
+                          style: bz.caption.copyWith(color: bz.ink200),
+                        ),
                     ],
                   ),
                 ),
-                if (distance != null) Text(distance, style: bz.label),
+                if (bearing != null)
+                  Transform.rotate(
+                    key: ValueKey('map-card-bearing-${point.id}'),
+                    angle: bearing * math.pi / 180,
+                    child: Icon(
+                      LucideIcons.navigation2,
+                      size: 24,
+                      color: bz.ink100,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: bz.space2),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _SourceChip(point: point),
+        ),
+        SizedBox(height: bz.space3),
+        ConstrainedBox(
+          constraints: BoxConstraints(minHeight: bz.minTouchTarget),
+          child: FilledButton(
+            key: const ValueKey('map-card-open'),
+            onPressed: focus,
+            child: Text(_hasPosition ? pointGuideText : mapShowOnMapText),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _KindMarker extends StatelessWidget {
+  const _KindMarker({required this.confirmed});
+
+  final bool confirmed;
+
+  @override
+  Widget build(BuildContext context) {
+    final bz = context.bz;
+    // Unconfirmed: empty (outlined) marker, per DS.
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: confirmed ? bz.ink100 : Colors.transparent,
+        border: Border.all(color: bz.ink100, width: 2),
+      ),
+      child: Icon(
+        LucideIcons.shield,
+        size: 16,
+        color: confirmed ? bz.bg000 : bz.ink100,
+      ),
+    );
+  }
+}
+
+/// Neutral (grey, shield) source chip; tap shows source and verification date.
+class _SourceChip extends StatelessWidget {
+  const _SourceChip({required this.point});
+
+  final ShelterPoint point;
+
+  @override
+  Widget build(BuildContext context) {
+    final bz = context.bz;
+    return Semantics(
+      button: true,
+      label: pointSourceText(point.source, point.verifiedAt),
+      excludeSemantics: true,
+      child: InkWell(
+        key: const ValueKey('map-card-source'),
+        borderRadius: BorderRadius.circular(bz.radiusFull),
+        onTap: () => showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            content: Text(
+              point.confirmed
+                  ? pointSourceText(point.source, point.verifiedAt)
+                  : '${pointUnconfirmedText(point.source)}\n'
+                        '${pointSourceText(point.source, point.verifiedAt)}',
+              style: bz.chat,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Zamknij'),
+              ),
+            ],
+          ),
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: bz.minTouchTarget),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: bz.space2),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.shield, size: 14, color: bz.ink200),
+                SizedBox(width: bz.space1),
+                Flexible(
+                  child: Text(
+                    sourceChipText(point.source, point.verifiedAt),
+                    style: bz.caption.copyWith(color: bz.ink200),
+                  ),
+                ),
               ],
             ),
           ),
@@ -202,6 +341,99 @@ class _PointRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Lightweight static schematic of the DS mini map (no second MapLibre view in
+/// the chat list): you = `info` dot, target = marker, dotted straight line in
+/// `signal`. The target is placed by bearing; the line length is a fixed
+/// fraction of the box, so it conveys direction, not scale. Without a position
+/// only the target is drawn.
+class MiniMapPainter extends CustomPainter {
+  MiniMapPainter({
+    required this.bearing,
+    required this.confirmed,
+    required this.land,
+    required this.grid,
+    required this.link,
+    required this.you,
+    required this.target,
+    required this.halo,
+  });
+
+  final double? bearing;
+  final bool confirmed;
+  final Color land, grid, link, you, target, halo;
+
+  /// Pixel offsets (you -> target) for [bearing] fitting [size]; null when the
+  /// bearing is unknown.
+  static Offset vectorFor(double bearing, Size size) {
+    final dx = math.sin(bearing * math.pi / 180);
+    final dy = -math.cos(bearing * math.pi / 180);
+    final maxX = size.width * 0.7;
+    final maxY = size.height * 0.6;
+    final lx = dx.abs() < 1e-6 ? double.infinity : maxX / dx.abs();
+    final ly = dy.abs() < 1e-6 ? double.infinity : maxY / dy.abs();
+    final l = math.min(lx, ly);
+    return Offset(dx * l, dy * l);
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Offset.zero & size, Paint()..color = land);
+    final gridPaint = Paint()
+      ..color = grid
+      ..strokeWidth = 1;
+    for (var x = size.width / 6; x < size.width; x += size.width / 6) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
+    }
+    for (var y = size.height / 3; y < size.height; y += size.height / 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
+    }
+    final centre = size.center(Offset.zero);
+    void marker(Offset c) {
+      canvas.drawCircle(c, 9, Paint()..color = halo);
+      if (confirmed) {
+        canvas.drawCircle(c, 7, Paint()..color = target);
+      } else {
+        canvas.drawCircle(
+          c,
+          6,
+          Paint()
+            ..color = target
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2,
+        );
+      }
+    }
+
+    final b = bearing;
+    if (b == null) {
+      marker(centre);
+      return;
+    }
+    final v = vectorFor(b, size);
+    final from = centre - v / 2;
+    final to = centre + v / 2;
+    final linePaint = Paint()
+      ..color = link
+      ..strokeWidth = 2;
+    final total = (to - from).distance;
+    final dir = (to - from) / total;
+    for (var d = 0.0; d < total; d += 10) {
+      canvas.drawLine(
+        from + dir * d,
+        from + dir * math.min(d + 5, total),
+        linePaint,
+      );
+    }
+    marker(to);
+    canvas.drawCircle(from, 8, Paint()..color = halo);
+    canvas.drawCircle(from, 6, Paint()..color = you);
+  }
+
+  @override
+  bool shouldRepaint(MiniMapPainter o) =>
+      o.bearing != bearing || o.confirmed != confirmed || o.land != land;
 }
 
 /// Plugs the real `map` template into [r] (replaces the placeholder).

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bezpiecznik/czat/templates/map/map_card_view.dart';
 import 'package:bezpiecznik/czat/templates/template_registry.dart';
 import 'package:bezpiecznik/mapa/position_provider.dart';
+import 'package:bezpiecznik/mapa/punkty/point_sheet.dart';
 import 'package:bezpiecznik/mapa/punkty/points_db.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +12,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
-ShelterPoint point(int id, {bool confirmed = false, String? name, double lat = 53.43}) => ShelterPoint(
+ShelterPoint point(
+  int id, {
+  bool confirmed = false,
+  String? name,
+  double lat = 53.43,
+}) => ShelterPoint(
   id: id,
   kind: 'shelter',
   name: name,
@@ -45,7 +51,12 @@ Future<List<String>> pump(
   final visited = <String>[];
   final router = GoRouter(
     routes: [
-      GoRoute(path: '/', builder: (c, s) => Scaffold(body: SingleChildScrollView(child: MapCardView(target: target)))),
+      GoRoute(
+        path: '/',
+        builder: (c, s) => Scaffold(
+          body: SingleChildScrollView(child: MapCardView(target: target)),
+        ),
+      ),
       GoRoute(
         path: '/mapa',
         builder: (c, s) {
@@ -59,7 +70,10 @@ Future<List<String>> pump(
     ProviderScope(
       overrides: [
         nearestSheltersProvider.overrideWith((ref) => nearest()),
-        positionProvider.overrideWith((ref) => position == null ? const Stream.empty() : Stream.value(position)),
+        positionProvider.overrideWith(
+          (ref) =>
+              position == null ? const Stream.empty() : Stream.value(position),
+        ),
       ],
       child: MaterialApp.router(theme: buildBzTheme(), routerConfig: router),
     ),
@@ -70,57 +84,167 @@ Future<List<String>> pump(
 }
 
 void main() {
-  final three = [point(1, name: 'Schron A'), point(2, confirmed: true, name: 'Schron B', lat: 53.44), point(3)];
+  final three = [
+    point(1, name: 'Schron A'),
+    point(2, confirmed: true, name: 'Schron B', lat: 53.44),
+    point(3),
+  ];
 
-  testWidgets('shows 3 points with distance and unconfirmed status', (tester) async {
-    await pump(tester, nearest: () async => three, position: pos());
-    expect(find.text('Schron A'), findsOneWidget);
-    expect(find.text('Schron B'), findsOneWidget);
-    // Unnamed point: titled by its kind, address as subtitle, never invented.
+  testWidgets(
+    'shows the nearest point: distance, walk time, source chip, Prowadź',
+    (tester) async {
+      await pump(tester, nearest: () async => three, position: pos());
+      expect(find.text('Schron A'), findsOneWidget);
+      expect(find.text('Schron B'), findsNothing); // one point per card
+      // 53.43 vs 53.42 -> ~1,1 km -> 14 min at 5 km/h.
+      expect(
+        find.textContaining('w linii prostej · ok. 14 min'),
+        findsOneWidget,
+      );
+      expect(find.text('OSM · zweryf. 03.2026'), findsOneWidget);
+      expect(find.text('niepotwierdzony'), findsOneWidget);
+      expect(find.byKey(const ValueKey('map-card-bearing-1')), findsOneWidget);
+      expect(find.byKey(const ValueKey('map-card-minimap')), findsOneWidget);
+      expect(find.text(pointGuideText), findsOneWidget);
+      expect(find.text(mapNoPositionText), findsNothing);
+    },
+  );
+
+  testWidgets('unnamed point: titled by kind, address as subtitle', (
+    tester,
+  ) async {
+    await pump(tester, nearest: () async => [point(3)], position: pos());
     expect(find.text('Schron'), findsOneWidget);
     expect(find.text('ul. Długa 3'), findsOneWidget);
     expect(find.text('Punkt bez nazwy'), findsNothing);
-    expect(find.text('s?'), findsNothing);
-    expect(find.byKey(const ValueKey('map-card-bearing-1')), findsOneWidget);
-    expect(find.text('niepotwierdzony'), findsNWidgets(2));
-    expect(find.textContaining(' m'), findsWidgets);
-    expect(find.text(mapNoPositionText), findsNothing);
-    expect(find.text(mapOpenMapText), findsOneWidget);
   });
 
-  testWidgets('tap on a point opens /mapa?point=<id>', (tester) async {
-    final visited = await pump(tester, nearest: () async => three, position: pos());
-    await tester.tap(find.byKey(const ValueKey('map-card-point-2')));
+  testWidgets('confirmed point has no "niepotwierdzony"', (tester) async {
+    await pump(
+      tester,
+      nearest: () async => [point(2, confirmed: true, name: 'B')],
+      position: pos(),
+    );
+    expect(find.text('niepotwierdzony'), findsNothing);
+  });
+
+  testWidgets('stale data shows months', (tester) async {
+    await pump(
+      tester,
+      nearest: () async => [
+        const ShelterPoint(
+          id: 9,
+          kind: 'shelter',
+          lat: 53.43,
+          lon: 14.55,
+          source: 'OSM',
+          verifiedAt: '2020-01-01',
+          confirmed: true,
+        ),
+      ],
+      position: pos(),
+    );
+    expect(find.textContaining('Dane sprzed '), findsOneWidget);
+  });
+
+  testWidgets('source chip opens a dialog with source and date', (
+    tester,
+  ) async {
+    await pump(tester, nearest: () async => three, position: pos());
+    await tester.tap(find.byKey(const ValueKey('map-card-source')));
     await tester.pumpAndSettle();
-    expect(visited, ['/mapa?point=2']);
+    expect(find.textContaining('Źródło: OSM, 2026-03-01'), findsOneWidget);
+    expect(find.textContaining('niesprawdzone przez PSP'), findsOneWidget);
   });
 
-  testWidgets('open map button goes to /mapa', (tester) async {
-    final visited = await pump(tester, nearest: () async => three, position: pos());
+  testWidgets('mini map tap opens /mapa?point=<id>', (tester) async {
+    final visited = await pump(
+      tester,
+      nearest: () async => three,
+      position: pos(),
+    );
+    await tester.tap(find.byKey(const ValueKey('map-card-minimap')));
+    await tester.pumpAndSettle();
+    expect(visited, ['/mapa?point=1']);
+  });
+
+  testWidgets('Prowadź opens the map focused on the point', (tester) async {
+    final visited = await pump(
+      tester,
+      nearest: () async => three,
+      position: pos(),
+    );
     await tester.tap(find.byKey(const ValueKey('map-card-open')));
     await tester.pumpAndSettle();
-    expect(visited, ['/mapa']);
+    expect(visited, ['/mapa?point=1']);
   });
 
-  testWidgets('rows and button are at least 48 dp high', (tester) async {
+  testWidgets('tap targets are at least 48 dp high', (tester) async {
     await pump(tester, nearest: () async => three, position: pos());
-    expect(tester.getSize(find.byKey(const ValueKey('map-card-point-1'))).height, greaterThanOrEqualTo(48));
-    expect(tester.getSize(find.byKey(const ValueKey('map-card-open'))).height, greaterThanOrEqualTo(48));
+    for (final k in ['map-card-point-1', 'map-card-open', 'map-card-source']) {
+      expect(
+        tester.getSize(find.byKey(ValueKey(k))).height,
+        greaterThanOrEqualTo(48),
+        reason: k,
+      );
+    }
   });
 
-  testWidgets('no position: message, no distances, "Pokaż na mapie"', (tester) async {
+  test('walkMinutes: 450 m -> 6 min, min 1, rounds up', () {
+    expect(walkMinutes(450), 6);
+    expect(walkMinutes(10), 1);
+    expect(walkMinutes(1000), 12);
+    expect(walkMinutes(1001), 13);
+  });
+
+  test('sourceChipText / monthsSince', () {
+    expect(sourceChipText('OSM', '2026-03-01'), 'OSM · zweryf. 03.2026');
+    expect(sourceChipText('OSM', 'x'), 'OSM');
+    expect(monthsSince('2025-11-21', DateTime(2026, 11, 21)), 12);
+    expect(monthsSince('2025-11-22', DateTime(2026, 11, 21)), 11);
+    expect(monthsSince('x', DateTime(2026)), isNull);
+  });
+
+  test('MiniMapPainter.vectorFor points along the bearing', () {
+    const size = Size(300, 96);
+    final north = MiniMapPainter.vectorFor(0, size);
+    expect(north.dx.abs(), lessThan(1e-6));
+    expect(north.dy, lessThan(0));
+    final east = MiniMapPainter.vectorFor(90, size);
+    expect(east.dx, greaterThan(0));
+    expect(east.dy.abs(), lessThan(1e-6));
+    final ne = MiniMapPainter.vectorFor(45, size);
+    expect(ne.dx, greaterThan(0));
+    expect(ne.dy, lessThan(0));
+    expect(ne.dx.abs(), closeTo(ne.dy.abs(), 1e-6));
+  });
+
+  testWidgets('no position: message, no distances, "Pokaż na mapie"', (
+    tester,
+  ) async {
     await pump(tester, nearest: () async => three);
     expect(find.text(mapNoPositionText), findsOneWidget);
     expect(find.text(mapShowOnMapText), findsOneWidget);
     expect(find.text(mapUnknownDistancesText), findsOneWidget);
-    expect(find.textContaining(RegExp(r'\d+ m ')), findsNothing);
+    expect(find.textContaining('ok. '), findsNothing);
   });
 
-  testWidgets('card reacts to a position fix arriving after the first build', (tester) async {
+  testWidgets('card reacts to a position fix arriving after the first build', (
+    tester,
+  ) async {
     final ctl = StreamController<Position?>();
     addTearDown(ctl.close);
     final router = GoRouter(
-      routes: [GoRoute(path: '/', builder: (c, s) => const Scaffold(body: SingleChildScrollView(child: MapCardView(target: 'nearest_shelter'))))],
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (c, s) => const Scaffold(
+            body: SingleChildScrollView(
+              child: MapCardView(target: 'nearest_shelter'),
+            ),
+          ),
+        ),
+      ],
     );
     await tester.pumpWidget(
       ProviderScope(
@@ -139,7 +263,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.text(mapNoPositionText), findsNothing);
-    expect(find.text(mapOpenMapText), findsOneWidget);
+    expect(find.text(pointGuideText), findsOneWidget);
     expect(find.byKey(const ValueKey('map-card-bearing-1')), findsOneWidget);
   });
 
@@ -149,15 +273,25 @@ void main() {
   });
 
   testWidgets('loading shows calm text', (tester) async {
-    final never = Future<List<ShelterPoint>>.delayed(const Duration(days: 1), () => const []);
+    final never = Future<List<ShelterPoint>>.delayed(
+      const Duration(days: 1),
+      () => const [],
+    );
     await pump(tester, nearest: () => never, position: pos());
     expect(find.text(mapLoadingText), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(days: 2));
   });
 
-  testWidgets('hospital target has no data: spec text, no invented points', (tester) async {
-    await pump(tester, nearest: () async => three, position: pos(), target: 'nearest_hospital');
+  testWidgets('hospital target has no data: spec text, no invented points', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      nearest: () async => three,
+      position: pos(),
+      target: 'nearest_hospital',
+    );
     expect(find.text(mapNoPointsText), findsOneWidget);
     expect(find.text('Schron A'), findsNothing);
     expect(find.text(mapHospitalCardTitle), findsOneWidget);
