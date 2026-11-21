@@ -1,6 +1,6 @@
 # Ekrany i panele
 
-Specyfikacja warstwy UI dla buildera. Każdy plik opisuje jeden ekran albo panel według [wzoru specyfikacji](#wzór-specyfikacji-ekranu). Zachowanie funkcji (co robi, skąd dane) opisują pliki w [02-funkcje](../02-funkcje/). Gdy ekran i funkcja się różnią, obowiązuje nowsza decyzja z listy [Decyzje w tym folderze](#decyzje-w-tym-folderze). Oznaczenia P0/P1 w plikach ekranów to waga w produkcie; **co budujemy w MVP, rozstrzyga [zakres MVP](../07-hackathon/zakres-mvp.md)**.
+Specyfikacja warstwy UI dla buildera. **Wygląd (kolory, typografia, komponenty): [design system](../08-design-system/README.md); które komponenty składają każdy ekran: [mapa komponentów](../08-design-system/komponenty.md).** Każdy plik opisuje jeden ekran albo panel według [wzoru specyfikacji](#wzór-specyfikacji-ekranu). Zachowanie funkcji (co robi, skąd dane) opisują pliki w [02-funkcje](../02-funkcje/). Gdy ekran i funkcja się różnią, obowiązuje nowsza decyzja z listy [Decyzje w tym folderze](#decyzje-w-tym-folderze). Oznaczenia P0/P1 w plikach ekranów to waga w produkcie; **co budujemy w MVP, rozstrzyga [zakres MVP](../07-hackathon/zakres-mvp.md)**.
 
 ## Decyzje w tym folderze
 

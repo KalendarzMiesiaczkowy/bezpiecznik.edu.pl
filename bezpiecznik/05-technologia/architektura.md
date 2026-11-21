@@ -44,6 +44,7 @@ Bezpiecznik to natywna aplikacja mobilna na **Android i iOS**. Nie ma wersji web
 | PDF | `pdfrx` | Okno PDF w szablonie `quote`: skok do strony i podświetlenie cytowanego fragmentu. Podświetlenie wymaga prostokątów fragmentu (`rects`) zapisanych przy budowie bazy wiedzy |
 | Wydruk planu (P2, później) | `pdf` + `printing` | Eksport planu 72 h |
 | Animacje | GIF przez wbudowany widżet `Image` (MVP); `lottie` później | Szablon `animation` w kartach ratunkowych. Decyzja z 2026-11-21: w MVP GIF |
+| Wygląd | Tokeny z [design systemu](../08-design-system/README.md) (`tokens.json`) przeniesione do `ThemeData` / `ThemeExtension`. Font Atkinson Hyperlegible Next (OFL) dołączony lokalnie jako asset, nigdy z Google Fonts. Ikony Lucide (ISC); pakiet Fluttera do wyboru i sprawdzenia na pub.dev | Komponenty React w design systemie to wzorzec wyglądu, stanów i wymiarów, nie kod do użycia |
 
 Aktualne wersje pakietów i obsługę obu platform trzeba sprawdzić na pub.dev przed rozpoczęciem pracy.
 

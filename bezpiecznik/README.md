@@ -11,6 +11,7 @@ Ten folder to **przepis na aplikację**: jedyne źródło prawdy dla budującego
 3. [Ekrany](03-ekrany/README.md): mapa nawigacji, elementy globalne, potem każdy ekran z kryteriami akceptacji.
 4. [Ranking funkcji](02-funkcje/ranking.md): waga funkcji w produkcie (P0 → P1 → P2).
 5. [Architektura](05-technologia/architektura.md): stos technologiczny i moduły.
+6. [Design system](08-design-system/README.md): kolory, typografia, odstępy, ikony, ruch, komponenty (React jako wzorzec dla Fluttera) i [mapa ekran → komponenty](08-design-system/komponenty.md).
 
 ## Spis treści
 
@@ -43,6 +44,9 @@ Ten folder to **przepis na aplikację**: jedyne źródło prawdy dla budującego
 
 **7. Hackathon**
 - [Zakres MVP](07-hackathon/zakres-mvp.md) · [Ograniczenia](07-hackathon/ograniczenia.md) · [Plan budowy](07-hackathon/plan-budowy.md) · [Scenariusz pokazu](07-hackathon/scenariusz-pokazu.md) · [Scenariusz filmu (75 s)](07-hackathon/scenariusz-filmu.md)
+
+**8. Design system**
+- [Przegląd i zasady](08-design-system/README.md) · [Mapa komponentów i odstępstwa od specyfikacji](08-design-system/komponenty.md) · [Tokeny](08-design-system/api/tokens.md) (`tokens.json`, `tokens.css`) · [Ruch](08-design-system/motion.md)
 
 ## Priorytety w skrócie
 
