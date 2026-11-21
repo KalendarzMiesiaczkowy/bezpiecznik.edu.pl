@@ -16,6 +16,13 @@ abstract interface class CprOverlayPort {
   void stop();
 }
 
+/// End summary: "Zakończono · czas 12:05 · 9 cykli".
+class CprSummary {
+  const CprSummary(this.elapsed, this.cycles);
+  final Duration elapsed;
+  final int cycles;
+}
+
 /// Whole seconds of [d], rounded up (a 9.4 s countdown reads "0:10"); null
 /// stays null.
 int? ceilSeconds(Duration? d) => d == null ? null : (d.inMilliseconds + 999) ~/ 1000;
@@ -70,6 +77,17 @@ class CprSession extends ChangeNotifier {
   String _shownKey = '';
   int _lastOverlaySecond = -1;
   bool _aedReminder = false;
+  CprSummary? _summary;
+
+  /// Result of the last finished session (shown in the chat card until
+  /// [dismissSummary]).
+  CprSummary? get summary => _summary;
+
+  void dismissSummary() {
+    if (_summary == null) return;
+    _summary = null;
+    notifyListeners();
+  }
 
   /// Whether the "Poproś kogoś o AED" row is shown. On at start (when the card
   /// has an AED voice line), hidden by [dismissAedReminder], back on every
@@ -149,6 +167,8 @@ class CprSession extends ChangeNotifier {
   void stop() {
     final e = _engine;
     if (e == null) return;
+    final last = e.snapshot;
+    _summary = CprSummary(last.elapsed, last.completedCycles);
     e.stop();
     _timer?.cancel();
     _timer = null;

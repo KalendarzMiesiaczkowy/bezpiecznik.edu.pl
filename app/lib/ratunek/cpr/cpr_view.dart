@@ -28,6 +28,23 @@ const String cprPauseLabel = 'Pauza';
 const String cprResumeLabel = 'Wznów';
 const String cprStopLabel = 'Zakończ';
 const String cprBreathsDoneLabel = 'Dalej';
+const String cprStopTitle = 'Zakończyć RKO?';
+const String cprStopConfirmLabel = 'Zakończ RKO';
+const String cprStopBackLabel = 'Wróć';
+const String cprRestartLabel = 'Zacznij od nowa';
+
+/// "Zakończono · czas 12:05 · 9 cykli" (Polish plural of "cykl").
+String cprSummaryText(CprSummary s) {
+  final n = s.cycles;
+  final last = n % 10;
+  final word = n == 1
+      ? 'cykl'
+      : (last >= 2 && last <= 4 && (n % 100 < 12 || n % 100 > 14))
+      ? 'cykle'
+      : 'cykli';
+  return 'Zakończono · czas ${formatCprElapsed(s.elapsed)} · $n $word';
+}
+
 const String cprAedReminderLabel = 'Poproś kogoś o AED';
 
 /// Opens the AED card in the chat (hidden without `aed_card_id`).
@@ -88,6 +105,30 @@ class CprCard extends ConsumerWidget {
             child: Text(
               cprRunningNotice,
               style: t.chat.copyWith(color: t.ink200),
+            ),
+          );
+        }
+        final done = session.summary;
+        if (done != null) {
+          return PanelCard(
+            title: cprTitle,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  cprSummaryText(done),
+                  key: const ValueKey('cpr-summary-end'),
+                  style: t.chat.copyWith(color: t.ink200),
+                ),
+                SizedBox(height: t.space3),
+                BzButton(
+                  label: cprRestartLabel,
+                  variant: BzButtonVariant.secondary,
+                  size: BzButtonSize.xl,
+                  fullWidth: true,
+                  onPressed: session.dismissSummary,
+                ),
+              ],
             ),
           );
         }
@@ -186,6 +227,28 @@ class CprPinned extends ConsumerWidget {
     }
   }
 
+  Future<void> _confirmStop(BuildContext context) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(cprStopTitle),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text(cprStopBackLabel),
+          ),
+          BzButton(
+            key: const ValueKey('cpr-stop-confirm'),
+            label: cprStopConfirmLabel,
+            variant: BzButtonVariant.dangerSolid,
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) session.stop();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListenableBuilder(
@@ -197,7 +260,9 @@ class CprPinned extends ConsumerWidget {
         if (s == null || cfg == null || v == null) {
           return const SizedBox.shrink();
         }
-        return _body(context, ref, s, cfg, v);
+        return _KeyboardBuilder(
+          builder: (context, kb) => _body(context, ref, kb, s, cfg, v),
+        );
       },
     );
   }
@@ -253,6 +318,7 @@ class CprPinned extends ConsumerWidget {
   Widget _body(
     BuildContext context,
     WidgetRef ref,
+    bool keyboardOpen,
     CprSnapshot s,
     CprConfig cfg,
     CprVariantConfig v,
@@ -289,6 +355,42 @@ class CprPinned extends ConsumerWidget {
         s.changesDue > 0 &&
         s.sinceChange < cprChangeBannerDuration &&
         cfg.voice.change.isNotEmpty;
+    // Keyboard open: one line "UCISKAJ 17/30 · 03:42 · [Pauza]".
+    if (keyboardOpen) {
+      final line = [
+        if (counter.isEmpty) label else '$label ${counter.replaceAll(' ', '')}',
+        formatCprElapsed(s.elapsed),
+      ].join(' · ');
+      return DecoratedBox(
+        key: const ValueKey('cpr-pinned-compact'),
+        decoration: BoxDecoration(
+          color: t.bg200,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(t.radiusLg)),
+          boxShadow: t.shadowFloat,
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(t.space4, 0, t.space2, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  line,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: t.label.copyWith(color: t.ink100),
+                ),
+              ),
+              BzButton(
+                label: paused ? cprResumeLabel : cprPauseLabel,
+                variant: BzButtonVariant.ghost,
+                size: BzButtonSize.md,
+                onPressed: paused ? session.resume : session.pause,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     final accent = breathing ? t.signal : t.ink100;
 
     // Large text: the AED reminder wraps to two lines instead of overflowing.
@@ -431,7 +533,7 @@ class CprPinned extends ConsumerWidget {
                   label: cprStopLabel,
                   variant: BzButtonVariant.ghost,
                   size: BzButtonSize.md,
-                  onPressed: session.stop,
+                  onPressed: () => unawaited(_confirmStop(context)),
                 ),
               ],
             ),
@@ -461,6 +563,42 @@ class CprPinned extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Tells whether the soft keyboard is open. Reads the raw view insets: the
+/// chat Scaffold strips `MediaQuery.viewInsets` from its body, and rebuilds on
+/// metrics changes.
+class _KeyboardBuilder extends StatefulWidget {
+  const _KeyboardBuilder({required this.builder});
+  final Widget Function(BuildContext context, bool keyboardOpen) builder;
+
+  @override
+  State<_KeyboardBuilder> createState() => _KeyboardBuilderState();
+}
+
+class _KeyboardBuilderState extends State<_KeyboardBuilder>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) => widget.builder(
+    context,
+    MediaQuery.viewInsetsOf(context).bottom > 0 ||
+        View.of(context).viewInsets.bottom > 0,
+  );
 }
 
 class _Dots extends StatelessWidget {

@@ -142,11 +142,45 @@ void main() {
     await tester.tap(find.text(cprResumeLabel));
     await tester.pump();
     expect(find.text(cprCompressLabel), findsOneWidget);
+    // "Wróć" keeps the session running.
     await tester.tap(find.text(cprStopLabel));
-    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text(cprStopTitle), findsOneWidget);
+    await tester.tap(find.text(cprStopBackLabel));
+    await tester.pumpAndSettle();
+    expect(rig.session.running, isTrue);
+    await tester.tap(find.text(cprStopLabel));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(cprStopConfirmLabel));
+    await tester.pumpAndSettle();
     expect(rig.session.running, isFalse);
-    expect(find.text(cprStartLabel), findsOneWidget);
     expect(rig.wakelock.on, isFalse);
+    expect(find.textContaining('Zakończono · czas '), findsOneWidget);
+    await tester.tap(find.text(cprRestartLabel));
+    await tester.pump();
+    expect(find.text(cprStartLabel), findsOneWidget);
+  });
+
+  test('summary text pluralises "cykl"', () {
+    String f(int n) => cprSummaryText(CprSummary(const Duration(minutes: 12, seconds: 5), n));
+    expect(f(9), 'Zakończono · czas 12:05 · 9 cykli');
+    expect(f(1), endsWith('1 cykl'));
+    expect(f(3), endsWith('3 cykle'));
+    expect(f(12), endsWith('12 cykli'));
+  });
+
+  testWidgets('keyboard open: compact one-line pinned instructor', (tester) async {
+    final (rig, _) = await pumpCard(tester);
+    await tester.tap(find.text(cprStartLabel));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('cpr-pinned-compact')), findsNothing);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('cpr-pinned-compact')), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^UCISKAJ \d+/30 · 00:\d\d$')), findsOneWidget);
+    expect(find.text(cprPauseLabel), findsOneWidget);
+    rig.session.stop();
   });
 
   testWidgets('change banner appears for 10 s after the prompt', (tester) async {
