@@ -7,6 +7,7 @@ import 'no_source.dart';
 import 'panel_model.dart';
 import 'placeholder_panel.dart';
 import 'quote_panel.dart';
+import 'source_sheet.dart';
 import 'steps_panel.dart';
 
 /// Everything a panel builder needs to draw one template of a message.
@@ -82,8 +83,7 @@ final templateRegistryProvider = Provider<TemplateRegistry>(
   (ref) => buildAppTemplateRegistry(),
 );
 
-/// Called when a source chip / "Powiększ" is tapped. The PDF preview task
-/// overrides it; default does nothing.
+/// Called when a source chip / "Powiększ" is tapped. Default: source sheet.
 final sourceOpenerProvider = Provider<void Function(SourceRecord)>(
-  (ref) => (_) {},
+  (ref) => openSourceSheet,
 );
