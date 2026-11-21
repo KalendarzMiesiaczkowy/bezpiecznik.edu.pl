@@ -26,6 +26,18 @@ abstract class LocationGateway {
   Future<bool> openSettings();
 }
 
+/// Single source of position settings. `forceLocationManager` makes the plugin
+/// use the Android LocationManager (GPS works offline) instead of the
+/// FusedLocationProvider, which would show the Play services "Location
+/// Accuracy" resolution dialog over the app (geolocator_android
+/// GeolocationManager.createLocationClient / FusedLocationClient).
+AndroidSettings bezpiecznikLocationSettings() => AndroidSettings(
+  accuracy: LocationAccuracy.high,
+  distanceFilter: 2,
+  forceLocationManager: true,
+  intervalDuration: const Duration(seconds: 2),
+);
+
 class GeolocatorGateway implements LocationGateway {
   const GeolocatorGateway();
 
@@ -42,15 +54,11 @@ class GeolocatorGateway implements LocationGateway {
   }
 
   @override
-  Future<Position?> lastKnown() => Geolocator.getLastKnownPosition();
+  Future<Position?> lastKnown() => Geolocator.getLastKnownPosition(forceAndroidLocationManager: true);
 
   @override
   Stream<Position> positions() => Geolocator.getPositionStream(
-    locationSettings: AndroidSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 2,
-      intervalDuration: const Duration(seconds: 2),
-    ),
+    locationSettings: bezpiecznikLocationSettings(),
   );
 
   @override

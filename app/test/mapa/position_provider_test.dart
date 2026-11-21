@@ -70,4 +70,10 @@ void main() {
     expect(seen.map((p) => p?.latitude).toList(), contains(53.4));
     expect(seen.last, isNull);
   });
+
+  test('location settings force the Android LocationManager (no Play services dialog)', () {
+    final settings = bezpiecznikLocationSettings();
+    expect(settings.forceLocationManager, isTrue);
+    expect(settings.toJson()['forceLocationManager'], isTrue);
+  });
 }
