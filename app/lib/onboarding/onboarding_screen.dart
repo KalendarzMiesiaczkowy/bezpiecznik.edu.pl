@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../czat/drawer/bz_logo.dart';
 import '../profil/profile_form.dart';
 import '../profil/profile_model.dart';
 import '../profil/profile_store.dart';
@@ -70,12 +71,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       children: [
         if (progress != null) ...[
           Text(progress, style: bz.caption),
-          const SizedBox(height: 8),
+          SizedBox(height: bz.space2),
           OnboardingProgressBar(fraction: _fractionOf(progress)),
-        ],
-        const SizedBox(height: 8),
+          SizedBox(height: bz.space5),
+        ] else
+          SizedBox(height: bz.space2),
         Text(text, style: bz.title),
-        const SizedBox(height: 16),
+        SizedBox(height: bz.space4),
       ],
     );
   }
@@ -107,17 +109,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: BzLogo(size: 48),
+                  ),
+                  SizedBox(height: bz.space4),
                   _title('Bezpiecznik'),
                   Text(
                     'Podpowiada, co zrobić w sytuacji kryzysowej, według oficjalnych poradników. Działa bez internetu. Prowadzi do najbliższego schronu.',
                     style: bz.chat,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: bz.space4),
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(bz.space4),
                     decoration: BoxDecoration(
                       color: bz.signalTint,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(bz.radiusMd),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +135,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           size: 24,
                           color: bz.signal,
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: bz.space3),
                         Expanded(
                           child: Text(
                             'Nie zastępuje 112. W zagrożeniu życia dzwoń pod 112.',
@@ -168,7 +175,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             fullWidth: true,
             onPressed: _allow,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: bz.space2),
           BzButton(
             key: const Key('onb-later'),
             label: 'Nie teraz',
@@ -190,7 +197,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 'Bez lokalizacji nie pokażę najbliższego schronu. Możesz to zmienić w ustawieniach telefonu.',
                 style: bz.caption,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: bz.space3),
             ],
             Text(
               'Odpowiedz na kilka pytań o domowników i mieszkanie (ok. 2 min). Dzięki temu porady dotyczą twojej rodziny. Profil zostaje tylko w telefonie.',
@@ -205,7 +212,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             fullWidth: true,
             onPressed: () => _go(OnboardingStep.profileForm),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: bz.space2),
           BzButton(
             key: const Key('onb-profile-later'),
             label: 'Później',
@@ -218,15 +225,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       case OnboardingStep.profileForm:
         return [
           _title('Profil domu', progress: 'Krok 3 z 3'),
-          Text(
-            'Zostaje w telefonie. Wysyłasz go tylko ty. Każde pole możesz pominąć.',
-            style: bz.caption,
-          ),
+          Text('Każde pole możesz pominąć.', style: bz.caption),
           Expanded(
             child: Stack(
               children: [
                 SingleChildScrollView(
-                  padding: const EdgeInsets.only(top: 16, bottom: 24),
+                  padding: EdgeInsets.only(top: bz.space4, bottom: bz.space5),
                   child: ProfileForm(
                     initial: _draft,
                     onChanged: (p) => _draft = p,
@@ -276,7 +280,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: bz.space2),
           BzButton(
             key: const Key('onb-profile-save'),
             label: 'Dalej',
@@ -285,6 +289,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             fullWidth: true,
             onPressed: _formValid ? _saveProfile : null,
           ),
+          SizedBox(height: bz.space2),
           BzButton(
             key: const Key('onb-profile-skip'),
             label: 'Pomiń',
@@ -300,14 +305,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget _confirmation() => Expanded(
     child: TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 400),
+      duration: context.bz.durationSlow,
+      curve: context.bz.easeOut,
       builder: (_, v, child) => Opacity(opacity: v, child: child),
       child: Column(
         key: const Key('onb-confirm'),
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(LucideIcons.check, size: 48, color: context.bz.verified),
-          const SizedBox(height: 16),
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: context.bz.verifiedTint,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              LucideIcons.check,
+              size: 32,
+              color: context.bz.verified,
+            ),
+          ),
+          SizedBox(height: context.bz.space4),
           Text('Dodano profil domu', style: context.bz.title),
         ],
       ),
@@ -331,7 +349,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: SafeArea(
                 child: Padding(
                   // Leaves room for the floating shell controls (Back, SOS).
-                  padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
+                  padding: EdgeInsets.fromLTRB(
+                    context.bz.space4,
+                    80,
+                    context.bz.space4,
+                    context.bz.space4,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: _confirming ? [_confirmation()] : _body(),
