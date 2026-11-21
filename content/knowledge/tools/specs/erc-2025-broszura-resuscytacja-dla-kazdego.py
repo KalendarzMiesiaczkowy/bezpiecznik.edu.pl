@@ -17,6 +17,14 @@ dict(page=24, n=2, section="Podstawowe zabiegi resuscytacyjne u dorosłych: 2. Z
 
 Dyspozytorzy centrów powiadamiania ratunkowego są przeszkoleni w pomaganiu świadkom zdarzenia, by mogli skutecznie przeprowadzić RKO. Dyspozytor może zacząć od pytań, czy osoba jest przytomna i czy oddycha prawidłowo."""),
 
+dict(page=24, n=3, section="Podstawowe zabiegi resuscytacyjne u dorosłych: 1. OCEŃ, wysiłek fizyczny i drgawki",
+ start="Osoby, u których", end="2. ZADZWOŃ",
+ topics=["rko-aed"],
+ keywords=["drgawki", "zatrzymanie krążenia", "wysiłek fizyczny", "ciężko oddycha", "otwarte oczy", "jak rozpoznać zatrzymanie krążenia", "oceń oddech"],
+ body="""Osoby, u których do zatrzymania krążenia doszło w trakcie intensywnego wysiłku fizycznego lub zabawy, mogą sprawiać wrażenie, że ciężko oddychają, i często mają otwarte oczy. Mimo to są w stanie zatrzymania krążenia i wymagają natychmiastowej RKO.
+
+Nie myl zatrzymania krążenia z drgawkami. Krótkie, przypominające drgawki ruchy są często obserwowane u młodszych ofiar zatrzymania krążenia i mogą utrudniać jego rozpoznanie. Gdy ruchy ustaną, natychmiast oceń oddech."""),
+
 dict(page=25, n=1, section="Podstawowe zabiegi resuscytacyjne u dorosłych: Zadzwoń (tryb głośnomówiący)",
  start="Nieprzeszkolonemu", end="3. RKO",
  topics=["rko-aed", "numery-alarmowe"],
@@ -85,7 +93,7 @@ dict(page=28, n=1, section="AED: umiejscowienie elektrod i postępowanie po defi
 
 Po przyklejeniu elektrod AED oceni rytm serca poszkodowanego, aby ustalić, czy defibrylacja jest potrzebna. Jeśli tak, AED poinstruuje ratownika, co robić dalej.
 
-Natychmiast po defibrylacji podejmij RKO. Jeśli defibrylacja będzie nieskuteczna, od razu wróć do uciskania klatki piersiowej."""),
+Natychmiast po defibrylacji podejmij RKO. Natychmiast po defibrylacji wróć do uciskania klatki piersiowej i postępuj zgodnie z poleceniami AED."""),
 
 dict(page=29, n=1, section="Podstawowe zabiegi resuscytacyjne krok po kroku: bezpieczeństwo, świadomość, wezwanie pomocy",
  start="BEZPIECZEŃSTWO", end="DROGI ODDECHOWE",
@@ -121,6 +129,49 @@ dict(page=29, n=3, section="Podstawowe zabiegi resuscytacyjne krok po kroku: uci
 - Powtarzaj uciśnięcia w tempie 100–120 na minutę.
 
 RKO wyłącznie z uciskaniem klatki piersiowej: jeśli nie masz przeszkolenia lub nie potrafisz wykonać oddechów ratowniczych, prowadź RKO wyłącznie z uciskaniem klatki piersiowej, czyli nieprzerwanymi uciśnięciami w tempie 100–120 na minutę."""),
+
+dict(page=30, n=1, section="Podstawowe zabiegi resuscytacyjne krok po kroku: połącz uciśnięcia klatki piersiowej z oddechami ratowniczymi (udrożnienie dróg i nos)",
+ start="POŁĄCZ UCIŚNIĘCIA", end="Weź normalny wdech i szczelnie",
+ topics=["rko-aed"],
+ keywords=["oddechy ratownicze", "30:2", "odgięcie głowy", "uniesienie brody", "zatkać nos", "jak wykonać oddech ratowniczy"],
+ body="""Połącz uciśnięcia klatki piersiowej z oddechami ratowniczymi.
+- Jeśli posiadasz przeszkolenie, po 30 uciśnięciach ponownie udrożnij drogi oddechowe manewrem odgięcia głowy i uniesienia brody.
+- Palcem wskazującym i kciukiem dłoni znajdującej się na czole zaciśnij skrzydełka nosa poszkodowanego.
+- Pozwól, aby usta poszkodowanego się otworzyły, ale trzymaj jego brodę uniesioną."""),
+
+dict(page=30, n=2, section="Podstawowe zabiegi resuscytacyjne krok po kroku: technika oddechów ratowniczych",
+ start="Weź normalny wdech i szczelnie", end="GDY AED",
+ topics=["rko-aed"],
+ keywords=["oddechy ratownicze", "30:2", "usta-usta", "2 oddechy", "10 sekund", "skuteczny oddech ratowniczy", "wdmuchiwanie powietrza"],
+ body="""Technika oddechów ratowniczych:
+- Weź normalny wdech i szczelnie obejmij swoimi ustami usta poszkodowanego.
+- Wdmuchuj powietrze jednostajnie w usta poszkodowanego, obserwując, czy jego klatka piersiowa się unosi. Powinno to trwać około 1 sekundę, jak podczas normalnego oddechu. To jest skuteczny oddech ratowniczy.
+- Utrzymując odgięcie głowy i uniesienie brody, odsuń swoje usta od poszkodowanego i obserwuj, jak jego klatka piersiowa opada podczas wydostawania się powietrza.
+- Weź kolejny normalny wdech i powtórz wdmuchiwanie powietrza do ust poszkodowanego, tak aby łącznie wykonać 2 oddechy ratownicze.
+- Nie przerywaj uciśnięć klatki piersiowej na dłużej niż 10 sekund, żeby wykonać 2 oddechy ratownicze, nawet jeśli jeden z nich lub obydwa byłyby nieskuteczne.
+- Następnie bez opóźnienia połóż dłonie we właściwej pozycji na mostku i wykonaj kolejne 30 uciśnięć klatki piersiowej.
+- Kontynuuj uciśnięcia klatki piersiowej i oddechy ratownicze w stosunku 30:2."""),
+
+dict(page=30, n=3, section="Podstawowe zabiegi resuscytacyjne krok po kroku: gdy AED zostanie dostarczone",
+ start="GDY AED", end="JEŚLI AED JEST",
+ topics=["rko-aed"],
+ keywords=["AED", "elektrody", "defibrylacja", "nie dotykaj poszkodowanego", "przycisk defibrylacji", "defibrylacja niezalecana"],
+ body="""Gdy AED zostanie dostarczone, włącz je i przyklej elektrody na odsłoniętą klatkę piersiową poszkodowanego. Jeśli na miejscu jest więcej niż jeden ratownik, należy kontynuować RKO podczas przyklejania elektrod do klatki piersiowej.
+
+Postępuj zgodnie z instrukcjami głosowymi i wizualnymi AED. Jeśli zalecana jest defibrylacja, upewnij się, że ani Ty, ani nikt inny nie dotyka poszkodowanego. Naciśnij przycisk defibrylacji zgodnie z poleceniem. Następnie natychmiast podejmij ponownie RKO zgodnie z poleceniami AED.
+
+Jeśli defibrylacja nie jest zalecana, natychmiast podejmij ponownie RKO i kontynuuj ją zgodnie z poleceniami AED."""),
+
+dict(page=30, n=4, section="Podstawowe zabiegi resuscytacyjne krok po kroku: gdy AED jest niedostępne, kiedy przerwać RKO",
+ start="JEŚLI AED JEST", end="AED (automated",
+ topics=["rko-aed"],
+ keywords=["kiedy przerwać RKO", "AED niedostępne", "powrót krążenia", "zbyt zmęczony", "oznaki powrotu krążenia", "kontynuuj RKO"],
+ body="""Jeśli AED jest niedostępne lub czekasz na jego dostarczenie, kontynuuj RKO. Nie przerywaj resuscytacji do czasu, gdy:
+- pracownik ochrony zdrowia powie Ci, żebyś przestał, LUB
+- poszkodowany w sposób oczywisty odzyskuje przytomność, porusza się, otwiera oczy i zaczyna prawidłowo oddychać, LUB
+- jesteś zbyt zmęczony, żeby kontynuować.
+
+Rzadko się zdarza, żeby samo prowadzenie RKO przywróciło czynność serca. Kontynuuj RKO, chyba że masz pewność, że u poszkodowanego powróciło krążenie. Oznaki powrotu krążenia: poszkodowany odzyskuje przytomność, porusza się, otwiera oczy, prawidłowo oddycha."""),
 
 dict(page=36, n=1, section="Zabiegi resuscytacyjne u dzieci: 1. OCEŃ (narzędzie ZOK)",
  start="Zachowanie: Jak zachowuje", end="2. ZADZWOŃ",
@@ -179,7 +230,7 @@ dict(page=38, n=2, section="Zabiegi resuscytacyjne u dzieci: AED, umieszczenie e
  keywords=["elektrody u dziecka", "między łopatkami", "AED niemowlę", "pozycja przednio-tylna", "25 kg"],
  body="""Umieszczenie elektrod AED u dzieci:
 - U niemowląt i dzieci o masie ciała poniżej 25 kg przyklej jedną elektrodę na przedniej części klatki piersiowej dziecka, lekko na lewo od środka. Drugą umieść na plecach między łopatkami.
-- U dzieci o masie ciała powyżej 25 kg i u nastolatków umieść elektrody jak u dorosłych albo przyklej jedną elektrodę poniżej prawego obojczyka, obok mostka, a drugą po lewej stronie pod pachą. Unikaj umieszczania elektrod bezpośrednio na tkance gruczołu piersiowego.
+- U dzieci o masie ciała powyżej 25 kg i u nastolatków umieść elektrody tak jak u mniejszych dzieci (jedna z przodu klatki piersiowej, druga na plecach) albo przyklej jedną elektrodę poniżej prawego obojczyka, obok mostka, a drugą po lewej stronie pod pachą. Unikaj umieszczania elektrod bezpośrednio na tkance gruczołu piersiowego.
 - Pozycja przednio-tylna może być użyta, jeśli elektrody są zbyt duże, aby umieścić je z przodu klatki piersiowej dziecka."""),
 
 dict(page=38, n=3, section="Zabiegi resuscytacyjne u dzieci: AED, analiza rytmu i wznowienie RKO",
@@ -276,9 +327,9 @@ dict(page=60, n=2, section="Szczególne stany: zadławienie",
  start="■ Zadławienie", end="Nawet jeśli",
  topics=["zadlawienie"],
  keywords=["zadławienie", "dławi się", "uderzenia w plecy", "uciśnięcia nadbrzusza", "oddech zatrzymany", "udusi się", "ciało obce w gardle"],
- body="""Zadławienie. Jeśli podejrzewasz zadławienie, zachęcaj poszkodowanego do kaszlu, wykonuj uderzenia w plecy i uciśnięcia nadbrzusza, jak pokazano na rycinie w broszurze.
+ body="""Zadławienie. Jeśli podejrzewasz zadławienie, zachęcaj poszkodowanego do kaszlu, wykonuj uderzenia w plecy i uciśnięcia nadbrzusza.
 
-Jeśli podczas udzielania pomocy osobie dławiącej się w jakimkolwiek momencie straci ona przytomność i przestanie oddychać lub będzie oddychać nieprawidłowo, natychmiast rozpocznij RKO. Uciśnięcia klatki piersiowej podczas RKO potrafią wytworzyć wysokie ciśnienie w drogach oddechowych, które może usunąć przeszkodę."""),
+Jeśli podczas udzielania pomocy osobie dławiącej się w jakimkolwiek momencie straci ona przytomność i przestanie oddychać lub będzie oddychać nieprawidłowo, natychmiast rozpocznij RKO. Uciśnięcia klatki piersiowej podczas RKO potrafią wytworzyć wysokie ciśnienie w drogach oddechowych, które może usunąć przeszkodę. Nawet jeśli przeszkoda nie zostanie usunięta, kontynuuj RKO do czasu przybycia pomocy."""),
 
 dict(page=61, n=1, section="Szczególne stany: utonięcie",
  start="Dowody wskazują", end="W niewielkiej",

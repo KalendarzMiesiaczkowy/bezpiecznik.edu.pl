@@ -194,7 +194,7 @@ FIXES = [
     ("zloka lizowaniu", "zlokalizowaniu"), ("pro mieniować", "promieniować"),
     ("nie zwłocznym", "niezwłocznym"), ("ta kim", "takim"), ("rozma wiaj", "rozmawiaj"),
     ("moż liwa", "możliwa"), ("Zastosowa nie", "Zastosowanie"), ("jakąkol wiek", "jakąkolwiek"),
-    ("licz bie", "liczbie"), ("oddycha nie", "oddychanie"), ("przyklejo nych", "przyklejonych"), ("oddy chaniem", "oddychaniem"),
+    ("licz bie", "liczbie"), ("oddycha nie", "oddychanie"), ("przyklejo nych", "przyklejonych"), ("oddy chaniem", "oddychaniem"), ("1 O sekund", "10 sekund"),
 ]
 
 

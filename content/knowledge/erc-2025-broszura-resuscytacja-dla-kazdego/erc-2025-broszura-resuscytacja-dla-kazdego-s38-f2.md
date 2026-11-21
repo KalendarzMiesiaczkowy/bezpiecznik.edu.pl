@@ -18,5 +18,5 @@ original: |
 ---
 Umieszczenie elektrod AED u dzieci:
 - U niemowląt i dzieci o masie ciała poniżej 25 kg przyklej jedną elektrodę na przedniej części klatki piersiowej dziecka, lekko na lewo od środka. Drugą umieść na plecach między łopatkami.
-- U dzieci o masie ciała powyżej 25 kg i u nastolatków umieść elektrody jak u dorosłych albo przyklej jedną elektrodę poniżej prawego obojczyka, obok mostka, a drugą po lewej stronie pod pachą. Unikaj umieszczania elektrod bezpośrednio na tkance gruczołu piersiowego.
+- U dzieci o masie ciała powyżej 25 kg i u nastolatków umieść elektrody tak jak u mniejszych dzieci (jedna z przodu klatki piersiowej, druga na plecach) albo przyklej jedną elektrodę poniżej prawego obojczyka, obok mostka, a drugą po lewej stronie pod pachą. Unikaj umieszczania elektrod bezpośrednio na tkance gruczołu piersiowego.
 - Pozycja przednio-tylna może być użyta, jeśli elektrody są zbyt duże, aby umieścić je z przodu klatki piersiowej dziecka.

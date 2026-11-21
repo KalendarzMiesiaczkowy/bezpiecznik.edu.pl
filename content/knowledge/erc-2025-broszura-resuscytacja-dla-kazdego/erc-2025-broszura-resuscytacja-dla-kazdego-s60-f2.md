@@ -16,6 +16,6 @@ original: |
   Jeśli podejrzewasz zadławienie, zachęcaj poszkodowanego do kaszlu, wykonuj uderzenia w plecy i uciśnięcia nadbrzusza, jak pokazano na rycinie poniżej.
   Jeśli podczas udzielania pomocy osobie dławiącej się w jakimkolwiek momencie straci ona przytomność i przestanie oddychać lub będzie oddychać nieprawidłowo, natychmiast rozpocznij RKO. Uciśnięcia klatki piersiowej podczas RKO potrafią wytworzyć wysokie ciśnienie w drogach oddechowych, które może usunąć przeszkodę.
 ---
-Zadławienie. Jeśli podejrzewasz zadławienie, zachęcaj poszkodowanego do kaszlu, wykonuj uderzenia w plecy i uciśnięcia nadbrzusza, jak pokazano na rycinie w broszurze.
+Zadławienie. Jeśli podejrzewasz zadławienie, zachęcaj poszkodowanego do kaszlu, wykonuj uderzenia w plecy i uciśnięcia nadbrzusza.
 
-Jeśli podczas udzielania pomocy osobie dławiącej się w jakimkolwiek momencie straci ona przytomność i przestanie oddychać lub będzie oddychać nieprawidłowo, natychmiast rozpocznij RKO. Uciśnięcia klatki piersiowej podczas RKO potrafią wytworzyć wysokie ciśnienie w drogach oddechowych, które może usunąć przeszkodę.
+Jeśli podczas udzielania pomocy osobie dławiącej się w jakimkolwiek momencie straci ona przytomność i przestanie oddychać lub będzie oddychać nieprawidłowo, natychmiast rozpocznij RKO. Uciśnięcia klatki piersiowej podczas RKO potrafią wytworzyć wysokie ciśnienie w drogach oddechowych, które może usunąć przeszkodę. Nawet jeśli przeszkoda nie zostanie usunięta, kontynuuj RKO do czasu przybycia pomocy.

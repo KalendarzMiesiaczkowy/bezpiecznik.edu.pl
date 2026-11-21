@@ -19,4 +19,4 @@ Druga elektroda trafia po lewej stronie pod pachą. Unikaj umieszczania elektrod
 
 Po przyklejeniu elektrod AED oceni rytm serca poszkodowanego, aby ustalić, czy defibrylacja jest potrzebna. Jeśli tak, AED poinstruuje ratownika, co robić dalej.
 
-Natychmiast po defibrylacji podejmij RKO. Jeśli defibrylacja będzie nieskuteczna, od razu wróć do uciskania klatki piersiowej.
+Natychmiast po defibrylacji podejmij RKO. Natychmiast po defibrylacji wróć do uciskania klatki piersiowej i postępuj zgodnie z poleceniami AED.
