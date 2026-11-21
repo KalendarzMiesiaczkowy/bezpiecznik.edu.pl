@@ -66,23 +66,65 @@ const int kMaxTitleLength = 30;
 
 /// The spec gives titles only as examples ("Teraz", "RKO", "Do plecaka",
 /// "Gdy straci przytomność"), so besides the fixed list a title is accepted
-/// when it is short and every content word of it occurs (5-character prefix,
-/// Polish inflection) in the chunks the panel cites: a title can then never
-/// carry an instruction the sources do not contain.
-String _safeTitle(Object? raw, String type, Set<String> sourceWords) {
+/// when it is short, every content word of it occurs (5-character prefix,
+/// Polish inflection) in the chunks the panel cites, and it passes the same
+/// number and negation checks as an item against every cited chunk (BG101):
+/// a title can then never carry an instruction the sources do not contain,
+/// nor flip "Nie wchodź do windy" into "Wchodź do windy".
+String _safeTitle(Object? raw, String type, List<_ChunkFacts> cited) {
   if (raw is String) {
     final n = normalizePl(raw);
     for (final t in kAllowedTitles) {
       if (normalizePl(t) == n) return t;
     }
     final trimmed = raw.trim();
+    final sourceWords = {for (final f in cited) ...f.words};
     if (trimmed.isNotEmpty &&
         trimmed.length <= kMaxTitleLength &&
-        _titleGrounded(n, sourceWords)) {
+        _titleGrounded(n, sourceWords) &&
+        cited.any((f) => _numberReason(trimmed, f) == null) &&
+        cited.every((f) => _negationReason(trimmed, f) == null)) {
       return sentenceCase(trimmed);
     }
   }
   return type == 'steps' ? 'Co zrobić' : 'Najważniejsze';
+}
+
+/// Numbers, doses and times: each number must be in the chunk, bound to the
+/// same unit / counted noun ("30 razy" is not "30 oddechów").
+RejectReason? _numberReason(String t, _ChunkFacts f) {
+  for (final n in numberFacts(t)) {
+    final cands = f.numbers.where((c) => c.value == n.value);
+    if (cands.isEmpty) return RejectReason.invalidNumber;
+    if (n.following.isEmpty) continue;
+    final ok = cands.any(
+      (c) => c.following.isEmpty || anySame(c.following, n.following.first),
+    );
+    if (!ok) return RejectReason.invalidNumber;
+  }
+  return null;
+}
+
+RejectReason? _negationReason(String t, _ChunkFacts f) {
+  final item = scanNegations(t);
+  // A clause that uses a word the source only mentions under a negation
+  // must itself negate it (any verb form, any word order).
+  for (final clause in clauses(t)) {
+    final neg = negatedIn(clause);
+    for (final w in clause) {
+      if (w.length < 3 || functionWords.contains(w) || isNegationWord(w)) continue;
+      if (anySame(f.negated, w) && !anySame(f.affirmed, w) && !neg.contains(w)) {
+        return RejectReason.droppedNegation;
+      }
+    }
+  }
+  for (final w in item.negated) {
+    if (anySame(f.affirmed, w) && !anySame(f.negated, w)) {
+      return RejectReason.addedNegation;
+    }
+  }
+  if (item.hasNegation && !f.hasNegation) return RejectReason.addedNegation;
+  return null;
 }
 
 /// "Sygnały Alarmowe" -> "Sygnały alarmowe": Polish sentence case, acronyms
@@ -213,37 +255,8 @@ class AnswerValidator {
     if (t.isEmpty) return RejectReason.emptyText;
     if (t.length > kMaxItemChars) return RejectReason.tooLong;
 
-    // Numbers, doses and times: each number must be in the chunk, bound to
-    // the same unit / counted noun ("30 razy" is not "30 oddechów").
-    for (final n in numberFacts(t)) {
-      final cands = f.numbers.where((c) => c.value == n.value);
-      if (cands.isEmpty) return RejectReason.invalidNumber;
-      if (n.following.isEmpty) continue;
-      final ok = cands.any(
-        (c) => c.following.isEmpty || anySame(c.following, n.following.first),
-      );
-      if (!ok) return RejectReason.invalidNumber;
-    }
-
-    // Negations.
-    final item = scanNegations(t);
-    // A clause that uses a word the source only mentions under a negation
-    // must itself negate it (any verb form, any word order).
-    for (final clause in clauses(t)) {
-      final neg = negatedIn(clause);
-      for (final w in clause) {
-        if (w.length < 3 || functionWords.contains(w) || isNegationWord(w)) continue;
-        if (anySame(f.negated, w) && !anySame(f.affirmed, w) && !neg.contains(w)) {
-          return RejectReason.droppedNegation;
-        }
-      }
-    }
-    for (final w in item.negated) {
-      if (anySame(f.affirmed, w) && !anySame(f.negated, w)) {
-        return RejectReason.addedNegation;
-      }
-    }
-    if (item.hasNegation && !f.hasNegation) return RejectReason.addedNegation;
+    final reason = _numberReason(t, f) ?? _negationReason(t, f);
+    if (reason != null) return reason;
 
     // Coverage: every content word of the item must occur in the chunk.
     for (final w in tokens(t)) {
@@ -300,10 +313,8 @@ class AnswerValidator {
         if (kept.length >= kMaxItemsPerPanel) break;
       }
       if (kept.isEmpty) continue;
-      final sourceWords = <String>{
-        for (final k in kept) ...facts[k['source_id']]!.words,
-      };
-      final title = _safeTitle(p['title'], type as String, sourceWords);
+      final cited = {for (final k in kept) facts[k['source_id']]!}.toList();
+      final title = _safeTitle(p['title'], type as String, cited);
       out.add({'type': type, 'title': title, 'items': kept});
     }
     return ValidatedAnswer(panels: out, rejected: rejected);

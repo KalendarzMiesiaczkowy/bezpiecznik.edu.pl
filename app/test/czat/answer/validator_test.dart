@@ -251,6 +251,35 @@ void main() {
       expect(titleOf('Zadzwoń po lekarza'), 'Co zrobić');
       expect(titleOf('  '), 'Co zrobić');
       expect(titleOf('Zejdź schodami na zewnątrz budynku'), 'Co zrobić');
+      // BG101: grounded words, but the negation is dropped or a number is
+      // not in the source.
+      expect(titleOf('Wchodź do windy'), 'Co zrobić');
+      expect(titleOf('Wejdź do windy'), 'Co zrobić');
+      expect(titleOf('Zejdź 2 schodami'), 'Co zrobić');
+      expect(titleOf('Nie schodź schodami'), 'Co zrobić');
+    });
+
+    test('a title number must be in a cited chunk with the same unit (BG101)', () {
+      String titleOf(String t) {
+        final r = v.validate(
+          panels([
+            {
+              'type': 'steps',
+              'title': t,
+              'items': [
+                {'text': 'Uciskaj środek klatki piersiowej 30 razy.', 'source_id': 'c2'},
+              ],
+            },
+          ]),
+          chunks,
+        );
+        return r.panels.single['title'] as String;
+      }
+
+      expect(titleOf('Uciskaj 30 razy'), 'Uciskaj 30 razy');
+      expect(titleOf('Uciskaj 50 razy'), 'Co zrobić');
+      expect(titleOf('Uciskaj 2 razy'), 'Co zrobić');
+      expect(titleOf('Nie uciskaj'), 'Co zrobić');
     });
 
     test('garbage structures do not throw', () {
