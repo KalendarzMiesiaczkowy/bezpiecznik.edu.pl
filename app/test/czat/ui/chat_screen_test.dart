@@ -263,4 +263,60 @@ void main() {
     // And it is the start of the answer, not stranded far below.
     expect(top, lessThan(bandBottom + 60));
   });
+
+  testWidgets('inserted assistant answer scrolls to its start below the island', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    AssistantAnswer longAnswer(String title, int n) => AssistantAnswer.fromJson({
+          'origin': 'ai',
+          'panels': [
+            {
+              'type': 'steps',
+              'title': title,
+              'items': [
+                for (var i = 0; i < n; i++)
+                  {'text': 'Krok $title-$i', 'source_id': 'fake-s1-f1'},
+              ],
+            },
+          ],
+          'sources': {
+            'fake-s1-f1': {
+              'source_id': 'fake-s1-f1',
+              'doc_id': 'fake',
+              'doc_title': 'Dokument przykładowy',
+              'doc_short': 'Przykład',
+              'page_label': '14',
+              'pdf_page': 16,
+              'text': 'Przykładowy fragment źródła.',
+            },
+          },
+        });
+    final service = FakeAnswerService(
+      script: (q, c) async* {
+        yield const AnswerThinking();
+        yield AnswerReady(longAnswer('Stara', 25));
+      },
+    );
+    final container = await pumpChat(tester, service);
+    await tester.enterText(find.byKey(const Key('composer-field')), 'A');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('composer-send')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    container
+        .read(chatControllerProvider.notifier)
+        .insertAssistantAnswer(longAnswer('Wstawka', 25));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final bandBottom = 48 + 48 + BzTokens.dark.space2;
+    await tester.pump(const Duration(milliseconds: 500));
+    final top = tester.getTopLeft(find.text('Wstawka')).dy;
+    expect(top, greaterThanOrEqualTo(bandBottom - 0.5));
+    expect(top, lessThan(bandBottom + 60));
+  });
 }

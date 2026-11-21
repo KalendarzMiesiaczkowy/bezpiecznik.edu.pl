@@ -68,10 +68,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   /// Scrolls so the top of the message [id] lands just below the floating
   /// island/SOS band (`_listTop`), not at the raw viewport top where the
   /// island would cover the first line.
-  void _toStartOf(String id) {
+  void _toStartOf(String id, {bool retry = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients) return;
       final ctx = _keys[id]?.currentContext;
-      if (!mounted || ctx == null || !_scroll.hasClients) return;
+      if (ctx == null) {
+        // The lazy list has not built the item yet (far below a tall
+        // neighbour): jump near the end so it gets built, then retry once.
+        if (retry) {
+          _scroll.jumpTo(_scroll.position.maxScrollExtent);
+          _toStartOf(id, retry: false);
+        }
+        return;
+      }
       final box = ctx.findRenderObject();
       if (box == null) return;
       final viewport = RenderAbstractViewport.maybeOf(box);
@@ -102,6 +111,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ?.showSnackBar(const SnackBar(content: Text(saveErrorText)));
     }
     final before = prev?.messages ?? const [];
+    if (next.messages.length == before.length + 1 &&
+        before.isNotEmpty &&
+        prev?.chatId == next.chatId) {
+      // An assistant message inserted without a question (e.g. the AED card
+      // from the CPR instructor): show its start, like a fresh answer.
+      final added = next.messages.last;
+      if (!added.isUser && !added.isThinking && added.answer != null) {
+        _toStartOf(added.id);
+        return;
+      }
+    }
     if (next.messages.length > before.length) {
       // A new question: show it with the thinking bubble.
       _toEnd();
