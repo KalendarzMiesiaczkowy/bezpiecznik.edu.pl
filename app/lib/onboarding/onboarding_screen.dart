@@ -53,12 +53,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (mounted) context.go('/');
   }
 
+  /// "Krok n z 3" -> n / 3.
+  static double _fractionOf(String progress) {
+    final m = RegExp(r'(\d+) z (\d+)').firstMatch(progress);
+    if (m == null) return 0;
+    return int.parse(m.group(1)!) / int.parse(m.group(2)!);
+  }
+
   Widget _title(String text, {String? progress}) {
     final bz = context.bz;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (progress != null) Text(progress, style: bz.caption),
+        if (progress != null) ...[
+          Text(progress, style: bz.caption),
+          const SizedBox(height: 8),
+          OnboardingProgressBar(fraction: _fractionOf(progress)),
+        ],
         const SizedBox(height: 8),
         Text(text, style: bz.title),
         const SizedBox(height: 16),
@@ -107,13 +118,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: bz.signalTint, borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+              color: bz.signalTint,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(LucideIcons.triangleAlert, key: const Key('onb-notice-icon'), size: 24, color: bz.signal),
+                Icon(
+                  LucideIcons.triangleAlert,
+                  key: const Key('onb-notice-icon'),
+                  size: 24,
+                  color: bz.signal,
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: Text('Nie zastępuje 112. W zagrożeniu życia dzwoń pod 112.', style: bz.step)),
+                Expanded(
+                  child: Text(
+                    'Nie zastępuje 112. W zagrożeniu życia dzwoń pod 112.',
+                    style: bz.step,
+                  ),
+                ),
               ],
             ),
           ),
@@ -192,10 +216,40 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       case OnboardingStep.profileForm:
         return [
           _title('Profil domu', progress: 'Krok 3 z 3'),
-          Text('Zostaje w telefonie. Wysyłasz go tylko ty. Każde pole możesz pominąć.', style: bz.caption),
+          Text(
+            'Zostaje w telefonie. Wysyłasz go tylko ty. Każde pole możesz pominąć.',
+            style: bz.caption,
+          ),
           Expanded(
-            child: SingleChildScrollView(
-              child: ProfileForm(initial: _draft, onChanged: (p) => _draft = p),
+            child: Stack(
+              children: [
+                SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: ProfileForm(
+                    initial: _draft,
+                    onChanged: (p) => _draft = p,
+                  ),
+                ),
+                // Fade hints that more fields are below the buttons.
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  height: 32,
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      key: const Key('onb-form-fade'),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [bz.bg000.withAlpha(0), bz.bg000],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -221,7 +275,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           _title('Gotowe'),
           _statusRow('SOS i karty ratunkowe', done: true),
           const SizedBox(height: 12),
-          _statusRow(_profileSaved ? 'Profil domu' : 'Profil domu: pominięto', done: _profileSaved),
+          _statusRow(
+            _profileSaved ? 'Profil domu' : 'Profil domu: pominięto',
+            done: _profileSaved,
+          ),
           const Spacer(),
           BzButton(
             key: const Key('onb-start'),
@@ -248,7 +305,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: Padding(
                 // Leaves room for the floating shell controls (Back, SOS).
                 padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: _body()),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: _body(),
+                ),
               ),
             ),
           ),
@@ -260,6 +320,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: BzBackButton(onBack: () => _go(prev)),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// 6 dp progress bar: `bg-300` track, `ink-100` fill (bundle.css `.bz-progress`).
+class OnboardingProgressBar extends StatelessWidget {
+  const OnboardingProgressBar({super.key, required this.fraction});
+
+  final double fraction;
+
+  @override
+  Widget build(BuildContext context) {
+    final bz = context.bz;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(3),
+      child: SizedBox(
+        key: const Key('onb-progress'),
+        height: 6,
+        child: ColoredBox(
+          color: bz.bg300,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: FractionallySizedBox(
+              key: const Key('onb-progress-fill'),
+              widthFactor: fraction.clamp(0.0, 1.0),
+              heightFactor: 1,
+              child: ColoredBox(color: bz.ink100),
+            ),
+          ),
+        ),
       ),
     );
   }

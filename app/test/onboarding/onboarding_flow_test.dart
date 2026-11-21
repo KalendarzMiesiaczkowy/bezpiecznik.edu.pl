@@ -20,7 +20,11 @@ class FakeGateway implements LocationPermissionGateway {
   }
 }
 
-Future<void> pumpOnboarding(WidgetTester tester, ProfileStore store, FakeGateway gw) async {
+Future<void> pumpOnboarding(
+  WidgetTester tester,
+  ProfileStore store,
+  FakeGateway gw,
+) async {
   tester.view.physicalSize = const Size(800, 1800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -28,12 +32,18 @@ Future<void> pumpOnboarding(WidgetTester tester, ProfileStore store, FakeGateway
     initialLocation: '/onboarding',
     routes: [
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
-      GoRoute(path: '/', builder: (_, _) => const Scaffold(body: Text('CZAT'))),
+      GoRoute(
+        path: '/',
+        builder: (_, _) => const Scaffold(body: Text('CZAT')),
+      ),
     ],
   );
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [profileStoreProvider.overrideWithValue(store), locationPermissionGatewayProvider.overrideWithValue(gw)],
+      overrides: [
+        profileStoreProvider.overrideWithValue(store),
+        locationPermissionGatewayProvider.overrideWithValue(gw),
+      ],
       child: MaterialApp.router(theme: buildBzTheme(), routerConfig: router),
     ),
   );
@@ -42,11 +52,31 @@ Future<void> pumpOnboarding(WidgetTester tester, ProfileStore store, FakeGateway
 
 void main() {
   onboardingVisualTests();
-  testWidgets('skip path: no profile saved, onboarding completed, chat opens', (tester) async {
+  testWidgets('step 2 of 3 shows a 6 dp progress bar filled 2/3', (
+    tester,
+  ) async {
+    await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(true));
+    await tester.tap(find.byKey(const Key('onb-next')));
+    await tester.pumpAndSettle();
+    expect(find.text('Krok 2 z 3'), findsOneWidget);
+    final bar = tester.getSize(find.byKey(const Key('onb-progress')));
+    final fill = tester.getSize(find.byKey(const Key('onb-progress-fill')));
+    expect(bar.height, 6);
+    expect(fill.width / bar.width, closeTo(2 / 3, 0.001));
+    // The fill must be as tall as the track (it was 0 dp high, invisible).
+    expect(fill.height, 6);
+  });
+
+  testWidgets('skip path: no profile saved, onboarding completed, chat opens', (
+    tester,
+  ) async {
     final store = ProfileStore.inMemory();
     final gw = FakeGateway(false);
     await pumpOnboarding(tester, store, gw);
-    expect(find.text('Nie zastępuje 112. W zagrożeniu życia dzwoń pod 112.'), findsOneWidget);
+    expect(
+      find.text('Nie zastępuje 112. W zagrożeniu życia dzwoń pod 112.'),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const Key('onb-next')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('onb-later')));
@@ -64,7 +94,9 @@ void main() {
     expect(await store.loadProfile(), isNull);
   });
 
-  testWidgets('complete path: permission requested, profile saved', (tester) async {
+  testWidgets('complete path: permission requested, profile saved', (
+    tester,
+  ) async {
     final store = ProfileStore.inMemory();
     final gw = FakeGateway(true);
     await pumpOnboarding(tester, store, gw);
@@ -84,7 +116,10 @@ void main() {
     await tester.enterText(find.byKey(const Key('ice-name-0')), 'Mama');
     await tester.enterText(find.byKey(const Key('ice-phone-0')), '112');
     await tester.pump();
-    expect(find.text('To numer alarmowy. Wpisz numer bliskiej osoby.'), findsOneWidget);
+    expect(
+      find.text('To numer alarmowy. Wpisz numer bliskiej osoby.'),
+      findsOneWidget,
+    );
     await tester.enterText(find.byKey(const Key('ice-phone-0')), '600 100 200');
     await tester.pump();
     await tester.tap(find.byKey(const Key('onb-profile-save')));
@@ -105,7 +140,12 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final store = ProfileStore.inMemory();
-    await store.saveProfile(const HouseholdProfile(medications: [Medication(name: 'Insulina')], home: Home(floor: 7)));
+    await store.saveProfile(
+      const HouseholdProfile(
+        medications: [Medication(name: 'Insulina')],
+        home: Home(floor: 7),
+      ),
+    );
     await tester.pumpWidget(
       ProviderScope(
         overrides: [profileStoreProvider.overrideWithValue(store)],
@@ -127,18 +167,23 @@ void main() {
 }
 
 void onboardingVisualTests() {
-  testWidgets('back button: absent on step 1, present on step 2 and goes back', (tester) async {
-    await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(false));
-    expect(find.bySemanticsLabel('Wróć'), findsNothing);
-    await tester.tap(find.byKey(const Key('onb-next')));
-    await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Wróć'), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel('Wróć'));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('onb-next')), findsOneWidget);
-  });
+  testWidgets(
+    'back button: absent on step 1, present on step 2 and goes back',
+    (tester) async {
+      await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(false));
+      expect(find.bySemanticsLabel('Wróć'), findsNothing);
+      await tester.tap(find.byKey(const Key('onb-next')));
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('Wróć'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Wróć'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('onb-next')), findsOneWidget);
+    },
+  );
 
-  testWidgets('back from profile form returns to the profile prompt', (tester) async {
+  testWidgets('back from profile form returns to the profile prompt', (
+    tester,
+  ) async {
     await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(false));
     await tester.tap(find.byKey(const Key('onb-next')));
     await tester.pumpAndSettle();
@@ -151,11 +196,18 @@ void onboardingVisualTests() {
     expect(find.byKey(const Key('onb-profile-fill')), findsOneWidget);
   });
 
-  testWidgets('112 notice has the warning icon and tint background', (tester) async {
+  testWidgets('112 notice has the warning icon and tint background', (
+    tester,
+  ) async {
     await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(false));
     expect(find.byKey(const Key('onb-notice-icon')), findsOneWidget);
     final box = tester.widget<Container>(
-      find.ancestor(of: find.byKey(const Key('onb-notice-icon')), matching: find.byType(Container)).first,
+      find
+          .ancestor(
+            of: find.byKey(const Key('onb-notice-icon')),
+            matching: find.byType(Container),
+          )
+          .first,
     );
     expect((box.decoration! as BoxDecoration).color, isNotNull);
   });

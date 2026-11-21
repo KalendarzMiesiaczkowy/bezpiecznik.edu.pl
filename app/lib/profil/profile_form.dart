@@ -8,7 +8,11 @@ import 'profile_model.dart';
 /// valid data through [onChanged]; invalid entries show an error and are not
 /// emitted (spec: invalid value is never saved).
 class ProfileForm extends StatefulWidget {
-  const ProfileForm({super.key, required this.initial, required this.onChanged});
+  const ProfileForm({
+    super.key,
+    required this.initial,
+    required this.onChanged,
+  });
 
   final HouseholdProfile initial;
   final ValueChanged<HouseholdProfile> onChanged;
@@ -39,9 +43,14 @@ class _ProfileFormState extends State<ProfileForm> {
   void initState() {
     super.initState();
     final p = widget.initial;
-    _counts = {for (final g in AgeGroup.values) g: p.members.where((m) => m.ageGroup == g).length};
+    _counts = {
+      for (final g in AgeGroup.values)
+        g: p.members.where((m) => m.ageGroup == g).length,
+    };
     _extraMembers = p.members;
-    _meds = [for (final m in p.medications) TextEditingController(text: m.name)];
+    _meds = [
+      for (final m in p.medications) TextEditingController(text: m.name),
+    ];
     _devices = {...p.powerDevices};
     _otherDevice = TextEditingController(text: p.powerOtherText ?? '');
     _floor = TextEditingController(text: p.home.floor?.toString() ?? '');
@@ -51,7 +60,12 @@ class _ProfileFormState extends State<ProfileForm> {
 
   @override
   void dispose() {
-    for (final c in [..._meds, _otherDevice, _floor, for (final d in _contacts) ...[d.name, d.phone]]) {
+    for (final c in [
+      ..._meds,
+      _otherDevice,
+      _floor,
+      for (final d in _contacts) ...[d.name, d.phone],
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -66,15 +80,25 @@ class _ProfileFormState extends State<ProfileForm> {
   }
 
   String? _nameError(_ContactDraft d) {
-    if (d.name.text.trim().isEmpty && d.phone.text.trim().isNotEmpty) return 'Wpisz nazwę albo usuń wpis.';
+    if (d.name.text.trim().isEmpty && d.phone.text.trim().isNotEmpty) {
+      return 'Wpisz nazwę albo usuń wpis.';
+    }
     return null;
   }
 
   String? _phoneError(_ContactDraft d) {
     final t = d.phone.text.trim();
-    if (t.isEmpty) return d.name.text.trim().isEmpty ? null : 'Wpisz numer w formacie 600 100 200 albo +48 600 100 200.';
-    if (isEmergencyNumber(t)) return 'To numer alarmowy. Wpisz numer bliskiej osoby.';
-    if (normalizePhone(t) == null) return 'Wpisz numer w formacie 600 100 200 albo +48 600 100 200.';
+    if (t.isEmpty) {
+      return d.name.text.trim().isEmpty
+          ? null
+          : 'Wpisz numer w formacie 600 100 200 albo +48 600 100 200.';
+    }
+    if (isEmergencyNumber(t)) {
+      return 'To numer alarmowy. Wpisz numer bliskiej osoby.';
+    }
+    if (normalizePhone(t) == null) {
+      return 'Wpisz numer w formacie 600 100 200 albo +48 600 100 200.';
+    }
     return null;
   }
 
@@ -102,8 +126,16 @@ class _ProfileFormState extends State<ProfileForm> {
           if (c.text.trim().isNotEmpty) Medication(name: c.text.trim()),
       ],
       powerDevices: _devices,
-      powerOtherText: _devices.contains('other') && _otherDevice.text.trim().isNotEmpty ? _otherDevice.text.trim() : null,
-      home: Home(floor: _floorError() == null ? int.tryParse(_floor.text.trim()) : widget.initial.home.floor, elevator: _elevator),
+      powerOtherText:
+          _devices.contains('other') && _otherDevice.text.trim().isNotEmpty
+          ? _otherDevice.text.trim()
+          : null,
+      home: Home(
+        floor: _floorError() == null
+            ? int.tryParse(_floor.text.trim())
+            : widget.initial.home.floor,
+        elevator: _elevator,
+      ),
       iceContacts: contacts,
     );
   }
@@ -118,19 +150,33 @@ class _ProfileFormState extends State<ProfileForm> {
     child: Text(title, style: context.bz.step),
   );
 
-  Widget _yesNo(String label, bool? value, ValueChanged<bool?> on, {String? key}) {
+  /// Ghost buttons carry a horizontal padding; shift left so the label lines
+  /// up with the section headings.
+  Widget _flushLeft(Widget child) => Align(
+    alignment: Alignment.centerLeft,
+    child: Transform.translate(
+      offset: Offset(-BzButtonSize.md.hPadding, 0),
+      child: child,
+    ),
+  );
+
+  Widget _yesNo(
+    String label,
+    bool? value,
+    ValueChanged<bool?> on, {
+    String? key,
+  }) {
     return Row(
       children: [
         Expanded(child: Text(label, style: context.bz.chat)),
         for (final (text, v) in [('Tak', true), ('Nie', false)])
           Padding(
             padding: const EdgeInsets.only(left: 8),
-            child: ChoiceChip(
+            child: BzChip(
               key: key == null ? null : Key('$key-$text'),
-              label: Text(text),
+              label: text,
               selected: value == v,
-              onSelected: (s) => on(s ? v : null),
-              materialTapTargetSize: MaterialTapTargetSize.padded,
+              onChanged: (s) => on(s ? v : null),
             ),
           ),
       ],
@@ -152,14 +198,25 @@ class _ProfileFormState extends State<ProfileForm> {
                 IconButton(
                   key: Key('members-${g.name}-minus'),
                   tooltip: 'Mniej: ${g.short}',
-                  onPressed: _counts[g]! > 0 ? () => _changed(() => _counts[g] = _counts[g]! - 1) : null,
+                  onPressed: _counts[g]! > 0
+                      ? () => _changed(() => _counts[g] = _counts[g]! - 1)
+                      : null,
                   icon: const Icon(Icons.remove),
                 ),
-                SizedBox(width: 24, child: Text('${_counts[g]}', textAlign: TextAlign.center, key: Key('members-${g.name}-count'))),
+                SizedBox(
+                  width: 24,
+                  child: Text(
+                    '${_counts[g]}',
+                    textAlign: TextAlign.center,
+                    key: Key('members-${g.name}-count'),
+                  ),
+                ),
                 IconButton(
                   key: Key('members-${g.name}-plus'),
                   tooltip: 'Więcej: ${g.short}',
-                  onPressed: _counts.values.fold<int>(0, (a, b) => a + b) < 15 ? () => _changed(() => _counts[g] = _counts[g]! + 1) : null,
+                  onPressed: _counts.values.fold<int>(0, (a, b) => a + b) < 15
+                      ? () => _changed(() => _counts[g] = _counts[g]! + 1)
+                      : null,
                   icon: const Icon(Icons.add),
                 ),
               ],
@@ -174,7 +231,11 @@ class _ProfileFormState extends State<ProfileForm> {
                   key: Key('med-$i'),
                   controller: _meds[i],
                   maxLength: 40,
-                  decoration: const InputDecoration(labelText: 'Nazwa leku', helperText: 'Np. insulina.', counterText: ''),
+                  decoration: const InputDecoration(
+                    labelText: 'Nazwa leku',
+                    helperText: 'Np. insulina.',
+                    counterText: '',
+                  ),
                   onChanged: (_) => _changed(),
                 ),
               ),
@@ -186,23 +247,28 @@ class _ProfileFormState extends State<ProfileForm> {
             ],
           ),
         if (_meds.length < 20)
-          BzButton(
-            key: const Key('med-add'),
-            label: '+ Dodaj lek',
-            variant: BzButtonVariant.ghost,
-            onPressed: () => _changed(() => _meds.add(TextEditingController())),
+          _flushLeft(
+            BzButton(
+              key: const Key('med-add'),
+              label: '+ Dodaj lek',
+              variant: BzButtonVariant.ghost,
+              onPressed: () =>
+                  _changed(() => _meds.add(TextEditingController())),
+            ),
           ),
         _section('Urządzenia zależne od prądu'),
         Wrap(
           spacing: 8,
+          runSpacing: 8,
           children: [
             for (final e in powerDeviceLabels.entries)
-              FilterChip(
+              BzChip(
                 key: Key('device-${e.key}'),
-                label: Text(e.value),
+                label: e.value,
                 selected: _devices.contains(e.key),
-                materialTapTargetSize: MaterialTapTargetSize.padded,
-                onSelected: (s) => _changed(() => s ? _devices.add(e.key) : _devices.remove(e.key)),
+                onChanged: (s) => _changed(
+                  () => s ? _devices.add(e.key) : _devices.remove(e.key),
+                ),
               ),
           ],
         ),
@@ -211,7 +277,10 @@ class _ProfileFormState extends State<ProfileForm> {
             key: const Key('device-other-text'),
             controller: _otherDevice,
             maxLength: 40,
-            decoration: const InputDecoration(labelText: 'Inne', counterText: ''),
+            decoration: const InputDecoration(
+              labelText: 'Inne',
+              counterText: '',
+            ),
             onChanged: (_) => _changed(),
           ),
         _section('Twoje mieszkanie'),
@@ -219,12 +288,24 @@ class _ProfileFormState extends State<ProfileForm> {
           key: const Key('home-floor'),
           controller: _floor,
           keyboardType: const TextInputType.numberWithOptions(signed: true),
-          decoration: InputDecoration(labelText: 'Piętro', helperText: '0 to parter', errorText: _floorError()),
+          decoration: InputDecoration(
+            labelText: 'Piętro',
+            helperText: '0 to parter',
+            errorText: _floorError(),
+          ),
           onChanged: (_) => _changed(),
         ),
-        _yesNo('Winda', _elevator, (v) => _changed(() => _elevator = v), key: 'home-elevator'),
+        _yesNo(
+          'Winda',
+          _elevator,
+          (v) => _changed(() => _elevator = v),
+          key: 'home-elevator',
+        ),
         _section('Kogo powiadomić w razie zagrożenia?'),
-        Text('Do tych osób przygotujemy SMS z twoją pozycją. Wyślesz go sam.', style: context.bz.caption),
+        Text(
+          'Do tych osób przygotujemy SMS z twoją pozycją. Wyślesz go sam.',
+          style: context.bz.caption,
+        ),
         for (var i = 0; i < _contacts.length; i++)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,14 +317,21 @@ class _ProfileFormState extends State<ProfileForm> {
                       key: Key('ice-name-$i'),
                       controller: _contacts[i].name,
                       maxLength: 40,
-                      decoration: InputDecoration(labelText: 'Imię', counterText: '', errorText: _nameError(_contacts[i])),
+                      decoration: InputDecoration(
+                        labelText: 'Imię',
+                        counterText: '',
+                        errorText: _nameError(_contacts[i]),
+                      ),
                       onChanged: (_) => _changed(),
                     ),
                     TextField(
                       key: Key('ice-phone-$i'),
                       controller: _contacts[i].phone,
                       keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(labelText: 'Numer', errorText: _phoneError(_contacts[i])),
+                      decoration: InputDecoration(
+                        labelText: 'Numer',
+                        errorText: _phoneError(_contacts[i]),
+                      ),
                       onChanged: (_) => _changed(),
                     ),
                   ],
@@ -261,13 +349,79 @@ class _ProfileFormState extends State<ProfileForm> {
             ],
           ),
         if (_contacts.length < 5)
-          BzButton(
-            key: const Key('ice-add'),
-            label: '+ Dodaj kontakt',
-            variant: BzButtonVariant.ghost,
-            onPressed: () => _changed(() => _contacts.add(_ContactDraft('', ''))),
+          _flushLeft(
+            BzButton(
+              key: const Key('ice-add'),
+              label: '+ Dodaj kontakt',
+              variant: BzButtonVariant.ghost,
+              onPressed: () =>
+                  _changed(() => _contacts.add(_ContactDraft('', ''))),
+            ),
           ),
       ],
+    );
+  }
+}
+
+/// Design-system choice chip (`.bz-chip`): 40 dp tall stadium, 1 px
+/// `line-150` border, `ink-100` label; on = `action` fill.
+class BzChip extends StatelessWidget {
+  const BzChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool selected;
+  final ValueChanged<bool> onChanged;
+
+  static const double height = 40;
+
+  @override
+  Widget build(BuildContext context) {
+    final bz = context.bz;
+    final fg = selected ? bz.onAction : bz.ink100;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
+      child: Material(
+        color: selected ? bz.action : const Color(0x00000000),
+        shape: StadiumBorder(
+          side: BorderSide(color: selected ? bz.action : bz.line150),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: () => onChanged(!selected),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: height,
+              maxHeight: height,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: fg,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
