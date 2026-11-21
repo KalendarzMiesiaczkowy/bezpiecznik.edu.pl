@@ -80,4 +80,26 @@ void main() {
     expect(panels.whereType<MapPanel>(), hasLength(1));
     expect(engine.requests, isEmpty);
   });
+
+  test('plecak -> checkable bullets, model not called', () async {
+    final engine = FakeEngine([]);
+    final e = await last(container(engine), 'co spakować do plecaka ewakuacyjnego');
+    final answer = (e as AnswerReady).answer;
+    expect(answer.origin, AnswerOrigin.rules);
+    expect((answer.panels.single as BulletsPanel).checkable, isTrue);
+    expect(engine.requests, isEmpty);
+  });
+
+  test('risk phrase + plecak -> call first', () async {
+    final engine = FakeEngine([]);
+    final e = await last(container(engine), 'pożar, co spakować do plecaka');
+    final panels = (e as AnswerReady).answer.panels;
+    expect(panels.first, isA<CallPanel>());
+    expect(panels.whereType<BulletsPanel>(), hasLength(1));
+  });
+
+  test('schron still goes to the map, not the kit', () async {
+    final e = await last(container(FakeEngine([])), 'gdzie jest najbliższy schron');
+    expect((e as AnswerReady).answer.panels.single, isA<MapPanel>());
+  });
 }

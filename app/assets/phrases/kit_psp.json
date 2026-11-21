@@ -1,0 +1,259 @@
+{
+  "version": 1,
+  "verify": true,
+  "title": "Do plecaka",
+  "items": [
+    {
+      "kit_id": "psp_regularnie_przyjmowane_leki",
+      "text": "Regularnie przyjmowane leki",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_srodki_przeciwbolowe",
+      "text": "Środki przeciwbólowe",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_srodki_do_odkazania_i_dezynfekcji",
+      "text": "Środki do odkażania i dezynfekcji",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_leki_na_przeziebienie",
+      "text": "Leki na przeziębienie",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_leki_przeciwko_biegunce_i_zapobiegajace_odwodnieniu",
+      "text": "Leki przeciwko biegunce i zapobiegające odwodnieniu",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_bandaze_opatrunki_plaster_kompresy_chusta_trojkatna",
+      "text": "Bandaże, opatrunki, plaster, kompresy, chusta trójkątna",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_termometr",
+      "text": "Termometr",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_rekawiczki_nitrylowe",
+      "text": "Rękawiczki nitrylowe",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_tasma_naprawcza",
+      "text": "Taśma naprawcza",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_rekawice_robocze",
+      "text": "Rękawice robocze",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_opaski_zaciskowe_10_szt",
+      "text": "Opaski zaciskowe – 10 szt.",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_linka_paracord_10_m",
+      "text": "Linka paracord – 10 m",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_wielofunkcyjna_saperka_skladana",
+      "text": "Wielofunkcyjna saperka składana",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_karta_survivalowa_11w1",
+      "text": "Karta survivalowa 11w1",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_multitool_np_10w1",
+      "text": "Multitool (np. 10w1)",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_gogle_ochronne",
+      "text": "Gogle ochronne",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_racje_zywnosciowe_dlugoterminowa_zywnosc",
+      "text": "Racje żywnościowe, długoterminowa żywność",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_woda_i_butelki_z_filtrem",
+      "text": "Woda i butelki z filtrem",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_kubek_stalowy",
+      "text": "Kubek stalowy",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_widelec_noz_lyzka",
+      "text": "Widelec, nóż, łyżka",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_worki_na_smieci",
+      "text": "Worki na śmieci",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_powerbanki_z_kablami_w_pelni_naladowane",
+      "text": "Powerbanki z kablami – w pełni naładowane",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_radio_na_dynamo_baterie_zapas_baterii",
+      "text": "Radio na dynamo / baterie, zapas baterii",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_pendrive_z_cyfrowymi_dokumentami",
+      "text": "Pendrive z cyfrowymi dokumentami",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_latarka_baterie",
+      "text": "Latarka + baterie",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_zapalniczka_zapalki",
+      "text": "Zapalniczka / zapałki",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1"
+    },
+    {
+      "kit_id": "psp_przybornik_krawiecki",
+      "text": "Przybornik krawiecki",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_stopery_do_uszu",
+      "text": "Stopery do uszu",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_kompas",
+      "text": "Kompas",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_czapka_rekawiczki",
+      "text": "Czapka, rękawiczki",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_kamizelka_odblaskowa",
+      "text": "Kamizelka odblaskowa",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_mapa_polski",
+      "text": "Mapa Polski",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_notes_dlugopis",
+      "text": "Notes + długopis",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_polmaska_filtrujaca_ffp3",
+      "text": "Półmaska filtrująca FFP3",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_recznik_szybkoschnacy",
+      "text": "Ręcznik (szybkoschnący)",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_mydlo_zel_szampon",
+      "text": "Mydło/żel/szampon",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_szczoteczka_i_pasta_do_zebow",
+      "text": "Szczoteczka i pasta do zębów",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_kobiece_srodki_higieniczne",
+      "text": "Kobiece środki higieniczne",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_patyczki_waciki_chusteczki",
+      "text": "Patyczki, waciki, chusteczki",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_krem_wazelina",
+      "text": "Krem / wazelina",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_spiwor_poduszka",
+      "text": "Śpiwór, poduszka",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_koc",
+      "text": "Koc",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_niezbedne_dokumenty_gotowka",
+      "text": "Niezbędne dokumenty/gotówka",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_gwizdek",
+      "text": "Gwizdek",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_odziez_na_zmiane_i_przeciwdeszczowa",
+      "text": "Odzież na zmianę i przeciwdeszczowa",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    },
+    {
+      "kit_id": "psp_poradnik_bezpieczenstwa",
+      "text": "Poradnik bezpieczeństwa",
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f1",
+      "doc_id": "psp-plecak-ewakuacyjny-lista",
+      "doc_title": "Plecak ewakuacyjny - lista kontrolna",
+      "doc_short": "Plecak ewakuacyjny PSP",
+      "publisher": "Państwowa Straż Pożarna (KW PSP Poznań)",
+      "page_label": "2",
+      "pdf_page": 2,
+      "text": "Lista kontrolna plecaka ewakuacyjnego, część pierwsza.\n\nApteczka: regularnie przyjmowane leki, środki przeciwbólowe, środki do odkażania i dezynfekcji, leki na przeziębienie, leki przeciwko biegunce i zapobiegające odwodnieniu, bandaże, opatrunki, plaster, kompresy, chusta trójkątna, termometr, rękawiczki nitrylowe.\n\nNarzędzia: taśma naprawcza, rękawice robocze, opaski zaciskowe (10 szt.), linka paracord (10 m), wielofunkcyjna saperka składana, karta survivalowa 11w1, multitool (np. 10w1), gogle ochronne.\n\nŻywność: racje żywnościowe i żywność długoterminowa, woda i butelki z filtrem, kubek stalowy, widelec, nóż i łyżka, worki na śmieci.\n\nElektronika: powerbanki z kablami w pełni naładowane, radio na dynamo lub baterie wraz z zapasem baterii, pendrive z cyfrowymi dokumentami, latarka i baterie, zapalniczka lub zapałki."
+    },
+    {
+      "source_id": "psp-plecak-ewakuacyjny-lista-s2-f2",
+      "doc_id": "psp-plecak-ewakuacyjny-lista",
+      "doc_title": "Plecak ewakuacyjny - lista kontrolna",
+      "doc_short": "Plecak ewakuacyjny PSP",
+      "publisher": "Państwowa Straż Pożarna (KW PSP Poznań)",
+      "page_label": "2",
+      "pdf_page": 2,
+      "text": "Lista kontrolna plecaka ewakuacyjnego, część druga.\n\nInne elementy: przybornik krawiecki, stopery do uszu, kompas, czapka i rękawiczki, kamizelka odblaskowa, mapa Polski, notes i długopis, półmaska filtrująca FFP3.\n\nHigiena: ręcznik (szybkoschnący), mydło, żel lub szampon, szczoteczka i pasta do zębów, kobiece środki higieniczne, patyczki, waciki i chusteczki, krem lub wazelina.\n\nNocleg: śpiwór, poduszka, koc.\n\nPozostałe pozycje listy: niezbędne dokumenty i gotówka, gwizdek, odzież na zmianę i przeciwdeszczowa, Poradnik bezpieczeństwa."
+    }
+  ]
+}

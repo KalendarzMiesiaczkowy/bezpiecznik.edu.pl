@@ -3,18 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../ratunek/ui/rescue_answer.dart';
 import 'answer/pipeline_answer_service.dart';
+import 'intent/kit_answer.dart';
 import 'intent/map_answer.dart';
 import 'ui/answer_service.dart';
 
 /// Production answer order (spec ekran-1-czat.md, zakres-mvp.md):
 /// 1. risk phrase → rescue card, no model (< 1 s);
 /// 2. shelter / where-to-go / hospital intent → `map` template, no model;
-/// 3. everything else → the sourced answer pipeline (retrieval + model).
+/// 3. "plecak / co spakować" → checkable `bullets` from the PSP list, no model;
+/// 4. everything else → the sourced answer pipeline (retrieval + model).
 class RoutedAnswerService implements AnswerService {
-  RoutedAnswerService({required this.rescue, required this.map, required this.pipeline});
+  RoutedAnswerService({
+    required this.rescue,
+    required this.map,
+    required this.pipeline,
+    this.kit,
+  });
 
   final Future<RescueAnswerService> Function() rescue;
   final MapAnswerService map;
+  final KitAnswerService? kit;
   final AnswerService pipeline;
 
   @override
@@ -40,6 +48,12 @@ class RoutedAnswerService implements AnswerService {
       yield AnswerReady(risky ? RescueAnswerService.withCallFirst(mapAnswer) : mapAnswer);
       return;
     }
+    final kitAnswer = await kit?.tryAnswer(question);
+    if (kitAnswer != null) {
+      final risky = cards?.isRisk(question) ?? false;
+      yield AnswerReady(risky ? RescueAnswerService.withCallFirst(kitAnswer) : kitAnswer);
+      return;
+    }
     yield* pipeline.answer(question, ctx);
   }
 }
@@ -49,6 +63,7 @@ final routedAnswerServiceProvider = Provider<AnswerService>(
   (ref) => RoutedAnswerService(
     rescue: () => ref.read(rescueAnswerServiceProvider.future),
     map: ref.watch(mapAnswerServiceProvider),
+    kit: ref.watch(kitAnswerServiceProvider),
     pipeline: ref.watch(pipelineAnswerServiceProvider),
   ),
 );
