@@ -351,22 +351,26 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
 
   List<Widget> _moreChildren(BzTokens bz, Position? pos) => [
     const SizedBox(height: 8),
-    Row(
+    Wrap(
+      spacing: 8,
+      runSpacing: 8,
       children: [
         for (final (n, name) in const [
           ('999', 'Pogotowie'),
           ('998', 'Straż'),
           ('997', 'Policja'),
-        ]) ...[
-          if (n != '999') const SizedBox(width: 8),
-          Expanded(
-            child: _SmallDial(
-              key: Key('call-$n'),
-              label: '$n · $name',
-              onTap: () => _dial(n),
+        ])
+          // Three per row when they fit, otherwise they wrap to the next line.
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 96),
+            child: IntrinsicWidth(
+              child: _SmallDial(
+                key: Key('call-$n'),
+                label: '$n · $name',
+                onTap: () => _dial(n),
+              ),
             ),
           ),
-        ],
       ],
     ),
     const SizedBox(height: 12),
@@ -469,30 +473,41 @@ class _BigButton extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(bz.radiusFull),
             onTap: onTap,
-            child: SizedBox(
-              height: 80,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 24, color: fg),
-                  const SizedBox(width: 12),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        label,
-                        style: bz.label.copyWith(fontSize: 18, color: fg),
+            // Grows with text scale: min 80, labels wrap instead of clipping.
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 80),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 24, color: fg),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            label,
+                            softWrap: true,
+                            style: bz.label.copyWith(fontSize: 18, color: fg),
+                          ),
+                          Text(
+                            sub,
+                            softWrap: true,
+                            style: bz.caption.copyWith(
+                              color: fg.withValues(alpha: 0.85),
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        sub,
-                        style: bz.caption.copyWith(
-                          color: fg.withValues(alpha: 0.85),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -523,13 +538,17 @@ class _SmallDial extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: onTap,
-          child: SizedBox(
-            height: 56,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
             child: Center(
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: bz.caption.copyWith(color: bz.ink100),
+              widthFactor: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: bz.caption.copyWith(color: bz.ink100),
+                ),
               ),
             ),
           ),

@@ -57,10 +57,12 @@ class TemplateRenderer extends ConsumerWidget {
     final children = <Widget>[];
     if (label != null || answer.verify) {
       children.add(
-        Row(
+        Wrap(
+          spacing: t.space2,
+          runSpacing: t.space1,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             if (label != null) Text(label, style: t.caption.copyWith(color: t.ink300)),
-            if (label != null && answer.verify) SizedBox(width: t.space2),
             if (answer.verify) const VerifyBadge(),
           ],
         ),

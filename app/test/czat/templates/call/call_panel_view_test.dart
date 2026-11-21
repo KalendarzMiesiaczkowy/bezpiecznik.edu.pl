@@ -61,8 +61,8 @@ void main() {
     await pump(tester, []);
     expect(find.text(callTitle), findsOneWidget);
     expect(find.text(call112Label), findsOneWidget);
-    expect(tester.getSize(find.byKey(const Key('call-112'))).height, 80);
-    expect(tester.getSize(find.byKey(const Key('call-notify'))).height, 80);
+    expect(tester.getSize(find.byKey(const Key('call-112'))).height, greaterThanOrEqualTo(80));
+    expect(tester.getSize(find.byKey(const Key('call-notify'))).height, greaterThanOrEqualTo(80));
     expect(find.text('Więcej'), findsOneWidget);
     expect(find.byKey(const Key('call-999')), findsNothing);
     final material = tester.widget<Material>(

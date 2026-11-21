@@ -64,10 +64,10 @@ void main() {
     iceContacts: const [IceContact(name: 'Mama', phone: '+48600100200')],
   );
 
-  testWidgets('two 80 px buttons; nothing launched without a tap; More collapsed', (tester) async {
+  testWidgets('two buttons min 80 px (grow with text); nothing launched without a tap; More collapsed', (tester) async {
     final launched = await _pump(tester, profile);
-    expect(tester.getSize(find.byKey(const Key('call-112'))).height, 80);
-    expect(tester.getSize(find.byKey(const Key('call-notify'))).height, 80);
+    expect(tester.getSize(find.byKey(const Key('call-112'))).height, greaterThanOrEqualTo(80));
+    expect(tester.getSize(find.byKey(const Key('call-notify'))).height, greaterThanOrEqualTo(80));
     expect(launched, isEmpty);
     expect(find.byKey(const Key('call-999')), findsNothing);
     expect(find.text('Do: Mama'), findsOneWidget);

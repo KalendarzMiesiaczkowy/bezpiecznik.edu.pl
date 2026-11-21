@@ -40,11 +40,13 @@ class VerifyBadge extends StatelessWidget {
             children: <Widget>[
               Icon(Icons.warning_amber_rounded, size: 16, color: fg),
               const SizedBox(width: 4),
-              Text(
-                verifyBadgeText,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: fg,
-                  fontWeight: FontWeight.w600,
+              Flexible(
+                child: Text(
+                  verifyBadgeText,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: fg,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
