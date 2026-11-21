@@ -78,6 +78,20 @@ flutter:
     - assets/map/glyphs/AtkinsonHyperlegibleNext-Regular/
     - assets/map/glyphs/AtkinsonHyperlegibleNext-Bold/
 
+  fonts:
+    - family: Atkinson Hyperlegible Next
+      fonts:
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-ExtraBold.ttf
+          weight: 800
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
