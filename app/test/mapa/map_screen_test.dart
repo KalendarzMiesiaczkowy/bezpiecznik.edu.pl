@@ -24,7 +24,9 @@ class _Bundle extends CachingAssetBundle {
 }
 
 class _FakeGateway implements LocationGateway {
-  _FakeGateway(this.access, [this.stream]);
+  _FakeGateway(this.access, [this.stream, this.last]);
+
+  final Position? last;
 
   final LocationAccess access;
   final Stream<Position>? stream;
@@ -34,7 +36,7 @@ class _FakeGateway implements LocationGateway {
   Future<LocationAccess> ensureAccess() async => access;
 
   @override
-  Future<Position?> lastKnown() async => null;
+  Future<Position?> lastKnown() async => last;
 
   @override
   Stream<Position> positions() => stream ?? const Stream.empty();
@@ -76,8 +78,10 @@ void main() {
     WidgetTester tester,
     LocationAccess access, {
     Stream<Position>? stream,
+    Position? last,
+    MapViewBuilder? builder,
   }) async {
-    final gw = _FakeGateway(access, stream);
+    final gw = _FakeGateway(access, stream, last);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -93,7 +97,7 @@ void main() {
         child: MaterialApp(
           theme: buildBzTheme(),
           home: MapScreen(
-            mapBuilder: (context, params) => const SizedBox.expand(key: Key('fake-map')),
+            mapBuilder: builder ?? (context, params) => const SizedBox.expand(key: Key('fake-map')),
           ),
         ),
       ),
@@ -160,5 +164,71 @@ void main() {
     await tester.tap(layers);
     await tester.pumpAndSettle();
     expect(find.text('Schrony i ukrycia'), findsOneWidget);
+  });
+
+  testWidgets('last known position only: searching line with its age, recenter disabled', (tester) async {
+    final controller = StreamController<Position>();
+    addTearDown(controller.close);
+    MapViewParams? params;
+    final old = Position(
+      latitude: 53.5,
+      longitude: 14.6,
+      timestamp: DateTime.now().subtract(const Duration(minutes: 6, seconds: 5)),
+      accuracy: 5,
+      altitude: 0,
+      altitudeAccuracy: 1,
+      heading: 0,
+      headingAccuracy: 1,
+      speed: 0,
+      speedAccuracy: 1,
+    );
+    await pump(
+      tester,
+      LocationAccess.granted,
+      stream: controller.stream,
+      last: old,
+      builder: (context, p) {
+        params = p;
+        return const SizedBox.expand(key: Key('fake-map'));
+      },
+    );
+    expect(find.text('Szukam pozycji GPS…'), findsOneWidget);
+    expect(find.text('Ostatnia pozycja: 6 min temu'), findsOneWidget);
+    final sem = tester.getSemantics(find.bySemanticsLabel(recenterLabel));
+    expect(sem.getSemanticsData().flagsCollection.isEnabled, Tristate.isFalse);
+    // Camera starts at the last known position; native puck is off.
+    expect(params!.initialTarget.latitude, 53.5);
+    expect(params!.myLocationEnabled, isFalse);
+  });
+
+  testWidgets('lost signal shows "Brak sygnału GPS." with the last live position age', (tester) async {
+    final controller = StreamController<Position>();
+    addTearDown(controller.close);
+    await pump(tester, LocationAccess.granted, stream: controller.stream);
+    controller.add(_pos());
+    await tester.pump();
+    await tester.pump();
+    controller.addError(StateError('gps off'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Brak sygnału GPS.'), findsOneWidget);
+    expect(find.textContaining('Ostatnia pozycja:'), findsOneWidget);
+  });
+
+  testWidgets('a live fix starts the camera at the fix', (tester) async {
+    final controller = StreamController<Position>();
+    addTearDown(controller.close);
+    controller.add(_pos());
+    MapViewParams? params;
+    await pump(
+      tester,
+      LocationAccess.granted,
+      stream: controller.stream,
+      builder: (context, p) {
+        params = p;
+        return const SizedBox.expand(key: Key('fake-map'));
+      },
+    );
+    expect(params!.initialTarget.latitude, 53.43);
   });
 }

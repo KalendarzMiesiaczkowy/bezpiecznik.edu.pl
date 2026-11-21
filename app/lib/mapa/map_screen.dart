@@ -12,23 +12,22 @@ import '../wspolne/shell/shell_icon_button.dart';
 import '../wspolne/shell/sos_button.dart';
 import '../wspolne/theme/bz_theme.dart';
 import 'kompas/compass_screen.dart';
+import 'gps_status.dart';
 import 'map_assets.dart';
 import 'position_provider.dart';
 import 'punkty/point_sheet.dart';
 import 'punkty/points_db.dart';
 import 'punkty/shelter_layer.dart';
 
+export 'gps_status.dart' show gpsSearchLongSeconds, gpsSearchingLongText, gpsSearchingText;
+
 /// Szczecin centre, used until the first fix (spec: no GPS, no last position).
 const szczecinCentre = LatLng(53.4285, 14.5528);
 const mapInitialZoom = 14.0;
 
-/// Seconds without a first fix before the long "no position" text (spec).
-const gpsSearchLongSeconds = 60;
 
 // Spec: ekran-2-mapa.md, texts table.
 const attributionText = '© OpenStreetMap contributors'; // map.attribution
-const gpsSearchingText = 'Szukam pozycji GPS…'; // map.gps.searching
-const gpsSearchingLongText = 'Nie mogę ustalić pozycji. Wyjdź pod otwarte niebo.'; // map.gps.searchingLong
 const permissionDeniedText = 'Bez dostępu do lokalizacji nie pokażę, gdzie jesteś.'; // map.permission.denied
 const openPhoneSettingsText = 'Otwórz ustawienia telefonu'; // spec Stany: brak zgody
 
@@ -55,6 +54,7 @@ class MapViewParams {
     this.onMapClick,
     this.onStyleLoaded,
     this.onCameraIdle,
+    this.onCameraMoveStarted,
   });
 
   final String styleString;
@@ -67,6 +67,7 @@ class MapViewParams {
   final OnMapClickCallback? onMapClick;
   final VoidCallback? onStyleLoaded;
   final VoidCallback? onCameraIdle;
+  final void Function(CameraMoveReason reason)? onCameraMoveStarted;
 }
 
 typedef MapViewBuilder = Widget Function(BuildContext context, MapViewParams params);
@@ -91,6 +92,7 @@ Widget defaultMapViewBuilder(BuildContext context, MapViewParams p) {
     onMapClick: p.onMapClick,
     onStyleLoadedCallback: p.onStyleLoaded,
     onCameraIdle: p.onCameraIdle,
+    onCameraMoveStarted: p.onCameraMoveStarted,
     // Own attribution text and no native north compass (B05 owns the compass).
     attributionEnabled: false,
     compassEnabled: false,
@@ -131,6 +133,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   int? _focusId;
   bool _focusResolved = false;
   bool _focusDone = false;
+  bool _styleReady = false;
+  bool _markerLayersAdded = false;
+  Timer? _ageTimer;
+  DateTime? _lastTrackedFix;
 
   @override
   void didChangeDependencies() {
@@ -161,6 +167,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void initState() {
     super.initState();
     _startInstall();
+    // Keeps "Ostatnia pozycja: N min temu" current.
+    _ageTimer = Timer.periodic(const Duration(seconds: 20), (_) {
+      if (mounted) setState(() {});
+    });
     _searchTimer = Timer(const Duration(seconds: gpsSearchLongSeconds), () {
       if (mounted) setState(() => _searchLong = true);
     });
@@ -176,6 +186,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   void dispose() {
     _searchTimer?.cancel();
+    _ageTimer?.cancel();
     _progress.dispose();
     super.dispose();
   }
@@ -219,6 +230,57 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       _symbols = await c.addSymbols([for (final p in _points) symbolFor(p)]);
     } on Object {
       // Layer is optional: the map stays usable if points or annotations fail.
+    }
+  }
+
+  /// Own position marker (replaces MapLibre's puck, which draws nothing
+  /// without a live fix): GeoJSON source + halo and dot circle layers.
+  Future<void> _syncUserMarker() async {
+    final c = _controller;
+    if (c == null || !_styleReady || !mounted) return;
+    final position = ref.read(positionProvider).value;
+    final fix = ref.read(gpsFixProvider);
+    final live = position != null && !fix.lastKnownOnly;
+    final at = position ?? fix.lastKnown;
+    final kind = userMarkerKind(live: live, hasLastKnown: at != null);
+    final data = userMarkerGeoJson(
+      kind == UserMarkerKind.none ? null : at?.latitude,
+      kind == UserMarkerKind.none ? null : at?.longitude,
+      live: kind == UserMarkerKind.live,
+    );
+    try {
+      if (!_markerLayersAdded) {
+        _markerLayersAdded = true;
+        final bz = context.bz;
+        final color = ['case', ['get', 'live'], _hex(bz.info), _hex(bz.ink300)];
+        await c.addGeoJsonSource(_userSourceId, data);
+        await c.addCircleLayer(
+          _userSourceId,
+          _userHaloLayerId,
+          CircleLayerProperties(circleRadius: 16, circleColor: color, circleOpacity: 0.25),
+          enableInteraction: false,
+        );
+        await c.addCircleLayer(
+          _userSourceId,
+          _userDotLayerId,
+          CircleLayerProperties(
+            circleRadius: 7,
+            circleColor: color,
+            circleStrokeColor: _hex(bz.ink100),
+            circleStrokeWidth: 2,
+          ),
+          enableInteraction: false,
+        );
+      } else {
+        await c.setGeoJsonSource(_userSourceId, data);
+      }
+      // Follow the user while tracking is on (live fixes only).
+      if (live && _tracking && position.timestamp != _lastTrackedFix) {
+        _lastTrackedFix = position.timestamp;
+        await c.animateCamera(CameraUpdate.newLatLng(LatLng(position.latitude, position.longitude)));
+      }
+    } on Object {
+      // The marker is best effort: the map stays usable without it.
     }
   }
 
@@ -315,6 +377,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final bz = context.bz;
     final access = ref.watch(locationAccessProvider);
     final position = ref.watch(positionProvider).value;
+    final fix = ref.watch(gpsFixProvider);
+    ref.listen(positionProvider, (_, _) => _syncUserMarker());
+    ref.listen(gpsFixProvider, (_, _) => _syncUserMarker());
+    final live = position != null && !fix.lastKnownOnly;
+    final startAt = position ?? fix.lastKnown;
     final granted = access.value == LocationAccess.granted;
     final bottom = MediaQuery.paddingOf(context).bottom;
     final top = MediaQuery.paddingOf(context).top;
@@ -340,21 +407,29 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 context,
                 MapViewParams(
                   styleString: snap.requireData.styleJson,
-                  initialTarget: position == null
+                  initialTarget: startAt == null
                       ? szczecinCentre
-                      : LatLng(position.latitude, position.longitude),
+                      : LatLng(startAt.latitude, startAt.longitude),
                   initialZoom: mapInitialZoom,
-                  myLocationEnabled: granted,
-                  trackingMode: granted && _tracking
-                      ? MyLocationTrackingMode.tracking
-                      : MyLocationTrackingMode.none,
+                  // Our own marker layer replaces the native puck (one marker only).
+                  myLocationEnabled: false,
+                  trackingMode: MyLocationTrackingMode.none,
                   onMapCreated: (c) => _controller = c,
                   onStyleLoaded: () async {
+                    _styleReady = true;
+                    _markerLayersAdded = false;
+                    await _syncUserMarker();
                     await _refreshShelters();
                     await _applyFocus();
                   },
                   onCameraIdle: _refreshShelters,
                   onMapClick: _onMapClick,
+                  onCameraMoveStarted: (reason) {
+                    // A finger on the map switches tracking off (spec).
+                    if (reason == CameraMoveReason.gesture && mounted && _tracking) {
+                      setState(() => _tracking = false);
+                    }
+                  },
                   onTrackingDismissed: () {
                     if (mounted) setState(() => _tracking = false);
                   },
@@ -373,9 +448,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 LayersButton(onPressed: _showLayers),
                 SizedBox(height: bz.space2 + 2),
                 RecenterButton(
-                  enabled: granted && position != null,
-                  active: granted && _tracking,
-                  onPressed: position == null ? null : () => _recenter(position),
+                  enabled: granted && live,
+                  active: granted && live && _tracking,
+                  onPressed: !live ? null : () => _recenter(position),
                 ),
               ],
             ),
@@ -386,7 +461,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               top: topInset + SosButton.size + 8,
               left: 16,
               right: 16,
-              child: _notice(access.requireValue, position),
+              child: _notice(access.requireValue, live, fix, startAt),
             ),
           ],
           Positioned(
@@ -416,7 +491,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
   }
 
-  Widget _notice(LocationAccess access, Position? position) {
+  Widget _notice(LocationAccess access, bool live, GpsFix fix, Position? at) {
     if (access != LocationAccess.granted) {
       return MapNotice(
         text: permissionDeniedText,
@@ -424,12 +499,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         onAction: () => ref.read(locationGatewayProvider).openSettings(),
       );
     }
-    if (position == null) {
-      return MapNotice(text: _searchLong ? gpsSearchingLongText : gpsSearchingText);
-    }
-    return const SizedBox.shrink();
+    final line = gpsStatusLine(
+      live: live,
+      lost: fix.lost,
+      lastKnownAt: at?.timestamp,
+      now: DateTime.now(),
+      searchLong: _searchLong,
+    );
+    if (line == null) return const SizedBox.shrink();
+    return MapNotice(text: line.text, detail: line.detail);
   }
 }
+
+const _userSourceId = 'user-position';
+const _userHaloLayerId = 'user-position-halo';
+const _userDotLayerId = 'user-position-dot';
+
+/// `#rrggbb` for MapLibre style colours.
+String _hex(Color c) => '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
 
 /// Floating round recenter button, >= 48 dp, same surface as Back.
 class RecenterButton extends StatelessWidget {
@@ -523,9 +610,10 @@ class LayersButton extends StatelessWidget {
 
 /// Bar notice (spec: `Notice`, variant `bar`).
 class MapNotice extends StatelessWidget {
-  const MapNotice({super.key, required this.text, this.actionLabel, this.onAction});
+  const MapNotice({super.key, required this.text, this.detail, this.actionLabel, this.onAction});
 
   final String text;
+  final String? detail;
   final String? actionLabel;
   final VoidCallback? onAction;
 
@@ -548,6 +636,7 @@ class MapNotice extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(text, style: bz.label.copyWith(color: bz.ink100)),
+              if (detail != null) Text(detail!, style: bz.caption.copyWith(color: bz.ink200)),
               if (actionLabel != null) ...[
                 SizedBox(height: bz.space2),
                 BzButtonLike(label: actionLabel!, onPressed: onAction),
