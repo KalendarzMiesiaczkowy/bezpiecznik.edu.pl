@@ -144,4 +144,21 @@ void main() {
     expect(data.flagsCollection.isButton, isTrue);
     expect(data.flagsCollection.isEnabled, Tristate.isTrue);
   });
+
+  testWidgets('Warstwy sits above the recenter button, right-aligned, opens layer toggle', (tester) async {
+    final controller = StreamController<Position>();
+    addTearDown(controller.close);
+    await pump(tester, LocationAccess.granted, stream: controller.stream);
+    final layers = find.text('Warstwy');
+    expect(layers, findsOneWidget);
+    final layersRect = tester.getRect(find.byType(LayersButton));
+    final recenterRect = tester.getRect(find.bySemanticsLabel(recenterLabel));
+    expect(layersRect.bottom, lessThan(recenterRect.top));
+    expect(layersRect.right, recenterRect.right);
+    expect(layersRect.height, greaterThanOrEqualTo(48));
+    expect(find.text('Schrony i ukrycia'), findsNothing);
+    await tester.tap(layers);
+    await tester.pumpAndSettle();
+    expect(find.text('Schrony i ukrycia'), findsOneWidget);
+  });
 }

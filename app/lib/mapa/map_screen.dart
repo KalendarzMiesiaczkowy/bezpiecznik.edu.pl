@@ -35,6 +35,7 @@ const openPhoneSettingsText = 'Otwórz ustawienia telefonu'; // spec Stany: brak
 // Drafted (not in the spec, verify: true, source: ekran-2-mapa.md has no copy
 // for the first-run state, recenter label or install error).
 const recenterLabel = 'Wyśrodkuj mapę na mojej pozycji'; // verify:true
+const layersButtonText = 'Warstwy'; // spec: przycisk Warstwy (ekran-2-mapa.md)
 const preparingTitle = 'Przygotowuję mapę…'; // verify:true
 const preparingBody = 'Kopiuję mapę na telefon. Dzieje się to tylko raz. Potem mapa działa bez internetu.'; // verify:true
 const installErrorText = 'Nie mogę przygotować mapy.'; // verify:true
@@ -278,6 +279,29 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
   }
 
+  Future<void> _showLayers() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: context.bz.bg200,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) => Padding(
+          padding: EdgeInsets.all(context.bz.space4),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ShelterLayerToggle(
+              on: _sheltersOn,
+              onChanged: (v) {
+                setState(() => _sheltersOn = v);
+                setSheetState(() {});
+                _refreshShelters();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _recenter(Position position) async {
     final c = _controller;
     if (c != null) {
@@ -338,6 +362,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               );
             },
           ),
+          Positioned(
+            // Spec layout: [Warstwy] above [◎], right edge, above the attribution.
+            right: 16,
+            bottom: 16 + bottom + 28,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                LayersButton(onPressed: _showLayers),
+                SizedBox(height: bz.space2 + 2),
+                RecenterButton(
+                  enabled: granted && position != null,
+                  active: granted && _tracking,
+                  onPressed: position == null ? null : () => _recenter(position),
+                ),
+              ],
+            ),
+          ),
           if (access.hasValue) ...[
             Positioned(
               // Below Back (left) and SOS (right), never over them.
@@ -345,14 +387,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               left: 16,
               right: 16,
               child: _notice(access.requireValue, position),
-            ),
-            Positioned(
-              right: 16,
-              bottom: 16 + bottom + 28,
-              child: RecenterButton(
-                enabled: granted && position != null,
-                onPressed: position == null ? null : () => _recenter(position),
-              ),
             ),
           ],
           Positioned(
@@ -362,14 +396,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ShelterLayerToggle(
-                  on: _sheltersOn,
-                  onChanged: (v) {
-                    setState(() => _sheltersOn = v);
-                    _refreshShelters();
-                  },
-                ),
-                SizedBox(height: bz.space2),
                 ConstrainedBox(
                   constraints: BoxConstraints(minHeight: bz.minTouchTarget),
                   child: FilledButton(
@@ -407,9 +433,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
 /// Floating round recenter button, >= 48 dp, same surface as Back.
 class RecenterButton extends StatelessWidget {
-  const RecenterButton({super.key, required this.enabled, required this.onPressed});
+  const RecenterButton({
+    super.key,
+    required this.enabled,
+    required this.onPressed,
+    this.active = false,
+  });
 
   final bool enabled;
+
+  /// Tracking is on: glyph in the `info` colour (DS `FloatingButton.is-active`).
+  final bool active;
   final VoidCallback? onPressed;
 
   @override
@@ -423,7 +457,7 @@ class RecenterButton extends StatelessWidget {
       onTap: enabled ? onPressed : null,
       excludeSemantics: true,
       child: Opacity(
-        opacity: enabled ? 1 : 0.4,
+        opacity: enabled ? 1 : 0.45,
         child: DecoratedBox(
           decoration: shellFloatDecoration(context, circle: true),
           child: SizedBox(
@@ -434,7 +468,50 @@ class RecenterButton extends StatelessWidget {
               child: InkResponse(
                 onTap: enabled ? onPressed : null,
                 customBorder: const CircleBorder(),
-                child: Icon(LucideIcons.locateFixed, size: 22, color: bz.ink100),
+                child: Icon(LucideIcons.locateFixed, size: 22, color: active ? bz.info : bz.ink100),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Floating pill "Warstwy" (spec: opens the layers sheet), >= 48 dp.
+class LayersButton extends StatelessWidget {
+  const LayersButton({super.key, required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final bz = context.bz;
+    return Semantics(
+      container: true,
+      button: true,
+      label: layersButtonText,
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: DecoratedBox(
+        decoration: shellFloatDecoration(context),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: bz.minTouchTarget, minWidth: bz.minTouchTarget),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(bz.radiusFull),
+              onTap: onPressed,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: bz.space4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(LucideIcons.layers, size: 18, color: bz.ink100),
+                    SizedBox(width: bz.space2),
+                    Text(layersButtonText, style: bz.label.copyWith(color: bz.ink100)),
+                  ],
+                ),
               ),
             ),
           ),
