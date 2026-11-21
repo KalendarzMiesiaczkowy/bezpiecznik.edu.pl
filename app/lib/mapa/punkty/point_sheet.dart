@@ -100,8 +100,10 @@ class PointSheet extends StatelessWidget {
     }
     final stale = isStale(point.verifiedAt, now ?? DateTime.now());
     final btn = Size(bz.minTouchTarget, bz.minTouchTarget);
-    return Padding(
-      padding: EdgeInsets.all(bz.space4),
+    return SafeArea(
+      top: false,
+      child: Padding(
+      padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,7 +155,7 @@ class PointSheet extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 

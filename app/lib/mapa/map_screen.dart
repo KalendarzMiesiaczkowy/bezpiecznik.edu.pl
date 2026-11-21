@@ -356,11 +356,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final pos = ref.read(positionProvider).value;
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: context.bz.bg200,
+      backgroundColor: context.bz.bg100,
       builder: (sheetContext) => PointSheet(
         point: p,
         fromLat: pos?.latitude,
         fromLon: pos?.longitude,
+        // Routing is post-MVP: Prowadź falls back to the straight-line compass.
+        onGuide: () {
+          Navigator.of(sheetContext).pop();
+          _openCompass(p);
+        },
         onCompass: () {
           Navigator.of(sheetContext).pop();
           _openCompass(p);

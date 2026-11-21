@@ -91,7 +91,9 @@ class _CompassScreenState extends ConsumerState<CompassScreen> {
       notice = compassCalibrateText;
     }
 
-    return ColoredBox(
+    // Material, not ColoredBox: pushed as a bare route it has no Scaffold,
+    // and Text without a Material ancestor renders red with yellow underlines.
+    return Material(
       color: bz.bg000,
       child: SafeArea(
         child: Padding(

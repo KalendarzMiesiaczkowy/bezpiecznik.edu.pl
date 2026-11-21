@@ -72,4 +72,23 @@ void main() {
     expect(find.text(compassNoPositionText), findsOneWidget);
     expect(find.byKey(const Key('compass-arrow')), findsNothing);
   });
+
+  testWidgets('pushed as a bare route (no Scaffold) the text still has a Material', (t) async {
+    await t.pumpWidget(ProviderScope(
+      overrides: [
+        positionProvider.overrideWith((ref) => Stream.value(pos())),
+        headingProvider.overrideWith((ref) => Stream.value(const HeadingReading(90, reliable: true))),
+      ],
+      child: MaterialApp(
+        theme: buildBzTheme(),
+        home: CompassScreen(
+          target: target, onShowMap: () {}, onEnd: () {},
+          now: () => DateTime(2026, 11, 21, 12),
+        ),
+      ),
+    ));
+    await t.pump();
+    final text = find.byType(Text).first;
+    expect(find.ancestor(of: text, matching: find.byType(Material)), findsWidgets);
+  });
 }
