@@ -10,8 +10,9 @@ class CprState {
   final Duration elapsed;
 }
 
-/// Minimal notifier: `start()` / `stop()` and a one-second elapsed ticker.
-/// D04 may replace the ticker with its own clock via [setElapsed].
+/// Minimal notifier: `start()` / `stop()` and an optional one-second elapsed
+/// ticker. The CPR session drives the elapsed time itself via [setElapsed] and
+/// starts with `selfTick: false`, so only one timer runs per session.
 class CprNotifier extends Notifier<CprState> {
   Timer? _timer;
 
@@ -21,9 +22,11 @@ class CprNotifier extends Notifier<CprState> {
     return const CprState();
   }
 
-  void start() {
+  void start({bool selfTick = true}) {
     _timer?.cancel();
+    _timer = null;
     state = const CprState(running: true);
+    if (!selfTick) return;
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       state = CprState(running: true, elapsed: state.elapsed + const Duration(seconds: 1));
     });

@@ -4,6 +4,7 @@ import 'package:bezpiecznik/czat/templates/app_templates.dart';
 import 'package:bezpiecznik/czat/templates/call/call_panel_view.dart';
 import 'package:bezpiecznik/czat/templates/template_registry.dart';
 import 'package:bezpiecznik/czat/templates/template_renderer.dart';
+import 'package:bezpiecznik/ratunek/cpr/cpr_view.dart' show cprStartLabel;
 import 'package:bezpiecznik/ratunek/ui/rescue_answer.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:flutter/services.dart';
@@ -43,7 +44,7 @@ void main() {
     expect(find.text('Dziecko'), findsWidgets);
     // Call panel, then the CPR instructor, then the steps (BG26).
     final call = tester.getTopLeft(find.text(call112Label)).dy;
-    final start = tester.getTopLeft(find.text('Start RKO')).dy;
+    final start = tester.getTopLeft(find.text(cprStartLabel)).dy;
     final firstStep = tester.getTopLeft(find.textContaining('Zapewnij bezpieczeństwo')).dy;
     expect(call, lessThan(start));
     expect(start, lessThan(firstStep));

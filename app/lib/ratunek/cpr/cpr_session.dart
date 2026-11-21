@@ -16,12 +16,16 @@ abstract interface class CprOverlayPort {
   void stop();
 }
 
+/// Whole seconds of [d], rounded up (a 9.4 s countdown reads "0:10"); null
+/// stays null.
+int? ceilSeconds(Duration? d) => d == null ? null : (d.inMilliseconds + 999) ~/ 1000;
+
 class _NotifierOverlay implements CprOverlayPort {
   _NotifierOverlay(this._ref);
   final Ref _ref;
 
   @override
-  void start() => _ref.read(cprProvider.notifier).start();
+  void start() => _ref.read(cprProvider.notifier).start(selfTick: false);
 
   @override
   void setElapsed(Duration elapsed) => _ref.read(cprProvider.notifier).setElapsed(elapsed);
@@ -65,6 +69,12 @@ class CprSession extends ChangeNotifier {
   Timer? _timer;
   String _shownKey = '';
   int _lastOverlaySecond = -1;
+  bool _aedReminder = false;
+
+  /// Whether the "Poproś kogoś o AED" row is shown. On at start (when the card
+  /// has an AED voice line), hidden by [dismissAedReminder], back on every
+  /// rescuer change.
+  bool get aedReminderVisible => _aedReminder && running;
 
   bool get running => _engine?.snapshot.active ?? false;
   CprSnapshot? get snapshot => _engine?.snapshot;
@@ -80,6 +90,7 @@ class CprSession extends ChangeNotifier {
     final engine = CprEngine(config: config, variant: v, clock: clock);
     _engine = engine;
     _lastOverlaySecond = -1;
+    _aedReminder = config.voice.aed.isNotEmpty;
     overlay.start();
     unawaited(wakelock.enable());
     final events = engine.start();
@@ -120,7 +131,14 @@ class CprSession extends ChangeNotifier {
     _notifyIfChanged(force: true);
   }
 
-  /// "Wdechy zrobione": ends the breath phase early / on tap.
+  /// Tick on the check mark of the AED reminder row.
+  void dismissAedReminder() {
+    if (!_aedReminder) return;
+    _aedReminder = false;
+    notifyListeners();
+  }
+
+  /// "Dalej": ends the breath phase early / on tap.
   void breathsDone() {
     final e = _engine;
     if (e == null) return;
@@ -139,6 +157,7 @@ class CprSession extends ChangeNotifier {
     overlay.stop();
     _engine = null;
     _shownKey = '';
+    _aedReminder = false;
     notifyListeners();
   }
 
@@ -158,6 +177,7 @@ class CprSession extends ChangeNotifier {
         case CprEventType.compressionsStart:
           if (!skipStartSpeech && voiceEnabled()) unawaited(voice.speak(cfg.voice.compress));
         case CprEventType.rescuerChange:
+          if (cfg.voice.aed.isNotEmpty) _aedReminder = true;
           // Silent while paused (pause() silenced voice); the engine keeps the
           // change due, so the banner shows after resume.
           if (cfg.voice.change.isNotEmpty && voiceEnabled() && snapshot?.phase != CprPhase.paused) unawaited(voice.speak(cfg.voice.change));
@@ -179,7 +199,7 @@ class CprSession extends ChangeNotifier {
     final s = _engine?.snapshot;
     if (s == null) return;
     final key = '${s.phase.index}|${s.beatInCycle}|${s.totalCompressions}|${s.elapsed.inSeconds}|'
-        '${s.untilChange.inSeconds}|${s.breathRemaining?.inSeconds}|${s.awaitingTap}';
+        '${s.untilChange.inSeconds}|${ceilSeconds(s.breathRemaining)}|${s.awaitingTap}|$_aedReminder';
     if (!force && key == _shownKey) return;
     _shownKey = key;
     notifyListeners();

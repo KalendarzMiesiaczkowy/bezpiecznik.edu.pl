@@ -16,14 +16,22 @@ import 'cpr_engine.dart';
 import 'cpr_session.dart';
 
 /// Copy of the instructor (Polish, per `instruktor-rko.md`).
-const String cprTitle = 'RKO';
-const String cprStartLabel = 'Start RKO';
+const String cprTitle = 'Instruktor RKO';
+
+/// Short name in the pinned header ("RKO · Dorosły").
+const String cprShortTitle = 'RKO';
+const String cprStartLabel = 'Zacznij uciskanie';
 const String cprPauseLabel = 'Pauza';
 const String cprResumeLabel = 'Wznów';
 const String cprStopLabel = 'Zakończ';
-const String cprBreathsDoneLabel = 'Wdechy zrobione';
+const String cprBreathsDoneLabel = 'Dalej';
+const String cprAedReminderLabel = 'Poproś kogoś o AED';
+const String cprAedDoneLabel = 'Ukryj przypomnienie o AED';
 const String cprCompressLabel = 'UCISKAJ';
-const String cprBreathsLabel = 'ODDECHY';
+
+/// Initial rescue breaths: neutral label, the count comes from the card data
+/// (`initial_breaths`); the card has no voice text for them.
+String cprInitialBreathsLabel(int count) => 'Oddechy ratownicze · $count';
 const String cprPausedLabel = 'PAUZA';
 
 /// `m:ss` for the change countdown ("Zmiana za 0:18").
@@ -81,7 +89,7 @@ class CprCard extends ConsumerWidget {
               ],
               if (variant != null)
                 Text(
-                  'Tempo ${config.rateBpm} na minutę · ${variant.compressions}:${variant.breaths}',
+                  '${variant.label} · ${config.rateBpm}/min · ${variant.compressions}:${variant.breaths}',
                   key: const ValueKey('cpr-summary'),
                   style: t.chat.copyWith(color: t.ink200),
                 ),
@@ -158,14 +166,20 @@ class CprPinned extends ConsumerWidget {
     final paused = s.phase == CprPhase.paused;
     final breathing = s.phase == CprPhase.breathing || s.phase == CprPhase.initialBreaths;
     final inBreaths = breathing || (paused && (s.awaitingTap || s.breathRemaining != null));
-    final label = paused
-        ? cprPausedLabel
-        : (breathing
-              ? (s.phase == CprPhase.breathing ? cfg.voice.breaths.toUpperCase() : cprBreathsLabel)
-              : cprCompressLabel);
-    final counter = inBreaths
-        ? (s.breathRemaining != null ? formatCprChange(s.breathRemaining!) : '')
-        : '${s.beatInCycle} / ${s.cycleLength}';
+    final breathLeft = s.breathRemaining;
+    final breathTime = breathLeft == null ? null : formatCprChange(Duration(seconds: ceilSeconds(breathLeft)!));
+    final String label;
+    if (paused) {
+      label = cprPausedLabel;
+    } else if (s.phase == CprPhase.breathing) {
+      // "Dwa oddechy · 0:08": card text plus the countdown of a timed phase.
+      label = breathTime == null ? cfg.voice.breaths : '${cfg.voice.breaths} · $breathTime';
+    } else if (s.phase == CprPhase.initialBreaths) {
+      label = cprInitialBreathsLabel(v.initialBreaths);
+    } else {
+      label = cprCompressLabel;
+    }
+    final counter = inBreaths ? '' : '${s.beatInCycle} / ${s.cycleLength}';
     final showChange =
         s.changesDue > 0 && s.sinceChange < cprChangeBannerDuration && cfg.voice.change.isNotEmpty;
     final accent = breathing ? t.signal : t.ink100;
@@ -184,7 +198,7 @@ class CprPinned extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Expanded(child: Text('$cprTitle · ${v.label}', style: t.label.copyWith(color: t.ink100))),
+                Expanded(child: Text('$cprShortTitle · ${v.label}', style: t.label.copyWith(color: t.ink100))),
                 BzButton(
                   label: '112',
                   variant: BzButtonVariant.sos,
@@ -248,6 +262,24 @@ class CprPinned extends ConsumerWidget {
                 ),
               ],
             ),
+            if (session.aedReminderVisible) ...[
+              SizedBox(height: t.space2),
+              Row(
+                key: const ValueKey('cpr-aed-row'),
+                children: [
+                  Expanded(
+                    child: Text(cprAedReminderLabel, style: t.label.copyWith(color: t.ink100)),
+                  ),
+                  BzButton(
+                    icon: LucideIcons.check,
+                    semanticLabel: cprAedDoneLabel,
+                    variant: BzButtonVariant.secondary,
+                    size: BzButtonSize.md,
+                    onPressed: session.dismissAedReminder,
+                  ),
+                ],
+              ),
+            ],
             SizedBox(height: t.space3),
             if (breathing) ...[
               BzButton(
