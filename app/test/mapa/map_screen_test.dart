@@ -166,6 +166,21 @@ void main() {
     expect(find.text('Schrony i ukrycia'), findsOneWidget);
   });
 
+  testWidgets('Najbliższy schron is full width minus 16 dp margins, below Warstwy and recenter', (tester) async {
+    final controller = StreamController<Position>();
+    addTearDown(controller.close);
+    await pump(tester, LocationAccess.granted, stream: controller.stream);
+    final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    final nearest = find.ancestor(of: find.text('Najbliższy schron'), matching: find.byType(FilledButton));
+    expect(nearest, findsOneWidget);
+    final rect = tester.getRect(nearest);
+    expect(rect.width, screenWidth - 32);
+    expect(rect.left, 16);
+    expect(rect.height, greaterThanOrEqualTo(48));
+    expect(tester.getRect(find.byType(LayersButton)).bottom, lessThanOrEqualTo(rect.top));
+    expect(tester.getRect(find.bySemanticsLabel(recenterLabel)).bottom, lessThanOrEqualTo(rect.top));
+  });
+
   testWidgets('last known position only: searching line with its age, recenter disabled', (tester) async {
     final controller = StreamController<Position>();
     addTearDown(controller.close);

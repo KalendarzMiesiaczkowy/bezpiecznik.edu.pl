@@ -437,24 +437,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               );
             },
           ),
-          Positioned(
-            // Spec layout: [Warstwy] above [◎], right edge, above the attribution.
-            right: 16,
-            bottom: 16 + bottom + 28,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                LayersButton(onPressed: _showLayers),
-                SizedBox(height: bz.space2 + 2),
-                RecenterButton(
-                  enabled: granted && live,
-                  active: granted && live && _tracking,
-                  onPressed: !live ? null : () => _recenter(position),
-                ),
-              ],
-            ),
-          ),
           if (access.hasValue) ...[
             Positioned(
               // Below Back (left) and SOS (right), never over them.
@@ -465,12 +447,32 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
           ],
           Positioned(
+            // Spec layout: [Warstwy] above [◎] (right-aligned), then the
+            // full-width "Najbliższy schron" button, then the attribution.
             left: 16,
-            bottom: 16 + bottom + 28,
+            right: 16,
+            bottom: 16 + bottom,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      LayersButton(onPressed: _showLayers),
+                      SizedBox(height: bz.space2 + 2),
+                      RecenterButton(
+                        enabled: granted && live,
+                        active: granted && live && _tracking,
+                        onPressed: !live ? null : () => _recenter(position),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: bz.space3),
                 ConstrainedBox(
                   constraints: BoxConstraints(minHeight: bz.minTouchTarget),
                   child: FilledButton(
@@ -478,13 +480,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     child: const Text(nearestButtonText),
                   ),
                 ),
+                SizedBox(height: bz.space2),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: AttributionLabel(),
+                ),
               ],
             ),
-          ),
-          Positioned(
-            left: 16,
-            bottom: 16 + bottom,
-            child: const AttributionLabel(),
           ),
         ],
       ),
