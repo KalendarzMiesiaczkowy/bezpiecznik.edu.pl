@@ -20,7 +20,13 @@ String stripPolish(String s) {
 /// Profile facts that may go into the SMS, in Polish (for the UI preview).
 /// Never contains household member names or contact numbers.
 class ProfileSmsFacts {
-  const ProfileSmsFacts({this.household = const [], this.medications = const [], this.devices = const [], this.floor, this.floorSms});
+  const ProfileSmsFacts({
+    this.household = const [],
+    this.medications = const [],
+    this.devices = const [],
+    this.floor,
+    this.floorSms,
+  });
 
   final List<String> household;
   final List<String> medications;
@@ -32,15 +38,15 @@ class ProfileSmsFacts {
   /// Same fact in the SMS wording: `Piętro 7, bez windy`.
   final String? floorSms;
 
-  bool get isEmpty => household.isEmpty && medications.isEmpty && devices.isEmpty && floor == null;
+  bool get isEmpty =>
+      household.isEmpty &&
+      medications.isEmpty &&
+      devices.isEmpty &&
+      floor == null;
 
   /// Preview under the switch, e.g. `niemowlę, insulina, 7. piętro bez windy`.
-  String get preview => [
-    ...household,
-    ...medications,
-    ...devices,
-    ?floor,
-  ].join(', ');
+  String get preview =>
+      [...household, ...medications, ...devices, ?floor].join(', ');
 
   /// The `{profil}` line of the template (ASCII); empty when no facts.
   String get smsLine {
@@ -59,17 +65,21 @@ ProfileSmsFacts profileSmsFacts(HouseholdProfile p) {
   final household = <String>[
     for (final g in attention)
       if (p.members.any((m) => m.ageGroup == g)) g.short,
-    if (p.members.any((m) => m.limitedMobility == true)) 'ograniczona mobilność',
+    if (p.members.any((m) => m.limitedMobility == true))
+      'ograniczona mobilność',
   ];
   final meds = [
     for (final m in p.medications)
-      if (m.name.trim().isNotEmpty) m.name.trim() + (m.needsFridge == true ? ' (lodówka)' : ''),
+      if (m.name.trim().isNotEmpty)
+        m.name.trim() + (m.needsFridge == true ? ' (lodówka)' : ''),
   ];
   final devices = [
     for (final k in powerDeviceLabels.keys)
       if (p.powerDevices.contains(k))
         if (k == 'other')
-          ((p.powerOtherText ?? '').trim().isEmpty ? powerDeviceLabels[k]! : p.powerOtherText!.trim())
+          ((p.powerOtherText ?? '').trim().isEmpty
+              ? powerDeviceLabels[k]!
+              : p.powerOtherText!.trim())
         else
           powerDeviceLabels[k]!.toLowerCase(),
   ];
@@ -137,7 +147,9 @@ String clipSituation(String s, [int max = 80]) {
 String buildSosSms(SosSmsInput i) {
   final lines = <String>['SOS. Potrzebuje pomocy.'];
   final sit = i.situation?.trim() ?? '';
-  if (sit.isNotEmpty) lines[0] = '${lines[0]} Sytuacja: ${sit.endsWith('.') ? sit : '$sit.'}';
+  if (sit.isNotEmpty) {
+    lines[0] = '${lines[0]} Sytuacja: ${sit.endsWith('.') ? sit : '$sit.'}';
+  }
   final hasPos = i.lat != null && i.lon != null;
   final time = i.positionTime == null ? '' : _hhmm(i.positionTime!);
   if (!hasPos) {
@@ -145,14 +157,20 @@ String buildSosSms(SosSmsInput i) {
   } else {
     final lat = _coord(i.lat!);
     final lon = _coord(i.lon!);
-    final acc = i.accuracyM == null ? '' : 'dokladnosc ${i.accuracyM!.round()} m';
+    final acc = i.accuracyM == null
+        ? ''
+        : 'dokladnosc ${i.accuracyM!.round()} m';
     final detail = [acc, time].where((e) => e.isNotEmpty).join(', ');
     if (i.fresh) {
       lines.add('Pozycja: $lat, $lon${detail.isEmpty ? '' : ' ($detail)'}');
     } else {
-      lines.add('Ostatnia pozycja: $lat, $lon (${time.isEmpty ? '' : '$time, '}teraz brak GPS)');
+      lines.add(
+        'Ostatnia pozycja: $lat, $lon (${time.isEmpty ? '' : '$time, '}teraz brak GPS)',
+      );
     }
-    lines.add('https://www.openstreetmap.org/?mlat=$lat&mlon=$lon#map=17/$lat/$lon');
+    lines.add(
+      'https://www.openstreetmap.org/?mlat=$lat&mlon=$lon#map=17/$lat/$lon',
+    );
     final adr = i.address?.trim() ?? '';
     if (adr.isNotEmpty) lines.add('Adres (ok.): $adr');
   }
@@ -165,7 +183,8 @@ String buildSosSms(SosSmsInput i) {
 /// ICE numbers that may receive the SMS: valid, and never an emergency number.
 List<String> smsRecipients(List<IceContact> contacts) => [
   for (final c in contacts)
-    if (!isEmergencyNumber(c.phone) && normalizePhone(c.phone) != null) normalizePhone(c.phone)!,
+    if (!isEmergencyNumber(c.phone) && normalizePhone(c.phone) != null)
+      normalizePhone(c.phone)!,
 ];
 
 /// `sms:` URI opening the system composer; empty recipients = empty "To".

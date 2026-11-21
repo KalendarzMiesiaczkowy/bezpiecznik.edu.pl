@@ -9,7 +9,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_router.dart' show profileRoutePath;
-import '../../czat/templates/call/call_panel_view.dart' show callLauncherProvider;
+import '../../czat/templates/call/call_panel_view.dart'
+    show callLauncherProvider;
 import '../../mapa/position_provider.dart';
 import '../../profil/profile_model.dart';
 import '../../profil/profile_store.dart';
@@ -19,7 +20,8 @@ import 'call_gps.dart';
 import 'sms_body.dart';
 
 /// One launcher seam shared with the chat `call` template (D03).
-export '../../czat/templates/call/call_panel_view.dart' show callLauncherProvider;
+export '../../czat/templates/call/call_panel_view.dart'
+    show callLauncherProvider;
 
 /// User-facing texts (spec "Teksty").
 const callPanelTitle = 'Kontakt ze służbami';
@@ -28,9 +30,11 @@ const call112Sub = 'Numer alarmowy';
 const call112Semantics = 'Zadzwoń pod numer alarmowy 112';
 const callSmsLabel = 'POWIADOM BLISKICH';
 const callSmsSub = 'SMS z lokalizacją';
-const callAmlNote = 'Przy połączeniu z 112 telefon sam przekazuje lokalizację, jeśli ma zasięg sieci komórkowej.';
+const callAmlNote =
+    'Przy połączeniu z 112 telefon sam przekazuje lokalizację, jeśli ma zasięg sieci komórkowej.';
 const callSaySection = 'Co powiedzieć dyspozytorowi';
-const callSay = 'Powiedz: co się stało, gdzie jesteś, ile osób potrzebuje pomocy, czy są przytomne.';
+const callSay =
+    'Powiedz: co się stało, gdzie jesteś, ile osób potrzebuje pomocy, czy są przytomne.';
 
 enum ContactPanelVariant { sheet, inline }
 
@@ -115,9 +119,12 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
     if (!ok && mounted) _toast('Nie mogę otworzyć $what. $fallback');
   }
 
-  void _dial(String number) => _launch(telUri(number), 'telefonu', 'Wybierz $number ręcznie.');
+  void _dial(String number) =>
+      _launch(telUri(number), 'telefonu', 'Wybierz $number ręcznie.');
 
-  void _close() => widget.onClose != null ? widget.onClose!() : ref.read(shellPanelsProvider.notifier).closeContactPanel();
+  void _close() => widget.onClose != null
+      ? widget.onClose!()
+      : ref.read(shellPanelsProvider.notifier).closeContactPanel();
 
   void _addContacts() {
     if (widget.onAddContacts != null) return widget.onAddContacts!();
@@ -134,7 +141,9 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
       accuracyM: p?.accuracy,
       positionTime: p?.timestamp.toLocal(),
       fresh: gps?.fresh ?? false,
-      situation: widget.situation == null ? null : clipSituation(widget.situation!),
+      situation: widget.situation == null
+          ? null
+          : clipSituation(widget.situation!),
       profile: _withProfile && !facts.isEmpty ? facts : null,
     );
   }
@@ -159,8 +168,12 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
           : 'Brak dostępu do lokalizacji.';
     }
     if (p != null && gps!.fresh) return 'GPS ±${p.accuracy.round()} m';
-    final last = p == null ? '' : ' Ostatnia pozycja (${_hhmm(p.timestamp.toLocal())})';
-    if (_searchTimedOut) return 'Brak sygnału GPS. Wyjdź na otwartą przestrzeń.$last';
+    final last = p == null
+        ? ''
+        : ' Ostatnia pozycja (${_hhmm(p.timestamp.toLocal())})';
+    if (_searchTimedOut) {
+      return 'Brak sygnału GPS. Wyjdź na otwartą przestrzeń.$last';
+    }
     return p == null ? 'Szukam pozycji GPS…' : 'Szukam pozycji GPS…$last';
   }
 
@@ -171,11 +184,15 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
   Widget build(BuildContext context) {
     final bz = context.bz;
     final gps = ref.watch(callGpsProvider).asData?.value;
-    final profile = ref.watch(profileProvider).asData?.value ?? HouseholdProfile.empty;
+    final profile =
+        ref.watch(profileProvider).asData?.value ?? HouseholdProfile.empty;
     final canSms = ref.watch(canSendSmsProvider).asData?.value ?? true;
     final facts = profileSmsFacts(profile);
     final recipients = smsRecipients(profile.iceContacts);
-    final names = [for (final c in profile.iceContacts) if (c.name.trim().isNotEmpty) c.name.trim()];
+    final names = [
+      for (final c in profile.iceContacts)
+        if (c.name.trim().isNotEmpty) c.name.trim(),
+    ];
     final noPermission = gps != null && gps.access == LocationAccess.denied;
     final pos = gps?.position;
     final sheet = widget.variant == ContactPanelVariant.sheet;
@@ -210,9 +227,15 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
       ),
       const SizedBox(height: 8),
       if (!canSms)
-        Text('Ten telefon nie wysyła SMS-ów.', style: bz.caption.copyWith(color: bz.ink200))
+        Text(
+          'Ten telefon nie wysyła SMS-ów.',
+          style: bz.caption.copyWith(color: bz.ink200),
+        )
       else ...[
-        Text('Przygotuję SMS do bliskich. Wyślesz go sam.', style: bz.caption.copyWith(color: bz.ink200)),
+        Text(
+          'Przygotuję SMS do bliskich. Wyślesz go sam.',
+          style: bz.caption.copyWith(color: bz.ink200),
+        ),
         if (recipients.isEmpty) ...[
           const SizedBox(height: 4),
           Text('Nie masz kontaktów alarmowych.', style: bz.caption),
@@ -220,7 +243,12 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
         ] else
           Row(
             children: [
-              Expanded(child: Text('Do: ${names.isEmpty ? recipients.join(', ') : names.join(', ')}', style: bz.caption)),
+              Expanded(
+                child: Text(
+                  'Do: ${names.isEmpty ? recipients.join(', ') : names.join(', ')}',
+                  style: bz.caption,
+                ),
+              ),
               _LinkButton(label: 'Zmień', onTap: _addContacts),
             ],
           ),
@@ -230,7 +258,11 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
         MergeSemantics(
           child: Row(
             children: [
-              Switch(key: const Key('call-profile-switch'), value: _withProfile, onChanged: (v) => setState(() => _withProfile = v)),
+              Switch(
+                key: const Key('call-profile-switch'),
+                value: _withProfile,
+                onChanged: (v) => setState(() => _withProfile = v),
+              ),
               const SizedBox(width: 8),
               Expanded(child: Text('Dołącz dane z profilu', style: bz.chat)),
             ],
@@ -239,17 +271,29 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
         if (_withProfile)
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 4),
-            child: Text('W SMS-ie: ${facts.preview}', key: const Key('call-profile-preview'), style: bz.caption.copyWith(color: bz.ink200)),
+            child: Text(
+              'W SMS-ie: ${facts.preview}',
+              key: const Key('call-profile-preview'),
+              style: bz.caption.copyWith(color: bz.ink200),
+            ),
           ),
       ],
       const SizedBox(height: 4),
-      Text(_gpsLine(gps), key: const Key('call-gps'), style: bz.caption.copyWith(color: bz.ink200)),
+      Text(
+        _gpsLine(gps),
+        key: const Key('call-gps'),
+        style: bz.caption.copyWith(color: bz.ink200),
+      ),
       if (noPermission)
         _LinkButton(
           label: 'Zezwól',
           onTap: () async {
-            final access = await ref.read(locationGatewayProvider).ensureAccess();
-            if (access != LocationAccess.granted) await ref.read(locationGatewayProvider).openSettings();
+            final access = await ref
+                .read(locationGatewayProvider)
+                .ensureAccess();
+            if (access != LocationAccess.granted) {
+              await ref.read(locationGatewayProvider).openSettings();
+            }
             ref.invalidate(locationAccessProvider);
           },
         ),
@@ -262,7 +306,10 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
               key: const Key('call-notice'),
               width: double.infinity,
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: bz.bg300, borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                color: bz.bg300,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Text(_notice!, style: bz.chat),
             ),
           ),
@@ -276,7 +323,11 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
           child: Row(
             children: [
               Expanded(child: Text('Więcej', style: bz.label)),
-              Icon(_more ? LucideIcons.chevronUp : LucideIcons.chevronDown, size: 20, color: bz.ink200),
+              Icon(
+                _more ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+                size: 20,
+                color: bz.ink200,
+              ),
             ],
           ),
         ),
@@ -284,11 +335,17 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
       if (_more) ..._moreChildren(bz, pos),
     ];
 
-    final column = Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children);
+    final column = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
+    );
     if (!sheet) return column;
     return SafeArea(
       top: false,
-      child: SingleChildScrollView(padding: const EdgeInsets.all(16), child: column),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: column,
+      ),
     );
   }
 
@@ -296,7 +353,11 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
     const SizedBox(height: 8),
     Row(
       children: [
-        for (final (n, name) in const [('999', 'Pogotowie'), ('998', 'Straż'), ('997', 'Policja')]) ...[
+        for (final (n, name) in const [
+          ('999', 'Pogotowie'),
+          ('998', 'Straż'),
+          ('997', 'Policja'),
+        ]) ...[
           if (n != '999') const SizedBox(width: 8),
           Expanded(
             child: _SmallDial(
@@ -333,7 +394,12 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
       children: [
         Icon(LucideIcons.info, size: 16, color: bz.ink200),
         const SizedBox(width: 8),
-        Expanded(child: Text(callAmlNote, style: bz.caption.copyWith(color: bz.ink200))),
+        Expanded(
+          child: Text(
+            callAmlNote,
+            style: bz.caption.copyWith(color: bz.ink200),
+          ),
+        ),
       ],
     ),
     const SizedBox(height: 12),
@@ -350,7 +416,11 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
           child: Row(
             children: [
               Expanded(child: Text('Sygnał ratunkowy', style: bz.label)),
-              Icon(_signal ? LucideIcons.chevronUp : LucideIcons.chevronDown, size: 20, color: bz.ink200),
+              Icon(
+                _signal ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+                size: 20,
+                color: bz.ink200,
+              ),
             ],
           ),
         ),
@@ -393,11 +463,11 @@ class _BigButton extends StatelessWidget {
         child: Material(
           color: filled ? bz.sos : Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(bz.radiusFull),
             side: filled ? BorderSide.none : BorderSide(color: bz.line150),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(bz.radiusFull),
             onTap: onTap,
             child: SizedBox(
               height: 80,
@@ -410,8 +480,16 @@ class _BigButton extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(label, style: bz.label.copyWith(fontSize: 18, color: fg)),
-                      Text(sub, style: bz.caption.copyWith(color: fg.withValues(alpha: 0.85))),
+                      Text(
+                        label,
+                        style: bz.label.copyWith(fontSize: 18, color: fg),
+                      ),
+                      Text(
+                        sub,
+                        style: bz.caption.copyWith(
+                          color: fg.withValues(alpha: 0.85),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -438,13 +516,22 @@ class _SmallDial extends StatelessWidget {
       excludeSemantics: true,
       child: Material(
         color: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: bz.line150)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: bz.line150),
+        ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: onTap,
           child: SizedBox(
             height: 56,
-            child: Center(child: Text(label, textAlign: TextAlign.center, style: bz.caption.copyWith(color: bz.ink100))),
+            child: Center(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: bz.caption.copyWith(color: bz.ink100),
+              ),
+            ),
           ),
         ),
       ),
@@ -460,12 +547,25 @@ class _LinkButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Align(
     alignment: Alignment.centerLeft,
-    child: TextButton(onPressed: onTap, style: TextButton.styleFrom(minimumSize: const Size(48, 48)), child: Text(label)),
+    // Zero horizontal padding keeps the label flush with the panel content.
+    child: TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        minimumSize: const Size(48, 48),
+        padding: EdgeInsets.zero,
+        alignment: Alignment.centerLeft,
+      ),
+      child: Text(label),
+    ),
   );
 }
 
 class _IconTap extends StatelessWidget {
-  const _IconTap({required this.icon, required this.label, required this.onTap});
+  const _IconTap({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -478,7 +578,11 @@ class _IconTap extends StatelessWidget {
     child: InkResponse(
       onTap: onTap,
       radius: 24,
-      child: SizedBox(width: 48, height: 48, child: Icon(icon, size: 24, color: context.bz.ink100)),
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child: Icon(icon, size: 24, color: context.bz.ink100),
+      ),
     ),
   );
 }
