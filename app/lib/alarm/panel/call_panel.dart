@@ -210,16 +210,20 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
           ),
         )
       else if (recipients.isEmpty)
-        _LinkButton(label: 'Dodaj kontakty', onTap: _addContacts)
-      else
-        Align(
-          alignment: Alignment.centerRight,
-          child: _LinkButton(label: 'Zmień', onTap: _addContacts),
-        ),
-      Text(
-        _gpsLine(gps),
-        key: const Key('call-gps'),
-        style: bz.caption.copyWith(color: bz.ink200),
+        _LinkButton(label: 'Dodaj kontakty', onTap: _addContacts),
+      // GPS state and the quiet "Zmień" (recipients) share one row.
+      Row(
+        children: [
+          Expanded(
+            child: Text(
+              _gpsLine(gps),
+              key: const Key('call-gps'),
+              style: bz.caption.copyWith(color: bz.ink200),
+            ),
+          ),
+          if (canSms && recipients.isNotEmpty)
+            _LinkButton(label: 'Zmień', onTap: _addContacts),
+        ],
       ),
       if (noPermission)
         _LinkButton(
@@ -376,7 +380,7 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
 
   List<Widget> _moreChildren(BzTokens bz, Position? pos) => [
     SizedBox(height: bz.space3),
-    Text('Twoja pozycja', style: bz.label),
+    Text('Twoja pozycja', style: bz.label.copyWith(color: bz.ink200)),
     if (pos == null)
       Text('Brak pozycji.', style: bz.caption.copyWith(color: bz.ink200))
     else
@@ -389,7 +393,9 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
             alignment: Alignment.centerLeft,
             child: Text(
               '${pos.latitude.toStringAsFixed(5)}, ${pos.longitude.toStringAsFixed(5)}\n${formatDms(pos.latitude, pos.longitude)}',
-              style: bz.readout,
+              style: bz.step.copyWith(
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ),
@@ -409,7 +415,7 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
       ],
     ),
     SizedBox(height: bz.space3),
-    Text(callSaySection, style: bz.label),
+    Text(callSaySection, style: bz.label.copyWith(color: bz.ink200)),
     SizedBox(height: bz.space1),
     Text(callSay, style: bz.chat),
     if (widget.signalBuilder != null) ...[
