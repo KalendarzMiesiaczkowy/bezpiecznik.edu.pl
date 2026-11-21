@@ -3,6 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'czat/templates/template_gallery.dart';
+import 'czat/ui/chat_screen.dart';
+import 'mapa/map_screen.dart';
+import 'onboarding/onboarding_screen.dart';
+import 'profil/profile_screen.dart';
+import 'profil/profile_store.dart';
 import 'wspolne/shell/placeholder_screen.dart';
 import 'wspolne/theme/gallery_screen.dart';
 
@@ -42,15 +48,15 @@ GoRouter createAppRouter({
     routes: [
       GoRoute(
         path: onboardingRoutePath,
-        builder: (context, state) => const PlaceholderScreen(title: 'Pierwsze uruchomienie'),
+        builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
         path: chatRoutePath,
-        builder: (context, state) => const PlaceholderScreen(title: 'Czat'),
+        builder: (context, state) => const ChatScreen(),
         routes: [
           GoRoute(
             path: 'mapa',
-            builder: (context, state) => const PlaceholderScreen(title: 'Mapa'),
+            builder: (context, state) => const MapScreen(),
           ),
           GoRoute(
             path: 'ustawienia',
@@ -61,7 +67,7 @@ GoRouter createAppRouter({
             routes: [
               GoRoute(
                 path: 'profil',
-                builder: (context, state) => const PlaceholderScreen(title: 'Profil'),
+                builder: (context, state) => const ProfileScreen(),
               ),
             ],
           ),
@@ -69,13 +75,19 @@ GoRouter createAppRouter({
       ),
       if (kDebugMode)
         GoRoute(path: galleryRoutePath, builder: (context, state) => const GalleryScreen()),
+      if (kDebugMode)
+        GoRoute(path: templateGalleryRoutePath, builder: (context, state) => const TemplateGalleryScreen()),
     ],
   );
 }
 
 /// The app router; tests override it.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final router = createAppRouter();
+  // Onboarding flag loads async: no redirect while loading; once it resolves
+  // to false the router is refreshed and redirects to /onboarding.
+  late final GoRouter router;
+  router = createAppRouter(needsOnboarding: () => ref.read(onboardingDoneProvider).value == false);
+  ref.listen(onboardingDoneProvider, (_, _) => router.refresh());
   ref.onDispose(router.dispose);
   return router;
 });

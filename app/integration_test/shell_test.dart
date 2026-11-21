@@ -20,7 +20,7 @@ void main() {
     );
 
     // E1 chat: island, no Back, SOS.
-    expect(find.text('Czat'), findsOneWidget);
+    expect(find.text('Co się dzieje?'), findsOneWidget);
     expect(menu, findsOneWidget);
     expect(back, findsNothing);
     expect(sos, findsOneWidget);
@@ -33,7 +33,7 @@ void main() {
     expect(sos, findsOneWidget);
     await tester.tap(back);
     await tester.pumpAndSettle();
-    expect(find.text('Czat'), findsOneWidget);
+    expect(find.text('Co się dzieje?'), findsOneWidget);
 
     // E3 via the drawer settings icon, E4 via the "Profil" button.
     await tester.tap(menu);
@@ -50,7 +50,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(back); // E3 -> E1
     await tester.pumpAndSettle();
-    expect(find.text('Czat'), findsOneWidget);
+    expect(find.text('Co się dzieje?'), findsOneWidget);
     expect(menu, findsOneWidget);
 
     // P2 via SOS tap, closed with its close button.
@@ -68,7 +68,7 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.text('Panel boczny'), findsNothing);
-    expect(find.text('Czat'), findsOneWidget);
+    expect(find.text('Co się dzieje?'), findsOneWidget);
 
     // Same for P2 opened on E1.
     await tester.tap(sos);
@@ -77,6 +77,6 @@ void main() {
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.text('Kontakt ze służbami'), findsNothing);
-    expect(find.text('Czat'), findsOneWidget);
+    expect(find.text('Co się dzieje?'), findsOneWidget);
   });
 }
