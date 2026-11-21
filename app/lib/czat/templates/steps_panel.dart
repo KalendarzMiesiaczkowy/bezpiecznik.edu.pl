@@ -2,6 +2,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ratunek/ui/card_link_button.dart';
 import '../../wspolne/theme/bz_buttons.dart';
 import '../../wspolne/theme/bz_theme.dart';
 import 'panel_card.dart';
@@ -53,6 +54,7 @@ class StepsPanelView extends StatelessWidget {
               number: i + 1,
               item: items[i],
               source: _chipSource(scope, items, i),
+              variant: scope.variant,
               done: done.contains(i),
               current: i == current,
               onChanged: (v) => scope.onDoneChanged(i, v),
@@ -183,6 +185,7 @@ class _StepRow extends StatelessWidget {
     required this.number,
     required this.item,
     required this.source,
+    required this.variant,
     required this.done,
     required this.current,
     required this.onChanged,
@@ -192,6 +195,7 @@ class _StepRow extends StatelessWidget {
   final int number;
   final PanelItem item;
   final SourceRecord? source;
+  final String? variant;
   final bool done;
   final bool current;
   final ValueChanged<bool> onChanged;
@@ -257,6 +261,12 @@ class _StepRow extends StatelessWidget {
                           SourceChip(
                             source: source!,
                             onTap: () => onOpenSource(source!),
+                          ),
+                        if (item.cardLinkLabel != null && item.cardLinkId != null)
+                          CardLinkButton(
+                            label: item.cardLinkLabel!,
+                            cardId: item.cardLinkId!,
+                            variant: variant,
                           ),
                       ],
                     ),

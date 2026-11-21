@@ -86,13 +86,17 @@ class SourceRecord {
 
 /// One element of `steps` / `bullets`.
 class PanelItem {
-  const PanelItem({required this.text, this.sourceId, this.kitId});
+  const PanelItem({required this.text, this.sourceId, this.kitId, this.cardLinkLabel, this.cardLinkId});
 
   final String text;
   final String? sourceId;
 
   /// `bullets` + `checkable`: id of the thing in the profile (`supplies.kit[].id`).
   final String? kitId;
+
+  /// Rescue-card `card_link` ("Nie oddycha → RKO"): button label + target card id.
+  final String? cardLinkLabel;
+  final String? cardLinkId;
 }
 
 /// `steps` variant (`adult`, `child`, `infant`...).
@@ -594,7 +598,14 @@ List<PanelItem> _items(Object? v) {
     if (e is! Map) continue;
     final text = _str(e['text']);
     if (text == null || text.trim().isEmpty) continue;
-    out.add(PanelItem(text: text, sourceId: _str(e['source_id']), kitId: _str(e['kit_id'])));
+    final link = e['card_link'];
+    out.add(PanelItem(
+      text: text,
+      sourceId: _str(e['source_id']),
+      kitId: _str(e['kit_id']),
+      cardLinkLabel: link is Map ? _str(link['label']) : null,
+      cardLinkId: link is Map ? _str(link['card_id']) : null,
+    ));
   }
   return out;
 }
