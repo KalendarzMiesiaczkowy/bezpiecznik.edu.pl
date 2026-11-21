@@ -139,6 +139,9 @@ void main() {
         expect(find.text(t), findsOneWidget, reason: t);
       }
       expect(find.text('Motyw'), findsNothing);
+      expect(find.text('Wersja'), findsNothing);
+      expect(find.text('1.0.0'), findsNothing);
+      expect(find.descendant(of: find.byKey(const Key('set-about')), matching: find.byType(CustomPaint)), findsOneWidget);
       expect(find.text('Bezpiecznik nie zastępuje 112 ani służb.'), findsOneWidget);
     });
 

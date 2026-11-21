@@ -90,6 +90,14 @@ void main() {
     expect(tester.getSize(find.bySemanticsLabel(drawerSettings)).height, 44);
   });
 
+  testWidgets('"Poradniki i źródła" opens the sources sheet', (tester) async {
+    await _pump(tester, ChatStore.inMemory());
+    await tester.tap(find.byKey(const Key('drawer-sources')));
+    await tester.pumpAndSettle();
+    expect(find.text('Źródła'), findsOneWidget);
+    expect(find.text('Poradnik bezpieczeństwa'), findsOneWidget);
+  });
+
   testWidgets('logo ignores the text scaler (BG71)', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 1.5;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

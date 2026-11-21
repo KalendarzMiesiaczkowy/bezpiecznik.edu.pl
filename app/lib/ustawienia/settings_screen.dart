@@ -4,14 +4,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../app_router.dart';
+import '../czat/drawer/bz_logo.dart';
 import '../wspolne/theme/bz_buttons.dart';
 import '../wspolne/theme/bz_theme.dart';
 import '../wspolne/theme/top_fade.dart';
 import 'data_wipe.dart';
 import 'settings_store.dart';
 import 'sources.dart';
-
-const appVersion = '1.0.0';
 
 /// E3 (MVP rows): Profil, Wygląd (text size), AI (Tryb bez AI, Głos
 /// instrukcji), Prywatność (Usuń wszystkie dane), O aplikacji. The theme row
@@ -43,36 +42,6 @@ class SettingsScreen extends ConsumerWidget {
     } catch (_) {
       messenger.showSnackBar(const SnackBar(content: Text('Nie udało się usunąć danych. Spróbuj ponownie.')));
     }
-  }
-
-  void _showSources(BuildContext context) {
-    final bz = context.bz;
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          children: [
-            Text('Źródła', style: bz.title),
-            const SizedBox(height: 12),
-            for (final s in appSources)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(s.title, style: bz.chat),
-                    Text('${s.publisher} · ${s.date} · licencja: ${s.license}', style: bz.caption),
-                  ],
-                ),
-              ),
-            Text(osmAttribution, style: bz.caption),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -210,9 +179,22 @@ class SettingsScreen extends ConsumerWidget {
                   key: const Key('set-sources'),
                   title: const Text('Źródła'),
                   trailing: const Icon(LucideIcons.chevronRight),
-                  onTap: () => _showSources(context),
+                  onTap: () => showSourcesSheet(context),
                 ),
-                ListTile(title: const Text('Wersja'), subtitle: const Text(appVersion)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Row(
+                    key: const Key('set-about'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const BzLogo(size: 40),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text('Bezpiecznik: poradniki kryzysowe offline, w twoim telefonie.', style: bz.chat),
+                      ),
+                    ],
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: Text('Bezpiecznik nie zastępuje 112 ani służb.', style: bz.step),
