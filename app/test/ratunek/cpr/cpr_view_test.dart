@@ -172,7 +172,8 @@ void main() {
     await tester.tap(find.text(cprStartLabel));
     await tester.pump();
     expect(find.byKey(const ValueKey('cpr-pinned')), findsOneWidget);
-    expect(find.textContaining('Panel jest przypięty'), findsOneWidget);
+    expect(find.text(cprRunningNotice), findsOneWidget);
+    expect(cprRunningNotice, 'Instruktor RKO działa ↓');
     rig.session.stop();
     await tester.pump();
     expect(find.byKey(const ValueKey('cpr-pinned')), findsNothing);
@@ -238,6 +239,9 @@ void main() {
     final box = tester.renderObject<RenderParagraph>(phase);
     expect(box.didExceedMaxLines, isFalse);
     expect(box.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 18)).length, 1);
+    // A gap separates the label from the counter (same as the compressions row).
+    final gap = tester.getTopLeft(find.byKey(const ValueKey('cpr-counter'))).dx - tester.getTopRight(phase).dx;
+    expect(gap, greaterThanOrEqualTo(8));
     rig.session.stop();
   });
 

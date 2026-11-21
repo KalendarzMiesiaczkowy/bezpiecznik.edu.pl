@@ -31,6 +31,8 @@ const String cprAedReminderLabel = 'Poproś kogoś o AED';
 /// Opens the AED card in the chat (hidden without `aed_card_id`).
 const String cprAedHowLabel = 'Jak użyć AED';
 const String cprAedDoneLabel = 'Ukryj przypomnienie o AED';
+/// Short in-chat notice while the pinned instructor runs (spec: szablony-czatu.md, CprPinned).
+const String cprRunningNotice = 'Instruktor RKO działa ↓';
 const String cprCompressLabel = 'UCISKAJ';
 
 /// Initial rescue breaths: neutral label; the count (card data
@@ -74,7 +76,7 @@ class CprCard extends ConsumerWidget {
           if (inlinePinned) return CprPinned(session: session);
           return PanelCard(
             title: cprTitle,
-            child: Text('RKO trwa. Panel jest przypięty nad polem wiadomości.', style: t.chat.copyWith(color: t.ink200)),
+            child: Text(cprRunningNotice, style: t.chat.copyWith(color: t.ink200)),
           );
         }
         final variant = config.variant(scope.variant);
@@ -248,6 +250,7 @@ class CprPinned extends ConsumerWidget {
                     ),
                   ),
                 ),
+                SizedBox(width: t.space3),
                 Flexible(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
