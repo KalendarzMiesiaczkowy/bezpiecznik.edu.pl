@@ -205,3 +205,46 @@ logika; kolejność sekcji bez zmian.
    shared; ja ustawię etykiety nad polem lokalnie.
 5. **`TextButton` w dialogach**: motyw `textButtonTheme` — jeśli shared ustawi go na wygląd `BzButton ghost`,
    nie muszę zamieniać ręcznie (dotyczy też innych dialogów w aplikacji).
+
+---
+
+## Dziennik realizacji (2026-11-21, tryb „1 h”, bez czekania na shared)
+
+Commity (`polish/forms`):
+- `c65e327` Polish onboarding: token spacing, logo, quieter form intro
+- `ecada09` Polish profile: section cards, Lucide icons, quieter hints
+- `4189848` Polish settings: grouped cards with icon headers (+ `app/lib/profil/section_card.dart`)
+- `f0e2b5b` Polish profile: breathing room around Winda and ICE intro
+
+Kontrola: `flutter analyze` → No issues found (baseline 0, po każdym commicie 0).
+`flutter test` → onboarding: 768 passed / 2 skipped / 0 failed; profil: 768/2/0; ustawienia: 768/2/0
+(po poprawce Material w karcie). Poprawka f0e2b5b: 767/2/1 — jedyny błąd to
+`test/mapa/map_screen_test.dart` (flaky przy obciążeniu; plik osobno: 8/8 zielone; mapy nie dotykam).
+Zrzuty „po” (emulator-5558, informacyjnie): `polish/after/onboarding-1..5.png`, `profil*.png`, `ustawienia*.png`.
+
+### Usunięte teksty (dosłownie, plik:linia przed zmianą)
+1. `app/lib/onboarding/onboarding_screen.dart:222` — „Zostaje w telefonie. Wysyłasz go tylko ty.”
+   (zostało „Każde pole możesz pominąć.”) — powtórzenie kroku 3 (l. 196).
+2. `app/lib/profil/profile_form.dart:317` — helperText „Pomoże dopasować porady.”
+3. `app/lib/profil/profile_form.dart:266` — helperText „Np. insulina.” → przeniesione do `hintText` „Np. insulina”.
+4. `app/lib/profil/profile_form.dart:316` — labelText „Np. choroby, diety” → `hintText` (etykietą jest nagłówek karty).
+5. `app/lib/profil/profile_form.dart:283`, `:377` — „+ ” z „+ Dodaj lek” / „+ Dodaj kontakt” → ikona `LucideIcons.plus`.
+6. `app/lib/ustawienia/settings_screen.dart:136` — „Tak będzie wyglądał tekst instrukcji.”
+7. `app/lib/ustawienia/settings_screen.dart:73` — nagłówek sekcji „Profil” (`section('Profil')`).
+
+Nie usunięte (decyzja człowieka): `settings_screen.dart:159` „Sieć służy tylko do pobierania paczek.”
+
+### Zrobione vs plan
+- E0: logo, tokeny odstępów/promieni, odstęp Dalej/Pomiń, potwierdzenie 300 ms `easeOut` + kółko `verifiedTint`. ✔
+- E4: karty sekcji (`SectionCard`, Material + 1 px `line-100`, `radiusLg`), ikony Lucide, liczniki
+  (bold, 0 = `ink-300`), hinty, `BzSpinner` w ładowaniu, stan błędu z paddingiem, pusty stan `caption`. ✔
+- E3: karty z nagłówkami ikona + tytuł, wiersz „Profil domu” jako osobna karta, separatory `line-100`,
+  ikona przy „Źródła”, `AnimatedContainer` w segmencie rozmiaru tekstu, „Anuluj” jako `BzButton ghost`,
+  tokeny w arkuszu „Źródła”. ✔
+
+### Świadomie niezrobione (brak czasu / poza zakresem)
+- Etykiety pól NAD polem (`MergeSemantics`) — zostały pływające etykiety Material; wymaga decyzji o motywie pól (prośba 4).
+- Piętro + Winda w jednym wierszu z `Segmented` (ref) — Winda nadal na `BzChip` Tak/Nie; czeka na `BzSegmented` (prośba 2).
+- Hit area `BzChip` 40 → 48 dp (prośba 3; test wymaga 40 dp wizualnie).
+- Separator między kontaktami ICE; pressed-overlay (`InkWell`) w segmencie rozmiaru tekstu.
+- `SectionCard` jest lokalny (`app/lib/profil/section_card.dart`) — do przeniesienia do `wspolne/`, gdy shared go przejmie (prośba 1).
