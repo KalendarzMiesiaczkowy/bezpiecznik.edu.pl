@@ -1,0 +1,61 @@
+# term<TAB>synonym. Candidates for the `synonyms` table (task A03). Not normalised on purpose:
+# the build step applies the shared normalisation (lowercase, no diacritics) to both columns.
+prąd	energia elektryczna
+brak prądu	blackout
+brak prądu	przerwa w dostawie prądu
+blackout	długotrwały brak prądu
+syrena	sygnał alarmowy
+syrena	alarm
+wyje syrena	ogłoszenie alarmu
+schron	schronienie
+schron	miejsce schronienia
+bunkier	schron
+piwnica	schronienie
+plecak ewakuacyjny	plecak awaryjny
+plecak ewakuacyjny	torba ewakuacyjna
+72 godziny	3 dni
+trzy doby	3 dni
+zapasy	zapas żywności
+jedzenie	żywność
+picie	woda pitna
+woda	woda pitna
+reanimacja	RKO
+reanimować	RKO
+resuscytacja	RKO
+masaż serca	uciśnięcia klatki piersiowej
+masaż serca	RKO
+defibrylator	AED
+zatrzymanie akcji serca	zatrzymanie krążenia
+zawał	ból w klatce piersiowej
+nie oddycha	brak oddechu
+nie oddycha	nie oddycha prawidłowo
+dławi się	zadławienie
+krztusi się	zadławienie
+zadławił się	zadławienie
+krwotok	obfite krwawienie
+krwawienie	krwotok
+opaska uciskowa	opaska do tamowania krwotoków
+turniket	opaska uciskowa
+pozycja boczna	pozycja boczna ustalona
+pozycja boczna	pozycja bezpieczna
+poparzenie	oparzenie
+topielec	utonięcie
+tonie	utonięcie
+dziecko	niemowlę
+pogotowie	numer alarmowy
+karetka	pogotowie ratunkowe
+straż	straż pożarna
+policja	997
+pożar	ogień
+gasić	gaśnica
+gaśnica	koc gaśniczy
+powódź	podtopienie
+powódź	zalanie
+zalało	powódź
+worki z piaskiem	zabezpieczenie przed powodzią
+ewakuować się	ewakuacja
+uciekać	ewakuacja
+skażenie	zagrożenie chemiczne
+promieniowanie	zagrożenie radiacyjne
+atomowy	nuklearny
+toaleta	higiena w kryzysie
