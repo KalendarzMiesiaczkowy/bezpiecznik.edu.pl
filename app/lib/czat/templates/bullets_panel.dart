@@ -104,7 +104,12 @@ class _BulletRow extends StatelessWidget {
             ),
           ),
           if (checkable)
-            BzCheck(value: checked, onChanged: onChanged, label: item.text),
+            // The 48 dp hit area is taller than the 26 dp first line; lift it
+            // so the 24 dp box centres on that line (hit testing follows).
+            Transform.translate(
+              offset: Offset(0, -(t.minTouchTarget - 26) / 2),
+              child: BzCheck(value: checked, onChanged: onChanged, label: item.text),
+            ),
         ],
       ),
     );

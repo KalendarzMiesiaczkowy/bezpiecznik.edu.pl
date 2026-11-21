@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/rendering.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,7 +12,7 @@ import 'quick_actions.dart';
 
 const String emptyChatHeading = 'Co się dzieje?';
 const String emptyChatNote = 'Działa bez internetu. Nie zastępuje 112.';
-const String newAnswerLabel = '↓ Nowa odpowiedź';
+const String newAnswerLabel = 'Nowa odpowiedź';
 
 /// E1: the chat. The shell overlay draws the island (top left) and SOS (top
 /// right) above this screen, so the list leaves room at the top and scrolls
@@ -234,11 +235,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [t.bg000, t.bg000, t.bg000.withValues(alpha: 0)],
-                    stops: [
-                      0,
-                      (topInset + 36) / (topInset + 48 + t.space4),
-                      1,
-                    ],
+                    stops: [0, (topInset + 36) / (topInset + 48 + t.space4), 1],
                   ),
                 ),
               ),
@@ -341,14 +338,27 @@ class _JumpPill extends StatelessWidget {
             child: Container(
               height: 36,
               padding: const EdgeInsets.symmetric(horizontal: 14),
-              alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: t.bg200,
                 border: Border.all(color: t.line150),
                 borderRadius: BorderRadius.circular(t.radiusFull),
                 boxShadow: t.shadowPop,
               ),
-              child: Text(newAnswerLabel, style: t.label),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(LucideIcons.arrowDown, size: 16, color: t.ink100),
+                  const SizedBox(width: 6),
+                  Text(
+                    newAnswerLabel,
+                    style: t.label.copyWith(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
