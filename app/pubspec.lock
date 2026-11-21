@@ -275,6 +275,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.7.1"
+  flutter_edge_ai_litertlm:
+    dependency: "direct main"
+    description:
+      name: flutter_edge_ai_litertlm
+      sha256: "5c9c6dc29e2a0406ad251c8c5739655294ae84bf22a3c00ec37417a6dcc11543"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.21.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -516,6 +524,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  litertlm_dart:
+    dependency: transitive
+    description:
+      name: litertlm_dart
+      sha256: "7b8a4d2b608e655573f8f49dd414c6a721735eb9df902b175c303227b069f051"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.1+1"
   logging:
     dependency: transitive
     description:

@@ -52,6 +52,7 @@ dependencies:
   flutter_edge_ai: ^2.7.1
   vibration: ^3.2.1
   lucide_icons_flutter: ^4.0.3
+  flutter_edge_ai_litertlm: ^1.21.0
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,7 @@ flutter:
     - assets/map/
     - assets/phrases/
     - assets/cards/
+    - assets/kb/
     - assets/map/glyphs/AtkinsonHyperlegibleNext-Regular/
     - assets/map/glyphs/AtkinsonHyperlegibleNext-Bold/
 
