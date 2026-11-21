@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,6 +12,9 @@ import '../wspolne/shell/sos_button.dart';
 import '../wspolne/theme/bz_theme.dart';
 import 'map_assets.dart';
 import 'position_provider.dart';
+import 'punkty/point_sheet.dart';
+import 'punkty/points_db.dart';
+import 'punkty/shelter_layer.dart';
 
 /// Szczecin centre, used until the first fix (spec: no GPS, no last position).
 const szczecinCentre = LatLng(53.4285, 14.5528);
@@ -45,6 +49,9 @@ class MapViewParams {
     required this.trackingMode,
     required this.onMapCreated,
     required this.onTrackingDismissed,
+    this.onMapClick,
+    this.onStyleLoaded,
+    this.onCameraIdle,
   });
 
   final String styleString;
@@ -54,6 +61,9 @@ class MapViewParams {
   final MyLocationTrackingMode trackingMode;
   final void Function(MapLibreMapController controller) onMapCreated;
   final VoidCallback onTrackingDismissed;
+  final OnMapClickCallback? onMapClick;
+  final VoidCallback? onStyleLoaded;
+  final VoidCallback? onCameraIdle;
 }
 
 typedef MapViewBuilder = Widget Function(BuildContext context, MapViewParams params);
@@ -69,6 +79,9 @@ Widget defaultMapViewBuilder(BuildContext context, MapViewParams p) {
     myLocationRenderMode:
         p.myLocationEnabled ? MyLocationRenderMode.compass : MyLocationRenderMode.normal,
     onCameraTrackingDismissed: p.onTrackingDismissed,
+    onMapClick: p.onMapClick,
+    onStyleLoadedCallback: p.onStyleLoaded,
+    onCameraIdle: p.onCameraIdle,
     // Own attribution text and no native north compass (B05 owns the compass).
     attributionEnabled: false,
     compassEnabled: false,
@@ -96,6 +109,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   bool _tracking = true;
   Timer? _searchTimer;
   bool _searchLong = false;
+  bool _sheltersOn = true;
+  List<ShelterPoint> _points = const [];
+  List<Circle> _circles = const [];
 
   @override
   void initState() {
@@ -118,6 +134,78 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     _searchTimer?.cancel();
     _progress.dispose();
     super.dispose();
+  }
+
+  Future<void> _refreshShelters() async {
+    final c = _controller;
+    if (c == null) return;
+    try {
+      if (_circles.isNotEmpty) await c.removeCircles(_circles);
+      _circles = const [];
+      if (!_sheltersOn) {
+        _points = const [];
+        return;
+      }
+      final db = await ref.read(pointsDbProvider.future);
+      final b = await c.getVisibleRegion();
+      _points = db.inBounds(
+        b.southwest.latitude,
+        b.southwest.longitude,
+        b.northeast.latitude,
+        b.northeast.longitude,
+      );
+      if (!mounted) return;
+      final bz = context.bz;
+      _circles = await c.addCircles([
+        for (final p in _points)
+          circleFor(p, confirmed: bz.verified, unconfirmed: bz.ink300),
+      ]);
+    } on Object {
+      // Layer is optional: the map stays usable if points or annotations fail.
+    }
+  }
+
+  void _onMapClick(math.Point<double> _, LatLng at) {
+    final zoom = _controller?.cameraPosition?.zoom ?? mapInitialZoom;
+    final hit = hitTest(_points, at.latitude, at.longitude, zoom);
+    if (hit != null) _showPoint(hit);
+  }
+
+  Future<void> _showPoint(ShelterPoint p) async {
+    final pos = ref.read(positionProvider).value;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: context.bz.bg200,
+      builder: (_) => PointSheet(
+        point: p,
+        fromLat: pos?.latitude,
+        fromLon: pos?.longitude,
+      ),
+    );
+  }
+
+  Future<void> _focus(ShelterPoint p) async {
+    await _controller?.animateCamera(CameraUpdate.newLatLng(LatLng(p.lat, p.lon)));
+    if (mounted) await _showPoint(p);
+  }
+
+  Future<void> _showNearest() async {
+    final pos = ref.read(positionProvider).value;
+    final points = await ref.read(nearestSheltersProvider.future);
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: context.bz.bg200,
+      builder: (sheetContext) => NearestList(
+        points: points,
+        fromLat: pos?.latitude,
+        fromLon: pos?.longitude,
+        onSelect: (p) {
+          Navigator.of(sheetContext).pop();
+          _focus(p);
+        },
+      ),
+    );
   }
 
   Future<void> _recenter(Position position) async {
@@ -167,6 +255,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ? MyLocationTrackingMode.tracking
                       : MyLocationTrackingMode.none,
                   onMapCreated: (c) => _controller = c,
+                  onStyleLoaded: _refreshShelters,
+                  onCameraIdle: _refreshShelters,
+                  onMapClick: _onMapClick,
                   onTrackingDismissed: () {
                     if (mounted) setState(() => _tracking = false);
                   },
@@ -191,6 +282,31 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               ),
             ),
           ],
+          Positioned(
+            left: 16,
+            bottom: 16 + bottom + 28,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ShelterLayerToggle(
+                  on: _sheltersOn,
+                  onChanged: (v) {
+                    setState(() => _sheltersOn = v);
+                    _refreshShelters();
+                  },
+                ),
+                SizedBox(height: bz.space2),
+                ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: bz.minTouchTarget),
+                  child: FilledButton(
+                    onPressed: _showNearest,
+                    child: const Text(nearestButtonText),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Positioned(
             left: 16,
             bottom: 16 + bottom,
