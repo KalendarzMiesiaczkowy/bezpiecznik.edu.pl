@@ -255,15 +255,33 @@ void main() {
       expect(ev.whereType<AnswerThinking>().length, 1);
     });
 
-    test('offTopic: refusal, never a call panel even on a risk phrase', () async {
-      final e = FakeEngine([]);
+    test('offTopic without a risk phrase: refusal, no call panel', () async {
       final a = ready(await run(
-        svc(e, risk: true, result: const RetrievalResult(decision: RetrievalDecision.offTopic, chunks: [])),
+        svc(FakeEngine([]), result: const RetrievalResult(decision: RetrievalDecision.offTopic, chunks: [])),
         'przepis na pierogi',
       ));
       expect(types(a), ['no_source']);
       expect((a.panels.single as NoSourcePanel).kind, NoSourceKind.offTopic);
       expect(jsonEncode(a.toJson()).contains('112'), isFalse);
+    });
+
+    test('a risk phrase is never off topic: typo "pazar" gets noSource + call', () async {
+      final a = ready(await run(
+        svc(FakeEngine([]), risk: true, result: const RetrievalResult(decision: RetrievalDecision.offTopic, chunks: [])),
+        'pazar w kuchni',
+      ));
+      expect(types(a), ['call', 'no_source']);
+      expect((a.panels.last as NoSourcePanel).kind, NoSourceKind.noSource);
+    });
+
+    test('pipeline error on a risk phrase still shows the call panel', () async {
+      final s = PipelineAnswerService(
+        search: (_) async => throw StateError('disk full'),
+        engine: FakeEngine([]),
+        isRisk: (_) => true,
+      );
+      final a = ready(await s.answer('zawal serca', ctx).toList());
+      expect(types(a), ['call', 'no_source']);
     });
 
     test('noSource with a risk phrase gets the call panel first', () async {

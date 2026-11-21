@@ -88,6 +88,7 @@ class PipelineAnswerService implements AnswerService {
       if (!run.cancelled && !out.isClosed) out.add(e);
     }
 
+    var risk = false;
     try {
       if (await _noAiMode()) run.engine = OffEngine();
       if (run.cancelled) return;
@@ -96,13 +97,17 @@ class PipelineAnswerService implements AnswerService {
       // nearest-shelter map card to whatever the sources give.
       final alarm = isAlarmQuickAction(question);
       if (alarm) question = kAlarmQuery;
-      final result = await search(question);
+      // Risk first: a pipeline error below must still be able to show 112.
+      risk = await isRisk(question);
       if (run.cancelled) return;
-      final risk = await isRisk(question);
+      final result = await search(question);
       if (run.cancelled) return;
 
       if (result.decision != RetrievalDecision.found || result.chunks.isEmpty) {
-        final kind = result.decision == RetrievalDecision.offTopic
+        // A risk phrase is never "off topic" (the risk detector tolerates
+        // typos the domain gate does not, e.g. "pazar"): refuse as noSource,
+        // which carries the 112 call panel.
+        final kind = result.decision == RetrievalDecision.offTopic && !risk
             ? NoSourceKind.offTopic
             : NoSourceKind.noSource;
         final refusal = buildRefusal(kind, risk: risk);
@@ -127,7 +132,12 @@ class PipelineAnswerService implements AnswerService {
     } catch (e) {
       // Retrieval or an unexpected bug: never crash the chat.
       onLog?.call('pipeline error: $e');
-      emit(const AnswerFailed('Nie udało się przygotować odpowiedzi. Spróbuj ponownie.'));
+      // Never lose the 112 block for a risk phrase because of an error.
+      if (risk) {
+        emit(AnswerReady(buildRefusal(NoSourceKind.noSource, risk: true)));
+      } else {
+        emit(const AnswerFailed('Nie udało się przygotować odpowiedzi. Spróbuj ponownie.'));
+      }
     } finally {
       if (!out.isClosed) await out.close();
     }
