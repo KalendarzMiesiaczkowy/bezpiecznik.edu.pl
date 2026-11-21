@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:bezpiecznik/profil/profile_form.dart';
 import 'package:bezpiecznik/profil/profile_model.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
@@ -35,10 +36,15 @@ void main() {
       );
       expect(material.shape, isA<StadiumBorder>());
 
-      final headingX = tester
-          .getTopLeft(find.byIcon(Icons.medication_outlined))
+      final headingX = tester.getTopLeft(find.byIcon(LucideIcons.pill)).dx;
+      final addLabelX = tester
+          .getTopLeft(
+            find.descendant(
+              of: find.byKey(const Key('med-add')),
+              matching: find.byIcon(LucideIcons.plus),
+            ),
+          )
           .dx;
-      final addLabelX = tester.getTopLeft(find.text('+ Dodaj lek')).dx;
       expect(addLabelX, closeTo(headingX, 0.5));
     },
   );

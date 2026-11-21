@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../wspolne/theme/bz_buttons.dart';
@@ -153,17 +154,52 @@ class _ProfileFormState extends State<ProfileForm> {
     widget.onValidityChanged?.call(_valid);
   }
 
-  Widget _section(String title, IconData icon) => Padding(
-    padding: EdgeInsets.only(top: context.bz.space5, bottom: context.bz.space2),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 20, color: context.bz.ink200),
-        SizedBox(width: context.bz.space2),
-        Expanded(child: Text(title, style: context.bz.step)),
-      ],
-    ),
-  );
+  /// Section card (ref `profil.png`): `bg-100`, 1 px `line-100`, `radius-lg`,
+  /// icon + title header like `PanelCard`.
+  Widget _section(String title, IconData icon, List<Widget> children) {
+    final bz = context.bz;
+    return Padding(
+      padding: EdgeInsets.only(top: bz.space4),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: bz.bg100,
+          border: Border.all(color: bz.line100),
+          borderRadius: BorderRadius.circular(bz.radiusLg),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(bz.space4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                header: true,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(icon, size: 20, color: bz.ink200),
+                    SizedBox(width: bz.space2),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: bz.label.copyWith(
+                          fontSize: 16,
+                          height: 22 / 16,
+                          fontWeight: FontWeight.w700,
+                          color: bz.ink100,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: bz.space3),
+              ...children,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   /// Ghost buttons carry a horizontal padding; shift left so the label lines
   /// up with the section headings.
@@ -203,183 +239,192 @@ class _ProfileFormState extends State<ProfileForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _section('Kto mieszka w domu?', Icons.group_outlined),
-        for (final g in AgeGroup.values)
-          ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Row(
-              children: [
-                Expanded(child: Text(g.label, style: context.bz.chat)),
-                IconButton(
-                  key: Key('members-${g.name}-minus'),
-                  tooltip: 'Mniej: ${g.short}',
-                  onPressed: _counts[g]! > 0
-                      ? () => _changed(() => _counts[g] = _counts[g]! - 1)
-                      : null,
-                  icon: const Icon(Icons.remove),
+        _section('Kto mieszka w domu?', LucideIcons.users, [
+          for (final g in AgeGroup.values)
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Row(
+                children: [
+                  Expanded(child: Text(g.label, style: context.bz.chat)),
+                  IconButton(
+                    key: Key('members-${g.name}-minus'),
+                    tooltip: 'Mniej: ${g.short}',
+                    onPressed: _counts[g]! > 0
+                        ? () => _changed(() => _counts[g] = _counts[g]! - 1)
+                        : null,
+                    icon: const Icon(LucideIcons.minus),
+                  ),
+                  SizedBox(
+                    width: 24,
+                    child: Text(
+                      '${_counts[g]}',
+                      textAlign: TextAlign.center,
+                      key: Key('members-${g.name}-count'),
+                      style: context.bz.chat.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: _counts[g] == 0
+                            ? context.bz.ink300
+                            : context.bz.ink100,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    key: Key('members-${g.name}-plus'),
+                    tooltip: 'Więcej: ${g.short}',
+                    onPressed: _counts.values.fold<int>(0, (a, b) => a + b) < 15
+                        ? () => _changed(() => _counts[g] = _counts[g]! + 1)
+                        : null,
+                    icon: const Icon(LucideIcons.plus),
+                  ),
+                ],
+              ),
+            ),
+        ]),
+        _section('Zwierzęta', LucideIcons.pawPrint, [
+          Wrap(
+            spacing: context.bz.space2,
+            runSpacing: context.bz.space2,
+            children: [
+              for (final e in petLabels.entries)
+                BzChip(
+                  key: Key('pet-${e.key}'),
+                  label: e.value,
+                  selected: _pets.contains(e.key),
+                  onChanged: (s) => _changed(
+                    () => s ? _pets.add(e.key) : _pets.remove(e.key),
+                  ),
                 ),
-                SizedBox(
-                  width: 24,
-                  child: Text(
-                    '${_counts[g]}',
-                    textAlign: TextAlign.center,
-                    key: Key('members-${g.name}-count'),
+            ],
+          ),
+        ]),
+        _section('Leki', LucideIcons.pill, [
+          for (var i = 0; i < _meds.length; i++)
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    key: Key('med-$i'),
+                    controller: _meds[i],
+                    maxLength: 40,
+                    decoration: const InputDecoration(
+                      labelText: 'Nazwa leku',
+                      hintText: 'Np. insulina',
+                      counterText: '',
+                    ),
+                    onChanged: (_) => _changed(),
                   ),
                 ),
                 IconButton(
-                  key: Key('members-${g.name}-plus'),
-                  tooltip: 'Więcej: ${g.short}',
-                  onPressed: _counts.values.fold<int>(0, (a, b) => a + b) < 15
-                      ? () => _changed(() => _counts[g] = _counts[g]! + 1)
-                      : null,
-                  icon: const Icon(Icons.add),
+                  tooltip: 'Usuń lek',
+                  onPressed: () => _changed(() => _meds.removeAt(i).dispose()),
+                  icon: const Icon(LucideIcons.x),
                 ),
               ],
             ),
-          ),
-        _section('Zwierzęta', Icons.pets_outlined),
-        Wrap(
-          spacing: context.bz.space2,
-          runSpacing: context.bz.space2,
-          children: [
-            for (final e in petLabels.entries)
-              BzChip(
-                key: Key('pet-${e.key}'),
-                label: e.value,
-                selected: _pets.contains(e.key),
-                onChanged: (s) =>
-                    _changed(() => s ? _pets.add(e.key) : _pets.remove(e.key)),
+          if (_meds.length < 20)
+            _flushLeft(
+              BzButton(
+                key: const Key('med-add'),
+                label: 'Dodaj lek',
+                icon: LucideIcons.plus,
+                variant: BzButtonVariant.ghost,
+                onPressed: () =>
+                    _changed(() => _meds.add(TextEditingController())),
               ),
-          ],
-        ),
-        _section('Leki', Icons.medication_outlined),
-        for (var i = 0; i < _meds.length; i++)
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  key: Key('med-$i'),
-                  controller: _meds[i],
-                  maxLength: 40,
-                  decoration: const InputDecoration(
-                    labelText: 'Nazwa leku',
-                    helperText: 'Np. insulina.',
-                    counterText: '',
+            ),
+        ]),
+        _section('Twoje mieszkanie', LucideIcons.house, [
+          TextField(
+            key: const Key('home-floor'),
+            controller: _floor,
+            keyboardType: const TextInputType.numberWithOptions(signed: true),
+            decoration: InputDecoration(
+              labelText: 'Piętro',
+              helperText: '0 to parter',
+              errorText: _floorError(),
+            ),
+            onChanged: (_) => _changed(),
+          ),
+          _yesNo(
+            'Winda',
+            _elevator,
+            (v) => _changed(() => _elevator = v),
+            key: 'home-elevator',
+          ),
+        ]),
+        _section('Dodatkowe informacje', LucideIcons.notebookPen, [
+          TextField(
+            key: const Key('notes'),
+            controller: _notes,
+            maxLength: maxNotesLength,
+            minLines: 2,
+            maxLines: 5,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: const InputDecoration(hintText: 'Np. choroby, diety'),
+            onChanged: (_) => _changed(),
+          ),
+        ]),
+        _section('Kogo powiadomić w razie zagrożenia?', LucideIcons.bookUser, [
+          Text(
+            'Do tych osób przygotujemy SMS z twoją pozycją. Wyślesz go sam.',
+            style: context.bz.caption,
+          ),
+          for (var i = 0; i < _contacts.length; i++)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    children: [
+                      TextField(
+                        key: Key('ice-name-$i'),
+                        controller: _contacts[i].name,
+                        maxLength: 40,
+                        decoration: InputDecoration(
+                          labelText: 'Imię',
+                          counterText: '',
+                          errorText: _nameError(_contacts[i]),
+                        ),
+                        onChanged: (_) => _changed(),
+                      ),
+                      SizedBox(height: context.bz.space3),
+                      TextField(
+                        key: Key('ice-phone-$i'),
+                        controller: _contacts[i].phone,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          labelText: 'Numer',
+                          errorText: _phoneError(_contacts[i]),
+                        ),
+                        onChanged: (_) =>
+                            _changed(() => _contacts[i].phoneTouched = true),
+                      ),
+                    ],
                   ),
-                  onChanged: (_) => _changed(),
                 ),
-              ),
-              IconButton(
-                tooltip: 'Usuń lek',
-                onPressed: () => _changed(() => _meds.removeAt(i).dispose()),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-        if (_meds.length < 20)
-          _flushLeft(
-            BzButton(
-              key: const Key('med-add'),
-              label: '+ Dodaj lek',
-              variant: BzButtonVariant.ghost,
-              onPressed: () =>
-                  _changed(() => _meds.add(TextEditingController())),
-            ),
-          ),
-        _section('Twoje mieszkanie', Icons.home_outlined),
-        TextField(
-          key: const Key('home-floor'),
-          controller: _floor,
-          keyboardType: const TextInputType.numberWithOptions(signed: true),
-          decoration: InputDecoration(
-            labelText: 'Piętro',
-            helperText: '0 to parter',
-            errorText: _floorError(),
-          ),
-          onChanged: (_) => _changed(),
-        ),
-        _yesNo(
-          'Winda',
-          _elevator,
-          (v) => _changed(() => _elevator = v),
-          key: 'home-elevator',
-        ),
-        _section('Dodatkowe informacje', Icons.notes_outlined),
-        TextField(
-          key: const Key('notes'),
-          controller: _notes,
-          maxLength: maxNotesLength,
-          minLines: 2,
-          maxLines: 5,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: const InputDecoration(
-            labelText: 'Np. choroby, diety',
-            helperText: 'Pomoże dopasować porady.',
-          ),
-          onChanged: (_) => _changed(),
-        ),
-        _section(
-          'Kogo powiadomić w razie zagrożenia?',
-          Icons.contact_phone_outlined,
-        ),
-        Text(
-          'Do tych osób przygotujemy SMS z twoją pozycją. Wyślesz go sam.',
-          style: context.bz.caption,
-        ),
-        for (var i = 0; i < _contacts.length; i++)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    TextField(
-                      key: Key('ice-name-$i'),
-                      controller: _contacts[i].name,
-                      maxLength: 40,
-                      decoration: InputDecoration(
-                        labelText: 'Imię',
-                        counterText: '',
-                        errorText: _nameError(_contacts[i]),
-                      ),
-                      onChanged: (_) => _changed(),
-                    ),
-                    SizedBox(height: context.bz.space3),
-                    TextField(
-                      key: Key('ice-phone-$i'),
-                      controller: _contacts[i].phone,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'Numer',
-                        errorText: _phoneError(_contacts[i]),
-                      ),
-                      onChanged: (_) =>
-                          _changed(() => _contacts[i].phoneTouched = true),
-                    ),
-                  ],
+                IconButton(
+                  tooltip: 'Usuń kontakt',
+                  onPressed: () => _changed(() {
+                    final d = _contacts.removeAt(i);
+                    d.name.dispose();
+                    d.phone.dispose();
+                  }),
+                  icon: const Icon(LucideIcons.x),
                 ),
-              ),
-              IconButton(
-                tooltip: 'Usuń kontakt',
-                onPressed: () => _changed(() {
-                  final d = _contacts.removeAt(i);
-                  d.name.dispose();
-                  d.phone.dispose();
-                }),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-        if (_contacts.length < 5)
-          _flushLeft(
-            BzButton(
-              key: const Key('ice-add'),
-              label: '+ Dodaj kontakt',
-              variant: BzButtonVariant.ghost,
-              onPressed: () =>
-                  _changed(() => _contacts.add(_ContactDraft('', ''))),
+              ],
             ),
-          ),
+          if (_contacts.length < 5)
+            _flushLeft(
+              BzButton(
+                key: const Key('ice-add'),
+                label: 'Dodaj kontakt',
+                icon: LucideIcons.plus,
+                variant: BzButtonVariant.ghost,
+                onPressed: () =>
+                    _changed(() => _contacts.add(_ContactDraft('', ''))),
+              ),
+            ),
+        ]),
       ],
     );
   }
