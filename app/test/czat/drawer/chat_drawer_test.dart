@@ -84,7 +84,7 @@ void main() {
     await _pump(tester, ChatStore.inMemory());
     expect(find.text(drawerEmpty), findsOneWidget);
     expect(find.text(drawerPrivacyNote), findsOneWidget);
-    expect(find.text('B+'), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const Key('drawer-logo')), matching: find.byType(CustomPaint)), findsOneWidget);
     expect(tester.getSize(find.byKey(const Key('drawer-logo'))), const Size(36, 36));
     expect(tester.getSize(find.bySemanticsLabel(drawerNewChat)).height, 44);
     expect(tester.getSize(find.bySemanticsLabel(drawerSettings)).height, 44);
