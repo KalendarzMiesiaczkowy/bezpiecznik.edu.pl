@@ -11,9 +11,9 @@ import '../wspolne/theme/bz_buttons.dart';
 import '../wspolne/theme/bz_theme.dart';
 import 'location_gateway.dart';
 
-enum OnboardingStep { intro, location, profileAsk, profileForm, done }
+enum OnboardingStep { intro, location, profileAsk, profileForm }
 
-/// E0 (MVP): intro -> location -> profile (skippable) -> done. The package
+/// E0 (MVP): intro -> location -> profile (skippable) -> chat. The package
 /// download step is not in the MVP (packages are bundled), so progress is
 /// "Krok n z 3".
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -26,7 +26,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   OnboardingStep _step = OnboardingStep.intro;
   bool? _locationGranted;
-  bool _profileSaved = false;
+  bool _confirming = false;
   HouseholdProfile _draft = HouseholdProfile.empty;
   bool _formValid = true;
 
@@ -42,11 +42,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _saveProfile() async {
-    if (!_draft.isEmpty) {
-      await ref.read(profileProvider.notifier).save(_draft);
-      _profileSaved = true;
-    }
-    if (mounted) _go(OnboardingStep.done);
+    if (_draft.isEmpty) return _finish();
+    await ref.read(profileProvider.notifier).save(_draft);
+    await ref.read(onboardingDoneProvider.notifier).complete();
+    if (!mounted) return;
+    setState(() => _confirming = true);
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    if (mounted) context.go('/');
   }
 
   Future<void> _finish() async {
@@ -78,32 +80,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  /// Status row with a fixed 24 dp icon column so all labels align.
-  Widget _statusRow(String label, {required bool done}) {
-    final bz = context.bz;
-    return Row(
-      children: [
-        SizedBox(
-          width: 24,
-          child: Icon(
-            done ? LucideIcons.check : LucideIcons.minus,
-            key: Key(done ? 'onb-status-done' : 'onb-status-skipped'),
-            size: 20,
-            color: done ? bz.verified : bz.ink300,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(child: Text(label, style: bz.chat)),
-      ],
-    );
-  }
-
   OnboardingStep? get _previous => switch (_step) {
     OnboardingStep.intro => null,
     OnboardingStep.location => OnboardingStep.intro,
     OnboardingStep.profileAsk => OnboardingStep.location,
     OnboardingStep.profileForm => OnboardingStep.profileAsk,
-    OnboardingStep.done => OnboardingStep.profileAsk,
   };
 
   /// Scrollable step body; the buttons after it stay pinned (large text).
@@ -175,7 +156,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           _scroll([
             _title('Pozwól na lokalizację', progress: 'Krok 2 z 3'),
             Text(
-              'Pokażę najbliższy schron i wykryję twoje województwo. Tylko gdy używasz aplikacji. Lokalizacja zostaje w telefonie. Wysyłasz ją tylko ty, np. SMS-em do bliskich.',
+              'Pokażę najbliższy schron. Tylko gdy używasz aplikacji. Lokalizacja zostaje w telefonie. Wysyłasz ją tylko ty, np. SMS-em do bliskich.',
               style: bz.chat,
             ),
           ]),
@@ -231,7 +212,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             variant: BzButtonVariant.ghost,
             size: BzButtonSize.xl,
             fullWidth: true,
-            onPressed: () => _go(OnboardingStep.done),
+            onPressed: _finish,
           ),
         ];
       case OnboardingStep.profileForm:
@@ -310,38 +291,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             variant: BzButtonVariant.ghost,
             size: BzButtonSize.xl,
             fullWidth: true,
-            onPressed: () => _go(OnboardingStep.done),
-          ),
-        ];
-      case OnboardingStep.done:
-        return [
-          _scroll([
-            _title('Gotowe'),
-            _statusRow('SOS i karty ratunkowe', done: true),
-            const SizedBox(height: 12),
-            // Bundled in the APK, so always ready (no packages step in MVP).
-            _statusRow('Baza wiedzy', done: true),
-            const SizedBox(height: 12),
-            _statusRow(
-              _profileSaved ? 'Profil domu' : 'Profil domu: pominięto',
-              done: _profileSaved,
-            ),
-          ]),
-          BzButton(
-            key: const Key('onb-start'),
-            label: 'Zacznij',
-            variant: BzButtonVariant.primary,
-            size: BzButtonSize.xl,
-            fullWidth: true,
             onPressed: _finish,
           ),
         ];
     }
   }
 
+  Widget _confirmation() => Expanded(
+    child: TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 400),
+      builder: (_, v, child) => Opacity(opacity: v, child: child),
+      child: Column(
+        key: const Key('onb-confirm'),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(LucideIcons.check, size: 48, color: context.bz.verified),
+          const SizedBox(height: 16),
+          Text('Dodano profil domu', style: context.bz.title),
+        ],
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
-    final prev = _previous;
+    final prev = _confirming ? null : _previous;
     final top = MediaQuery.paddingOf(context).top;
     return PopScope(
       canPop: prev == null,
@@ -359,7 +334,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 80, 16, 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: _body(),
+                    children: _confirming ? [_confirmation()] : _body(),
                   ),
                 ),
               ),

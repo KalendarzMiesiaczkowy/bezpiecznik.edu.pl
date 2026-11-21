@@ -227,11 +227,12 @@ class _RootOverlayState extends ConsumerState<RootOverlay> with WidgetsBindingOb
                         ),
                       ),
                     ),
-                  Positioned(
-                    right: _edgeMargin,
-                    top: topInset,
-                    child: SosButton(launcher: widget.sosLauncher),
-                  ),
+                  if (_path != onboardingRoutePath)
+                    Positioned(
+                      right: _edgeMargin,
+                      top: topInset,
+                      child: SosButton(launcher: widget.sosLauncher),
+                    ),
                 ],
               ),
             ),

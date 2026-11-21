@@ -115,10 +115,7 @@ void main() {
     expect(find.textContaining('Bez lokalizacji nie pokażę'), findsOneWidget);
     await tester.tap(find.byKey(const Key('onb-profile-later')));
     await tester.pumpAndSettle();
-    expect(find.text('Gotowe'), findsOneWidget);
-    expect(find.text('Profil domu: pominięto'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('onb-start')));
-    await tester.pumpAndSettle();
+    expect(find.text('Gotowe'), findsNothing);
     expect(find.text('CZAT'), findsOneWidget);
     expect(await store.isOnboardingDone(), isTrue);
     expect(await store.loadProfile(), isNull);
@@ -166,14 +163,13 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('onb-profile-save')));
     await tester.pumpAndSettle();
-    expect(find.text('Profil domu'), findsOneWidget);
-    expect(find.byKey(const Key('onb-status-done')), findsNWidgets(3));
+    expect(find.text('Dodano profil domu'), findsOneWidget);
+    expect(find.text('Gotowe'), findsNothing);
     final saved = (await store.loadProfile())!;
     expect(saved.members.length, 1);
     expect(saved.medications.single.name, 'Insulina');
     expect(saved.iceContacts.single.phone, '+48600100200');
-    await tester.tap(find.byKey(const Key('onb-start')));
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(seconds: 2));
     expect(find.text('CZAT'), findsOneWidget);
   });
 
@@ -254,19 +250,10 @@ void onboardingVisualTests() {
     expect((box.decoration! as BoxDecoration).color, isNotNull);
   });
 
-  testWidgets('Gotowe rows share one label x', (tester) async {
+  testWidgets('location step does not mention the voivodeship', (tester) async {
     await pumpOnboarding(tester, ProfileStore.inMemory(), FakeGateway(false));
     await tester.tap(find.byKey(const Key('onb-next')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onb-later')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('onb-profile-later')));
-    await tester.pumpAndSettle();
-    final a = tester.getTopLeft(find.text('SOS i karty ratunkowe')).dx;
-    final b = tester.getTopLeft(find.text('Profil domu: pominięto')).dx;
-    expect(a, b);
-    expect(tester.getTopLeft(find.text('Baza wiedzy')).dx, a);
-    expect(find.byKey(const Key('onb-status-done')), findsNWidgets(2));
-    expect(find.byKey(const Key('onb-status-skipped')), findsOneWidget);
+    expect(find.textContaining('województw'), findsNothing);
   });
 }
