@@ -108,15 +108,43 @@ class SettingsScreen extends ConsumerWidget {
                 children: [
                   Text('Rozmiar tekstu', style: bz.chat),
                   const SizedBox(height: 8),
-                  SegmentedButton<TextSizeOption>(
-                    showSelectedIcon: false,
-                    style: const ButtonStyle(minimumSize: WidgetStatePropertyAll(Size(48, 48))),
-                    segments: [
-                      for (final o in TextSizeOption.values)
-                        ButtonSegment(value: o, label: Text(o.label, key: Key('set-text-size-${o.name}'))),
-                    ],
-                    selected: {settings.textSize},
-                    onSelectionChanged: (s) => notifier.setTextSize(s.first),
+                  Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(color: bz.bg200, borderRadius: BorderRadius.circular(bz.radiusFull)),
+                    child: Row(
+                      children: [
+                        for (final o in TextSizeOption.values)
+                          Expanded(
+                            child: Semantics(
+                              button: true,
+                              selected: o == settings.textSize,
+                              excludeSemantics: true,
+                              label: o.label,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => notifier.setTextSize(o),
+                                child: Container(
+                                  constraints: const BoxConstraints(minHeight: 48),
+                                  alignment: Alignment.center,
+                                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                                  decoration: BoxDecoration(
+                                    color: o == settings.textSize ? bz.bg300 : null,
+                                    border: o == settings.textSize ? Border.all(color: bz.line150) : null,
+                                    borderRadius: BorderRadius.circular(bz.radiusFull),
+                                  ),
+                                  child: Text(
+                                    o.label,
+                                    key: Key('set-text-size-${o.name}'),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: bz.label.copyWith(color: o == settings.textSize ? bz.ink100 : bz.ink200),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text('Tak będzie wyglądał tekst instrukcji.', style: bz.chat),
