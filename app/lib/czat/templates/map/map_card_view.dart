@@ -139,7 +139,12 @@ class _Points extends StatelessWidget {
     final months = isStale(point.verifiedAt, DateTime.now())
         ? monthsSince(point.verifiedAt, DateTime.now())
         : null;
-    void focus() => context.push(mapPointLocation(point.id));
+    void focus() {
+      // Drop composer focus first, otherwise Flutter restores it on pop and
+      // the keyboard opens over the card.
+      FocusManager.instance.primaryFocus?.unfocus();
+      context.push(mapPointLocation(point.id));
+    }
     final label = [
       title,
       if (subtitle.isNotEmpty) subtitle,

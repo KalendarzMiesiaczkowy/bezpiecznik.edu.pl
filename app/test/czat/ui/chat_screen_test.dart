@@ -83,6 +83,22 @@ void main() {
     expect(tester.widget<TextField>(find.byKey(const Key('composer-field'))).controller!.text, isEmpty);
   });
 
+  testWidgets('after sending, the composer no longer has focus', (tester) async {
+    await pumpChat(tester, FakeAnswerService());
+    await tester.tap(find.byKey(const Key('composer-field')));
+    await tester.enterText(find.byKey(const Key('composer-field')), 'Pytanie');
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('composer-send')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    final editable = tester.widget<EditableText>(find.byType(EditableText));
+    expect(editable.focusNode.hasFocus, isFalse);
+    // Typing still works after tapping the field again.
+    await tester.tap(find.byKey(const Key('composer-field')));
+    await tester.pump();
+    expect(tester.widget<EditableText>(find.byType(EditableText)).focusNode.hasFocus, isTrue);
+  });
+
   testWidgets('send is disabled for empty or whitespace-only input', (tester) async {
     final service = FakeAnswerService();
     await pumpChat(tester, service);
