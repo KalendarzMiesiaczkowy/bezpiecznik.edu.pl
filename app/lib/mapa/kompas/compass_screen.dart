@@ -113,32 +113,47 @@ class _CompassScreenState extends ConsumerState<CompassScreen> {
                   child: Text(notice, key: const Key('compass-notice'), style: bz.chat.copyWith(color: bz.signal)),
                 ),
               Expanded(
-                child: Center(
-                  child: fix == null
-                      ? Text(compassNoPositionText, textAlign: TextAlign.center, style: bz.title)
-                      : _body(bz, dist!, bearing!, angleDeg, noSensor, fix),
+                child: LayoutBuilder(
+                  builder: (context, box) => SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: box.maxHeight),
+                      child: Center(
+                        child: fix == null
+                            ? Text(compassNoPositionText, textAlign: TextAlign.center, style: bz.title)
+                            : _body(bz, dist!, bearing!, angleDeg, noSensor, fix),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: BzButton(
-                      label: compassShowMapText,
-                      onPressed: widget.onShowMap,
-                      size: BzButtonSize.xl,
-                      fullWidth: true,
-                    ),
-                  ),
-                  SizedBox(width: bz.space3),
-                  Expanded(
-                    child: BzButton(
-                      label: compassEndText,
-                      onPressed: widget.onEnd,
-                      size: BzButtonSize.xl,
-                      fullWidth: true,
-                    ),
-                  ),
-                ],
+              // Labels never ellipsize: stack the buttons at large text.
+              Builder(
+                builder: (context) {
+                  final map = BzButton(
+                    label: compassShowMapText,
+                    onPressed: widget.onShowMap,
+                    size: BzButtonSize.xl,
+                    fullWidth: true,
+                  );
+                  final end = BzButton(
+                    label: compassEndText,
+                    onPressed: widget.onEnd,
+                    size: BzButtonSize.xl,
+                    fullWidth: true,
+                  );
+                  if (MediaQuery.textScalerOf(context).scale(1) > 1.15) {
+                    return Column(
+                      children: [map, SizedBox(height: bz.space3), end],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(child: map),
+                      SizedBox(width: bz.space3),
+                      Expanded(child: end),
+                    ],
+                  );
+                },
               ),
             ],
           ),

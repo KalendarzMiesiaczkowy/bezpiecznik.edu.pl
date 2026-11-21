@@ -106,6 +106,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     OnboardingStep.done => OnboardingStep.profileAsk,
   };
 
+  /// Scrollable step body; the buttons after it stay pinned (large text).
+  Widget _scroll(List<Widget> children) => Expanded(
+    child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      ),
+    ),
+  );
+
   List<Widget> _body() {
     final bz = context.bz;
     switch (_step) {
@@ -116,37 +126,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-          _title('Bezpiecznik'),
-          Text(
-            'Podpowiada, co zrobić w sytuacji kryzysowej, według oficjalnych poradników. Działa bez internetu. Prowadzi do najbliższego schronu.',
-            style: bz.chat,
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: bz.signalTint,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  LucideIcons.triangleAlert,
-                  key: const Key('onb-notice-icon'),
-                  size: 24,
-                  color: bz.signal,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Nie zastępuje 112. W zagrożeniu życia dzwoń pod 112.',
-                    style: bz.step,
+                  _title('Bezpiecznik'),
+                  Text(
+                    'Podpowiada, co zrobić w sytuacji kryzysowej, według oficjalnych poradników. Działa bez internetu. Prowadzi do najbliższego schronu.',
+                    style: bz.chat,
                   ),
-                ),
-              ],
-            ),
-          ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: bz.signalTint,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          LucideIcons.triangleAlert,
+                          key: const Key('onb-notice-icon'),
+                          size: 24,
+                          color: bz.signal,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Nie zastępuje 112. W zagrożeniu życia dzwoń pod 112.',
+                            style: bz.step,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -162,12 +172,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ];
       case OnboardingStep.location:
         return [
-          _title('Pozwól na lokalizację', progress: 'Krok 2 z 3'),
-          Text(
-            'Pokażę najbliższy schron i wykryję twoje województwo. Tylko gdy używasz aplikacji. Lokalizacja zostaje w telefonie. Wysyłasz ją tylko ty, np. SMS-em do bliskich.',
-            style: bz.chat,
-          ),
-          const Spacer(),
+          _scroll([
+            _title('Pozwól na lokalizację', progress: 'Krok 2 z 3'),
+            Text(
+              'Pokażę najbliższy schron i wykryję twoje województwo. Tylko gdy używasz aplikacji. Lokalizacja zostaje w telefonie. Wysyłasz ją tylko ty, np. SMS-em do bliskich.',
+              style: bz.chat,
+            ),
+          ]),
           BzButton(
             key: const Key('onb-allow'),
             label: 'Zezwól',
@@ -191,19 +202,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ];
       case OnboardingStep.profileAsk:
         return [
-          _title('Profil domu', progress: 'Krok 3 z 3'),
-          if (_locationGranted == false) ...[
+          _scroll([
+            _title('Profil domu', progress: 'Krok 3 z 3'),
+            if (_locationGranted == false) ...[
+              Text(
+                'Bez lokalizacji nie pokażę najbliższego schronu. Możesz to zmienić w ustawieniach telefonu.',
+                style: bz.caption,
+              ),
+              const SizedBox(height: 12),
+            ],
             Text(
-              'Bez lokalizacji nie pokażę najbliższego schronu. Możesz to zmienić w ustawieniach telefonu.',
-              style: bz.caption,
+              'Odpowiedz na kilka pytań o domowników i mieszkanie (ok. 2 min). Dzięki temu porady dotyczą twojej rodziny. Profil zostaje tylko w telefonie.',
+              style: bz.chat,
             ),
-            const SizedBox(height: 12),
-          ],
-          Text(
-            'Odpowiedz na kilka pytań o domowników i mieszkanie (ok. 2 min). Dzięki temu porady dotyczą twojej rodziny. Profil zostaje tylko w telefonie.',
-            style: bz.chat,
-          ),
-          const Spacer(),
+          ]),
           BzButton(
             key: const Key('onb-profile-fill'),
             label: 'Uzupełnij',
@@ -303,17 +315,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ];
       case OnboardingStep.done:
         return [
-          _title('Gotowe'),
-          _statusRow('SOS i karty ratunkowe', done: true),
-          const SizedBox(height: 12),
-          // Bundled in the APK, so always ready (no packages step in MVP).
-          _statusRow('Baza wiedzy', done: true),
-          const SizedBox(height: 12),
-          _statusRow(
-            _profileSaved ? 'Profil domu' : 'Profil domu: pominięto',
-            done: _profileSaved,
-          ),
-          const Spacer(),
+          _scroll([
+            _title('Gotowe'),
+            _statusRow('SOS i karty ratunkowe', done: true),
+            const SizedBox(height: 12),
+            // Bundled in the APK, so always ready (no packages step in MVP).
+            _statusRow('Baza wiedzy', done: true),
+            const SizedBox(height: 12),
+            _statusRow(
+              _profileSaved ? 'Profil domu' : 'Profil domu: pominięto',
+              done: _profileSaved,
+            ),
+          ]),
           BzButton(
             key: const Key('onb-start'),
             label: 'Zacznij',
