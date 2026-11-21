@@ -15,6 +15,7 @@ import 'kompas/compass_screen.dart';
 import 'gps_status.dart';
 import 'map_assets.dart';
 import 'position_provider.dart';
+import 'punkty/clusters.dart';
 import 'punkty/point_sheet.dart';
 import 'punkty/points_db.dart';
 import 'punkty/shelter_layer.dart';
@@ -93,6 +94,9 @@ Widget defaultMapViewBuilder(BuildContext context, MapViewParams p) {
     onStyleLoadedCallback: p.onStyleLoaded,
     onCameraIdle: p.onCameraIdle,
     onCameraMoveStarted: p.onCameraMoveStarted,
+    // Without it controller.cameraPosition stays null and marker clustering
+    // and tap hit tests would always assume the initial zoom.
+    trackCameraPosition: true,
     // Own attribution text and no native north compass (B05 owns the compass).
     attributionEnabled: false,
     compassEnabled: false,
@@ -128,6 +132,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   bool _searchLong = false;
   bool _sheltersOn = true;
   List<ShelterPoint> _points = const [];
+  List<MarkerCluster> _clusters = const [];
   List<Symbol> _symbols = const [];
   bool _markerImagesAdded = false;
   int? _focusId;
@@ -185,13 +190,35 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   void dispose() {
+    _controller?.onSymbolTapped.remove(_onSymbolTapped);
     _searchTimer?.cancel();
     _ageTimer?.cancel();
     _progress.dispose();
     super.dispose();
   }
 
+  bool _refreshing = false;
+  bool _refreshAgain = false;
+
+  /// Serialised: camera-idle and style-loaded can fire together, and two
+  /// overlapping runs would leave orphan symbols on the map.
   Future<void> _refreshShelters() async {
+    if (_refreshing) {
+      _refreshAgain = true;
+      return;
+    }
+    _refreshing = true;
+    try {
+      do {
+        _refreshAgain = false;
+        await _refreshSheltersOnce();
+      } while (_refreshAgain && mounted);
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  Future<void> _refreshSheltersOnce() async {
     final c = _controller;
     if (c == null) return;
     try {
@@ -199,6 +226,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       _symbols = const [];
       if (!_sheltersOn) {
         _points = const [];
+        _clusters = const [];
         return;
       }
       final db = await ref.read(pointsDbProvider.future);
@@ -212,7 +240,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (!mounted) return;
       final bz = context.bz;
       if (!_markerImagesAdded) {
-        for (final st in allMarkerStyles) {
+        for (final st in [...allMarkerStyles, ...allClusterStyles]) {
           final png = await renderMarkerPng(
             st,
             confirmed: bz.verified,
@@ -227,7 +255,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         await c.setSymbolIconIgnorePlacement(true);
         _markerImagesAdded = true;
       }
-      _symbols = await c.addSymbols([for (final p in _points) symbolFor(p)]);
+      final zoom = c.cameraPosition?.zoom ?? mapInitialZoom;
+      _clusters = clusterPoints(_points, zoom);
+      _symbols = await c.addSymbols([for (final cl in _clusters) symbolForCluster(cl)]);
     } on Object {
       // Layer is optional: the map stays usable if points or annotations fail.
     }
@@ -286,8 +316,40 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   void _onMapClick(math.Point<double> _, LatLng at) {
     final zoom = _controller?.cameraPosition?.zoom ?? mapInitialZoom;
-    final hit = hitTest(_points, at.latitude, at.longitude, zoom);
-    if (hit != null) _showPoint(hit);
+    _openCluster(hitTestClusters(_clusters, at.latitude, at.longitude, zoom));
+  }
+
+  /// MapLibre routes taps on a symbol annotation to onSymbolTapped, not to
+  /// onMapClick, so marker taps arrive here.
+  void _onSymbolTapped(Symbol s) {
+    final at = s.options.geometry;
+    if (at == null) return;
+    // Match by position: the tapped object may not be identical to ours.
+    MarkerCluster? best;
+    var bestD = double.infinity;
+    for (final c in _clusters) {
+      final d = (c.lat - at.latitude).abs() + (c.lon - at.longitude).abs();
+      if (d < bestD) {
+        best = c;
+        bestD = d;
+      }
+    }
+    if (best != null && bestD < 1e-6) _openCluster(best);
+  }
+
+  void _openCluster(MarkerCluster? hit) {
+    if (hit == null) return;
+    final zoom = _controller?.cameraPosition?.zoom ?? mapInitialZoom;
+    if (hit.isSingle) {
+      _showPoint(hit.first);
+    } else {
+      final move = clusterCameraUpdate(hit, zoom);
+      if (move == null) {
+        _showPoint(hit.first); // members share one place
+      } else {
+        _controller?.animateCamera(move);
+      }
+    }
   }
 
   Future<void> _showPoint(ShelterPoint p) async {
@@ -414,7 +476,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   // Our own marker layer replaces the native puck (one marker only).
                   myLocationEnabled: false,
                   trackingMode: MyLocationTrackingMode.none,
-                  onMapCreated: (c) => _controller = c,
+                  onMapCreated: (c) {
+                    _controller = c;
+                    c.onSymbolTapped.add(_onSymbolTapped);
+                  },
                   onStyleLoaded: () async {
                     _styleReady = true;
                     _markerLayersAdded = false;
