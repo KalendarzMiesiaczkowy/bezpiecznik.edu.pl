@@ -168,7 +168,7 @@ void main() {
     expect(visited, ['/mapa?point=1']);
   });
 
-  testWidgets('Prowadź opens the map focused on the point', (tester) async {
+  testWidgets('BG75: Prowadź opens the map straight into the compass', (tester) async {
     final visited = await pump(
       tester,
       nearest: () async => three,
@@ -176,7 +176,7 @@ void main() {
     );
     await tester.tap(find.byKey(const ValueKey('map-card-open')));
     await tester.pumpAndSettle();
-    expect(visited, ['/mapa?point=1']);
+    expect(visited, ['/mapa?point=1&guide=1']);
   });
 
   testWidgets('tap targets are at least 48 dp high', (tester) async {

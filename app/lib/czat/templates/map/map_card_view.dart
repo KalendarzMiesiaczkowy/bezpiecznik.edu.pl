@@ -33,7 +33,9 @@ const mapOpenMapText = 'Otwórz mapę'; // verify:true
 
 /// Route that opens E2 focused on [pointId] (no route; spec: tap -> map
 /// centred on the point).
-String mapPointLocation(int pointId) => '$mapRoutePath?point=$pointId';
+/// [guide] opens the compass to it straight away (BG75).
+String mapPointLocation(int pointId, {bool guide = false}) =>
+    '$mapRoutePath?point=$pointId${guide ? '&guide=1' : ''}';
 
 /// `map` template body for the chat. Only `nearest_shelter` has data in the
 /// MVP; any other target shows the spec "no points" text, never invented points.
@@ -147,12 +149,13 @@ class _Points extends StatelessWidget {
     final months = isStale(point.verifiedAt, DateTime.now())
         ? monthsSince(point.verifiedAt, DateTime.now())
         : null;
-    void focus() {
+    void open({bool guide = false}) {
       // Drop composer focus first, otherwise Flutter restores it on pop and
       // the keyboard opens over the card.
       FocusManager.instance.primaryFocus?.unfocus();
-      context.push(mapPointLocation(point.id));
+      context.push(mapPointLocation(point.id, guide: guide));
     }
+    void focus() => open();
     final label = [
       title,
       if (subtitle.isNotEmpty) subtitle,
@@ -263,7 +266,7 @@ class _Points extends StatelessWidget {
           constraints: BoxConstraints(minHeight: bz.minTouchTarget),
           child: FilledButton(
             key: const ValueKey('map-card-open'),
-            onPressed: focus,
+            onPressed: () => open(guide: _hasPosition),
             child: Text(_hasPosition ? pointGuideText : mapShowOnMapText),
           ),
         ),
