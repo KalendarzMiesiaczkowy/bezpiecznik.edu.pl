@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../app_router.dart' show mapRoutePath;
@@ -119,20 +122,26 @@ class _PointRow extends StatelessWidget {
     final bz = context.bz;
     final from = fromLat != null && fromLon != null;
     String? distance;
+    double? bearing;
     if (from) {
       final d = haversineM(fromLat!, fromLon!, point.lat, point.lon);
-      final b = bearingDeg(fromLat!, fromLon!, point.lat, point.lon);
-      distance = '${formatDistance(d)} ${arrowFor(b)}';
+      bearing = bearingDeg(fromLat!, fromLon!, point.lat, point.lon);
+      distance = formatDistance(d);
     }
     final address = point.address?.trim();
-    final title = pointTitle(point);
+    final hasAddress = address != null && address.isNotEmpty;
+    final name = point.name?.trim();
+    final hasName = name != null && name.isNotEmpty;
+    // Never an invented name: an unnamed point is titled by its kind and the
+    // address (if any) becomes the subtitle.
+    final title = hasName ? name : kindLabel(point.kind);
     final subtitle = [
-      kindLabel(point.kind),
-      if (address != null && address.isNotEmpty && address != title) address,
+      if (hasName) kindLabel(point.kind),
+      if (hasAddress) address,
     ].join(' · ');
     final label = [
       title,
-      subtitle,
+      if (subtitle.isNotEmpty) subtitle,
       ?distance,
       if (!point.confirmed) unconfirmedShortText,
     ].join(', ');
@@ -152,17 +161,31 @@ class _PointRow extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 32,
-                  child: Text(point.confirmed ? 'S' : 's?', style: bz.label),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: bearing == null
+                        ? Icon(LucideIcons.mapPin, size: 20, color: bz.ink200)
+                        : Transform.rotate(
+                            key: ValueKey('map-card-bearing-${point.id}'),
+                            angle: bearing * math.pi / 180,
+                            child: Icon(
+                              LucideIcons.navigation2,
+                              size: 20,
+                              color: bz.ink100,
+                            ),
+                          ),
+                  ),
                 ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title, style: bz.label),
-                      Text(
-                        subtitle,
-                        style: bz.caption.copyWith(color: bz.ink200),
-                      ),
+                      if (subtitle.isNotEmpty)
+                        Text(
+                          subtitle,
+                          style: bz.caption.copyWith(color: bz.ink200),
+                        ),
                       if (!point.confirmed)
                         Text(
                           unconfirmedShortText,

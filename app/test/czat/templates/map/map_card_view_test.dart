@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bezpiecznik/czat/templates/map/map_card_view.dart';
 import 'package:bezpiecznik/czat/templates/template_registry.dart';
 import 'package:bezpiecznik/mapa/position_provider.dart';
@@ -74,7 +76,12 @@ void main() {
     await pump(tester, nearest: () async => three, position: pos());
     expect(find.text('Schron A'), findsOneWidget);
     expect(find.text('Schron B'), findsOneWidget);
-    expect(find.text('ul. Długa 3'), findsOneWidget); // unnamed: address is the title
+    // Unnamed point: titled by its kind, address as subtitle, never invented.
+    expect(find.text('Schron'), findsOneWidget);
+    expect(find.text('ul. Długa 3'), findsOneWidget);
+    expect(find.text('Punkt bez nazwy'), findsNothing);
+    expect(find.text('s?'), findsNothing);
+    expect(find.byKey(const ValueKey('map-card-bearing-1')), findsOneWidget);
     expect(find.text('niepotwierdzony'), findsNWidgets(2));
     expect(find.textContaining(' m'), findsWidgets);
     expect(find.text(mapNoPositionText), findsNothing);
@@ -107,6 +114,33 @@ void main() {
     expect(find.text(mapShowOnMapText), findsOneWidget);
     expect(find.text(mapUnknownDistancesText), findsOneWidget);
     expect(find.textContaining(RegExp(r'\d+ m ')), findsNothing);
+  });
+
+  testWidgets('card reacts to a position fix arriving after the first build', (tester) async {
+    final ctl = StreamController<Position?>();
+    addTearDown(ctl.close);
+    final router = GoRouter(
+      routes: [GoRoute(path: '/', builder: (c, s) => const Scaffold(body: SingleChildScrollView(child: MapCardView(target: 'nearest_shelter'))))],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          nearestSheltersProvider.overrideWith((ref) async => three),
+          positionProvider.overrideWith((ref) => ctl.stream),
+        ],
+        child: MaterialApp.router(theme: buildBzTheme(), routerConfig: router),
+      ),
+    );
+    ctl.add(null);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text(mapNoPositionText), findsOneWidget);
+    ctl.add(pos());
+    await tester.pump();
+    await tester.pump();
+    expect(find.text(mapNoPositionText), findsNothing);
+    expect(find.text(mapOpenMapText), findsOneWidget);
+    expect(find.byKey(const ValueKey('map-card-bearing-1')), findsOneWidget);
   });
 
   testWidgets('empty list shows the spec text', (tester) async {
