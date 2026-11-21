@@ -40,9 +40,13 @@ sealed class AnswerEvent {
 
 /// Changes the phase label of the thinking skeleton.
 class AnswerThinking extends AnswerEvent {
-  const AnswerThinking([this.phase = ThinkingPhase.searching]);
+  const AnswerThinking([this.phase = ThinkingPhase.searching, this.risk = false]);
 
   final ThinkingPhase phase;
+
+  /// The question is a risk phrase: the chat shows the `call` panel above the
+  /// thinking skeleton right away (sticky until the answer replaces it).
+  final bool risk;
 }
 
 /// Optional streamed preview, shown only inside the thinking bubble. The

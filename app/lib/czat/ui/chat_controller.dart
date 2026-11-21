@@ -27,6 +27,7 @@ class ChatMessage {
     this.answer,
     this.phase = ThinkingPhase.searching,
     this.partialText,
+    this.risk = false,
   });
 
   final String id;
@@ -46,6 +47,9 @@ class ChatMessage {
   /// Optional streamed preview while generating.
   final String? partialText;
 
+  /// Risk phrase: the thinking bubble shows the `call` panel first.
+  final bool risk;
+
   bool get isUser => role == ChatRole.user;
   bool get isThinking => !isUser && status == MessageStatus.generating;
 
@@ -55,6 +59,7 @@ class ChatMessage {
     AssistantAnswer? answer,
     ThinkingPhase? phase,
     String? partialText,
+    bool? risk,
   }) {
     return ChatMessage(
       id: id,
@@ -65,6 +70,7 @@ class ChatMessage {
       answer: answer ?? this.answer,
       phase: phase ?? this.phase,
       partialText: partialText ?? this.partialText,
+      risk: risk ?? this.risk,
     );
   }
 
@@ -172,8 +178,8 @@ class ChatController extends Notifier<ChatState> {
       (event) {
         if (_activeId != assistantId) return;
         switch (event) {
-          case AnswerThinking(:final phase):
-            _update(assistantId, (m) => m.copyWith(phase: phase));
+          case AnswerThinking(:final phase, :final risk):
+            _update(assistantId, (m) => m.copyWith(phase: phase, risk: m.risk || risk));
           case AnswerPartialText(:final text):
             _update(assistantId, (m) => m.copyWith(partialText: text));
           case AnswerReady(:final answer):
@@ -207,6 +213,7 @@ class ChatController extends Notifier<ChatState> {
         createdAt: m.createdAt,
         text: stoppedNote,
         status: MessageStatus.stopped,
+        risk: m.risk,
       ),
       persistChatId: state.chatId,
     );

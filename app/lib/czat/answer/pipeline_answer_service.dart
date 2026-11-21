@@ -100,6 +100,9 @@ class PipelineAnswerService implements AnswerService {
       // Risk first: a pipeline error below must still be able to show 112.
       risk = await isRisk(question);
       if (run.cancelled) return;
+      // Show 112 now, not after the model (owner rule): the final answer
+      // starts with the same `call` panel.
+      if (risk) emit(const AnswerThinking(ThinkingPhase.searching, true));
       final result = await search(question);
       if (run.cancelled) return;
 
@@ -116,7 +119,7 @@ class PipelineAnswerService implements AnswerService {
       }
 
       final chunks = result.chunks;
-      emit(const AnswerThinking(ThinkingPhase.composing));
+      emit(AnswerThinking(ThinkingPhase.composing, risk));
       final ctxText = await _profile();
       if (run.cancelled) return;
 
