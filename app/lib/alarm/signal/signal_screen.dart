@@ -33,6 +33,11 @@ const strobeWarningBody =
 const strobeWarningConfirm = 'Włącz';
 const strobeWarningCancel = 'Anuluj';
 
+// Strobe colours: pure white and a bright red. Brighter than the `sos` token
+// on purpose, so the flash carries and the shell's SOS button stays visible.
+const _strobeWhite = Color(0xFFFFFFFF);
+const _strobeRed = Color(0xFFFF1F1F);
+
 const _pauses = [
   VariantOption('0', '0'),
   VariantOption('10000', '10 s'),
@@ -176,7 +181,6 @@ class _SignalScreenState extends State<SignalScreen> {
   Widget build(BuildContext context) {
     final bz = context.bz;
     final torchBlocked = _torchOk == false;
-    final top = MediaQuery.paddingOf(context).top;
     return Scaffold(
       backgroundColor: bz.bg000,
       body: Stack(
@@ -266,45 +270,30 @@ class _SignalScreenState extends State<SignalScreen> {
               valueListenable: _flash,
               builder: (context, on, child) => ColoredBox(
                 key: const Key('signal-strobe'),
-                color: on ? const Color(0xFFFFFFFF) : bz.sos,
+                color: on ? _strobeWhite : _strobeRed,
                 child: child,
               ),
               child: SafeArea(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    bz.space4,
-                    top + 96,
-                    bz.space4,
-                    bz.space6,
-                  ),
+                  padding: EdgeInsets.all(bz.space4),
                   child: Align(
                     alignment: Alignment.bottomCenter,
-                    child: Material(
-                      color: bz.bg000,
-                      borderRadius: BorderRadius.circular(bz.radiusFull),
-                      child: InkWell(
-                        key: const Key('signal-stop-screen'),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Material(
+                        color: bz.bg000,
                         borderRadius: BorderRadius.circular(bz.radiusFull),
-                        onTap: () => _setScreen(false),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minHeight: 64,
-                            minWidth: double.infinity,
-                          ),
-                          child: Center(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: bz.space5,
-                                vertical: bz.space3,
-                              ),
-                              child: Text(
-                                signalStopScreen,
-                                textAlign: TextAlign.center,
-                                style: bz.step.copyWith(
-                                  color: bz.ink100,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                        child: InkWell(
+                          key: const Key('signal-stop-screen'),
+                          borderRadius: BorderRadius.circular(bz.radiusFull),
+                          onTap: () => _setScreen(false),
+                          child: Padding(
+                            // 72 dp tall at the default text size.
+                            padding: EdgeInsets.symmetric(horizontal: bz.space5, vertical: 22),
+                            child: Text(
+                              signalStopScreen,
+                              textAlign: TextAlign.center,
+                              style: bz.step.copyWith(color: bz.ink100, fontWeight: FontWeight.w700),
                             ),
                           ),
                         ),

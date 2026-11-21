@@ -122,6 +122,11 @@ void main() {
     expect(colors, hasLength(2));
     expect(colors, contains(const Color(0xFFFFFFFF)));
 
+    // The way out is a button at the bottom, not a screen-sized slab.
+    final stop = tester.getRect(find.byKey(const Key('signal-stop-screen')));
+    expect(stop.height, inInclusiveRange(56, 120));
+    expect(stop.bottom, greaterThan(720 - 40));
+
     await tester.tap(find.byKey(const Key('signal-stop-screen')));
     await tester.pump(const Duration(seconds: 2));
     expect(find.byKey(const Key('signal-strobe')), findsNothing);
