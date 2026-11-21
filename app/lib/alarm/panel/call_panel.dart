@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../app_router.dart' show profileRoutePath;
+import '../../app_router.dart' show appRouterProvider, profileRoutePath;
 import '../../czat/templates/call/call_panel_view.dart'
     show callLauncherProvider;
 import '../../mapa/position_provider.dart';
@@ -128,7 +127,8 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
 
   void _addContacts() {
     if (widget.onAddContacts != null) return widget.onAddContacts!();
-    final router = GoRouter.of(context);
+    // The panel lives in the root overlay above the router: no GoRouter in context.
+    final router = ref.read(appRouterProvider);
     _close();
     router.go(profileRoutePath);
   }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:material_ui/material_ui.dart';
 
 import '../theme/bz_theme.dart';
@@ -109,10 +111,19 @@ class _PanelHostState extends State<PanelHost> with SingleTickerProviderStateMix
                       child: SizedBox(
                         key: widget.panelKey,
                         width: double.infinity,
-                        child: Material(
-                          color: bz.bg100,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(bz.radiusXl)),
-                          child: SafeArea(top: false, child: widget.child),
+                        // Top edge stays below status bar + SOS row (8 + 56 + 8) and <= 92 %.
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: math.min(
+                              size.height * 0.92,
+                              size.height - MediaQuery.paddingOf(context).top - 72,
+                            ),
+                          ),
+                          child: Material(
+                            color: bz.bg100,
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(bz.radiusXl)),
+                            child: SafeArea(top: false, child: widget.child),
+                          ),
                         ),
                       ),
                     ),
