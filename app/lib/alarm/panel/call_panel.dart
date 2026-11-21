@@ -7,7 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../app_router.dart' show appRouterProvider, profileRoutePath;
+import '../../app_router.dart' show appRouterProvider, profileRoutePath, signalRoutePath;
 import '../../czat/templates/call/call_panel_view.dart'
     show callLauncherProvider;
 import '../../mapa/position_provider.dart';
@@ -29,6 +29,8 @@ const call112Sub = 'Numer alarmowy';
 const call112Semantics = 'Zadzwoń pod numer alarmowy 112';
 const callSmsLabel = 'POWIADOM BLISKICH';
 const callSmsSub = 'SMS z lokalizacją';
+const callSignalLabel = 'SYGNAŁ RATUNKOWY';
+const callSignalSub = 'Latarka, dźwięk i ekran SOS';
 const callAmlNote =
     'Przy połączeniu z 112 telefon sam przekazuje lokalizację, jeśli ma zasięg sieci komórkowej.';
 const callSaySection = 'Co powiedzieć dyspozytorowi';
@@ -54,7 +56,7 @@ class ContactCallPanel extends ConsumerStatefulWidget {
     this.title,
     this.variant = ContactPanelVariant.sheet,
     this.situation,
-    this.signalBuilder,
+    this.onSignal,
     this.onClose,
     this.onAddContacts,
   });
@@ -67,8 +69,9 @@ class ContactCallPanel extends ConsumerStatefulWidget {
   /// SMS `{opis}`: rescue card name or last user message.
   final String? situation;
 
-  /// Content of the "Sygnał ratunkowy" section (task D05); hidden when null.
-  final WidgetBuilder? signalBuilder;
+  /// Opens the rescue signal screen (tests inject a recorder). Null: the
+  /// panel closes and the app router pushes [signalRoutePath].
+  final VoidCallback? onSignal;
 
   /// Defaults to closing P2 in the shell.
   final VoidCallback? onClose;
@@ -82,7 +85,6 @@ class ContactCallPanel extends ConsumerStatefulWidget {
 
 class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
   bool _more = false;
-  bool _signal = false;
   bool _searchTimedOut = false;
   String? _notice;
   Timer? _noticeTimer;
@@ -127,6 +129,15 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
   void _close() => widget.onClose != null
       ? widget.onClose!()
       : ref.read(shellPanelsProvider.notifier).closeContactPanel();
+
+  /// Sound, flashlight and screen SOS live on their own full screen.
+  void _openSignal() {
+    if (widget.onSignal != null) return widget.onSignal!();
+    // The panel lives in the root overlay above the router: no GoRouter in context.
+    final router = ref.read(appRouterProvider);
+    _close();
+    router.push(signalRoutePath);
+  }
 
   void _addContacts() {
     if (widget.onAddContacts != null) return widget.onAddContacts!();
@@ -280,6 +291,19 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
         onTap: canSms ? () => _notify(recipients, gps, facts) : null,
       ),
       ...contacts,
+      // Third way to get help, for when calling and texting are not possible.
+      // Only in the SOS sheet: the chat `call` panel keeps its two buttons.
+      if (sheet) ...[
+        SizedBox(height: bz.space3),
+        _BigButton(
+          key: const Key('call-signal'),
+          label: callSignalLabel,
+          sub: callSignalSub,
+          icon: LucideIcons.siren,
+          filled: false,
+          onTap: _openSignal,
+        ),
+      ],
     ];
 
     final more = _MoreToggle(
@@ -419,17 +443,6 @@ class _ContactCallPanelState extends ConsumerState<ContactCallPanel> {
     Text(callSaySection, style: bz.label.copyWith(color: bz.ink200)),
     SizedBox(height: bz.space1),
     Text(callSay, style: bz.chat),
-    if (widget.signalBuilder != null) ...[
-      SizedBox(height: bz.space2),
-      _MoreToggle(
-        key: const Key('call-signal'),
-        label: 'Sygnał ratunkowy',
-        open: _signal,
-        expand: true,
-        onTap: () => setState(() => _signal = !_signal),
-      ),
-      if (_signal) Builder(builder: widget.signalBuilder!),
-    ],
   ];
 }
 
@@ -575,16 +588,15 @@ class _SmallDial extends StatelessWidget {
   }
 }
 
-/// Collapsible row toggle ("Więcej", "Sygnał ratunkowy"): label + chevron.
+/// Collapsible row toggle "Więcej": label + chevron.
 class _MoreToggle extends StatelessWidget {
   const _MoreToggle({
     super.key,
-    this.label = 'Więcej',
     required this.open,
     required this.onTap,
     this.expand = false,
   });
-  final String label;
+  static const label = 'Więcej';
   final bool open;
   final VoidCallback onTap;
 
