@@ -59,6 +59,13 @@ void main() {
     }
   }, skip: hasKb ? false : 'no kb');
 
+  test('BG12: one absent word does not refuse co-occurring present topics', () async {
+    // "oparzenie" and "wstrząs" share a chunk; "padaczka" is absent.
+    expect(await d('Oparzenie, wstrząs czy padaczka?'), RetrievalDecision.found);
+    // A single present specific word still refuses.
+    expect(await d('Oparzenie czy padaczka?'), RetrievalDecision.noSource);
+  }, skip: hasKb ? false : 'no kb');
+
   test('off-topic stays offTopic', () async {
     for (final q in ['Jak naprawić zmywarkę?', 'Opowiedz mi dowcip', 'Ile kosztuje bitcoin?']) {
       expect(await d(q), RetrievalDecision.offTopic, reason: q);

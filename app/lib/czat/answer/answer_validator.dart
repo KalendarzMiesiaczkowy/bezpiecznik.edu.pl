@@ -61,14 +61,40 @@ const List<String> kAllowedTitles = [
   'Gdy straci przytomność',
 ];
 
-String _safeTitle(Object? raw, String type) {
+/// Spec limit for `title` (szablony-czatu.md: "Do 30 znaków").
+const int kMaxTitleLength = 30;
+
+/// The spec gives titles only as examples ("Teraz", "RKO", "Do plecaka",
+/// "Gdy straci przytomność"), so besides the fixed list a title is accepted
+/// when it is short and every content word of it occurs (5-character prefix,
+/// Polish inflection) in the chunks the panel cites: a title can then never
+/// carry an instruction the sources do not contain.
+String _safeTitle(Object? raw, String type, Set<String> sourceWords) {
   if (raw is String) {
     final n = normalizePl(raw);
     for (final t in kAllowedTitles) {
       if (normalizePl(t) == n) return t;
     }
+    final trimmed = raw.trim();
+    if (trimmed.isNotEmpty &&
+        trimmed.length <= kMaxTitleLength &&
+        _titleGrounded(n, sourceWords)) {
+      return trimmed;
+    }
   }
   return type == 'steps' ? 'Co zrobić' : 'Najważniejsze';
+}
+
+bool _titleGrounded(String normalized, Set<String> sourceWords) {
+  var content = 0;
+  for (final w in normalized.split(' ')) {
+    if (w.length < 3 || functionWords.contains(w)) continue;
+    content++;
+    final k = w.length < 5 ? w.length : 5;
+    final stem = w.substring(0, k);
+    if (!sourceWords.any((s) => s.startsWith(stem))) return false;
+  }
+  return content > 0;
 }
 
 class _ChunkFacts {
@@ -197,7 +223,10 @@ class AnswerValidator {
         if (kept.length >= kMaxItemsPerPanel) break;
       }
       if (kept.isEmpty) continue;
-      final title = _safeTitle(p['title'], type as String);
+      final sourceWords = <String>{
+        for (final k in kept) ...facts[k['source_id']]!.words,
+      };
+      final title = _safeTitle(p['title'], type as String, sourceWords);
       out.add({'type': type, 'title': title, 'items': kept});
     }
     return ValidatedAnswer(panels: out, rejected: rejected);

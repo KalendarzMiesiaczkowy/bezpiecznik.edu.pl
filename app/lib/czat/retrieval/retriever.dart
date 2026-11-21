@@ -318,7 +318,16 @@ class Retriever {
     return RegExp(r'^[a-z0-9]+$').hasMatch(stem) ? '$stem*' : null;
   }
 
+  /// True when a safety word of [question] has no chunk in the KB, so the
+  /// topic is not covered. BG12: one absent word does not refuse a question
+  /// whose other, specific safety words (at least two, not generic like
+  /// "pomoc", not person states) all occur together in a single chunk ("ból
+  /// przy oparzeniu i wstrząsie, czy to padaczka?" is answered from the burn
+  /// and shock chunk). A single present word keeps the refusal ("atak
+  /// padaczki" must not be answered from a chunk about attacks).
   bool _hasAbsentSafetyTopic(String question) {
+    var absent = false;
+    final present = <String>[];
     for (final t in domainTokens(question)) {
       if (kStateWords.contains(t) || !_isSafetyWord(t)) continue;
       final m = _tokenMatch(t);
@@ -327,9 +336,19 @@ class Retriever {
         'SELECT 1 FROM chunks_fts WHERE chunks_fts MATCH ? LIMIT 1',
         [m],
       );
-      if (hit.isEmpty) return true;
+      if (hit.isEmpty) {
+        absent = true;
+      } else if (!_isGeneric(t)) {
+        present.add(m);
+      }
     }
-    return false;
+    if (!absent) return false;
+    if (present.length < 2) return true;
+    final both = _kb.db.select(
+      'SELECT 1 FROM chunks_fts WHERE chunks_fts MATCH ? LIMIT 1',
+      [present.join(' AND ')],
+    );
+    return both.isEmpty;
   }
 
   final Map<String, bool> _genericCache = {};

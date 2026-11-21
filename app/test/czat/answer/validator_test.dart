@@ -165,7 +165,7 @@ void main() {
       expect(r.panels[1]['title'], 'Najważniejsze');
     });
 
-    test('titles come from the fixed list only', () {
+    test('titles: fixed list or short and grounded in the cited chunks', () {
       String titleOf(Object? t) {
         final r = v.validate(
           panels([
@@ -186,6 +186,13 @@ void main() {
       expect(titleOf('teraz'), 'Teraz');
       expect(titleOf('Do zapamiętania'), 'Do zapamiętania');
       expect(titleOf(42), 'Co zrobić');
+      // Not on the list, but every content word is in the cited chunk.
+      expect(titleOf('Zejdź schodami'), 'Zejdź schodami');
+      expect(titleOf('Nie wchodź do windy'), 'Nie wchodź do windy');
+      // Words missing from the source, empty, or longer than 30 characters.
+      expect(titleOf('Zadzwoń po lekarza'), 'Co zrobić');
+      expect(titleOf('  '), 'Co zrobić');
+      expect(titleOf('Zejdź schodami na zewnątrz budynku'), 'Co zrobić');
     });
 
     test('garbage structures do not throw', () {
