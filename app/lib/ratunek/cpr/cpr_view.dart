@@ -510,33 +510,27 @@ class CprPinned extends ConsumerWidget {
                   ),
                 ),
                 SizedBox(width: t.space3),
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          counter,
-                          key: const ValueKey('cpr-counter'),
-                          style: t.readout.copyWith(color: t.ink100),
-                        ),
-                        if (total != null)
-                          Text(
-                            ' z $total',
-                            style: t.chat.copyWith(
-                              color: t.ink200,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                      ],
+                // Not flexible: the counter hugs the right edge, the phase
+                // label shrinks first.
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      counter,
+                      key: const ValueKey('cpr-counter'),
+                      style: t.readout.copyWith(color: t.ink100),
                     ),
-                  ),
+                    if (total != null)
+                      Text(
+                        ' z $total',
+                        style: t.chat.copyWith(
+                          color: t.ink200,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                  ],
                 ),
               ],
             ),
