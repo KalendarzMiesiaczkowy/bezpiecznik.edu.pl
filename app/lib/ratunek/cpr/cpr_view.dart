@@ -205,10 +205,16 @@ class CprPinned extends ConsumerWidget {
                     style: t.title.copyWith(color: accent),
                   ),
                 ),
-                Text(
-                  counter,
-                  key: const ValueKey('cpr-counter'),
-                  style: t.readout.copyWith(color: accent),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      counter,
+                      key: const ValueKey('cpr-counter'),
+                      style: t.readout.copyWith(color: accent),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -226,8 +232,9 @@ class CprPinned extends ConsumerWidget {
                   child: Text(cfg.voice.change, style: t.label.copyWith(color: t.signalInk)),
                 ),
               ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              runSpacing: t.space1,
               children: [
                 Text(
                   'Czas ${formatCprElapsed(s.elapsed)}',

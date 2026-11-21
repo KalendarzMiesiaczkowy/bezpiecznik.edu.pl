@@ -81,9 +81,14 @@ class AudioCprSound implements CprSound {
     }
   }
 
-  Future<void> warmUp() async {
-    _click ??= await _pool(clickAsset, 4);
-    _breath ??= await _pool(breathAsset, 1);
+  Future<void>? _warm;
+
+  /// One shared warm-up: concurrent callers await the same future.
+  Future<void> warmUp() => _warm ??= _doWarmUp();
+
+  Future<void> _doWarmUp() async {
+    _click = await _pool(clickAsset, 4);
+    _breath = await _pool(breathAsset, 1);
   }
 
   @override
@@ -116,6 +121,7 @@ class AudioCprSound implements CprSound {
     }
     _click = null;
     _breath = null;
+    _warm = null;
   }
 }
 

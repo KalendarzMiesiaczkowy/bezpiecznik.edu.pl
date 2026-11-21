@@ -83,6 +83,19 @@ void main() {
     r.session.stop();
   });
 
+  test('rescuer change is not spoken while paused; due after resume', () {
+    final r = Rig();
+    r.session.start(rkoConfig(), 'adult');
+    r.advance(const Duration(seconds: 100));
+    r.session.pause();
+    r.advance(const Duration(seconds: 40));
+    expect(r.voice.spoken.where((s) => s == 'Zmiana ratownika'), isEmpty);
+    expect(r.session.snapshot!.changesDue, 1);
+    r.session.resume();
+    expect(r.voice.spoken.where((s) => s == 'Zmiana ratownika'), isEmpty);
+    r.session.stop();
+  });
+
   test('overlay elapsed follows the stopwatch once per second; stop clears everything', () {
     final r = Rig();
     r.session.start(rkoConfig(), 'adult');

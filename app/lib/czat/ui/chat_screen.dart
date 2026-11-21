@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../ratunek/cpr/cpr_view.dart';
 import '../../wspolne/theme/bz_theme.dart';
 import 'chat_controller.dart';
 import 'composer.dart';
@@ -76,7 +77,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   void _onState(ChatState? prev, ChatState next) {
     if (next.saveFailed) {
       ref.read(chatControllerProvider.notifier).ackSaveError();
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(const SnackBar(content: Text(saveErrorText)));
+      ScaffoldMessenger.maybeOf(context)
+          ?.showSnackBar(const SnackBar(content: Text(saveErrorText)));
     }
     final before = prev?.messages ?? const [];
     if (next.messages.length > before.length) {
@@ -87,7 +89,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (before.isEmpty || next.messages.isEmpty) return;
     final wasThinking = before.last.isThinking;
     final last = next.messages.last;
-    if (wasThinking && !last.isUser && !last.isThinking && last.answer != null) {
+    if (wasThinking &&
+        !last.isUser &&
+        !last.isThinking &&
+        last.answer != null) {
       // Spec: scroll to the START of the new answer, not to the end; when the
       // user is reading higher up, only offer the pill.
       if (_atBottom) {
@@ -126,21 +131,34 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           child: ListView.builder(
                             key: const Key('message-list'),
                             controller: _scroll,
-                            padding: EdgeInsets.fromLTRB(t.space4, listTop, t.space4, t.space4),
+                            padding: EdgeInsets.fromLTRB(
+                              t.space4,
+                              listTop,
+                              t.space4,
+                              t.space4,
+                            ),
                             itemCount: state.messages.length,
                             itemBuilder: (context, i) {
                               final m = state.messages[i];
                               return Padding(
                                 key: _keyFor(m.id),
-                                padding: EdgeInsets.only(top: i == 0 ? 0 : t.space5),
+                                padding: EdgeInsets.only(
+                                  top: i == 0 ? 0 : t.space5,
+                                ),
                                 child: MessageView(
                                   message: m,
-                                  onAnswerChanged: (a) => controller.updateAnswer(m.id, a),
+                                  onAnswerChanged: (a) =>
+                                      controller.updateAnswer(m.id, a),
                                 ),
                               );
                             },
                           ),
                         ),
+                ),
+                // Running RKO instructor stays pinned above the composer.
+                Padding(
+                  padding: EdgeInsets.fromLTRB(t.space4, 0, t.space4, t.space2),
+                  child: const CprPinnedHost(),
                 ),
                 Padding(
                   padding: EdgeInsets.fromLTRB(
@@ -183,7 +201,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               bottom: 0,
               child: Padding(
                 padding: EdgeInsets.only(
-                  bottom: 52 + t.space4 + t.space2 + MediaQuery.paddingOf(context).bottom,
+                  bottom:
+                      52 +
+                      t.space4 +
+                      t.space2 +
+                      MediaQuery.paddingOf(context).bottom,
                 ),
                 child: Center(
                   child: _JumpPill(
@@ -215,7 +237,12 @@ class _EmptyChat extends StatelessWidget {
       builder: (context, constraints) => SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(t.space4, topPadding, t.space4, t.space4),
         child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.maxHeight - topPadding - t.space4),
+          constraints: BoxConstraints(
+            minHeight: (constraints.maxHeight - topPadding - t.space4).clamp(
+              0.0,
+              double.infinity,
+            ),
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,

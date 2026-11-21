@@ -4,10 +4,14 @@ import 'package:bezpiecznik/czat/data/chat_store.dart';
 import 'package:bezpiecznik/czat/ui/answer_service.dart';
 import 'package:bezpiecznik/czat/ui/chat_controller.dart';
 import 'package:bezpiecznik/czat/ui/chat_screen.dart';
+import 'package:bezpiecznik/ratunek/cpr/cpr_session.dart';
+import 'package:bezpiecznik/ratunek/cpr/cpr_view.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+
+import '../../ratunek/cpr/cpr_fakes.dart';
 
 Future<ProviderContainer> pumpChat(WidgetTester tester, AnswerService service) async {
   final store = ChatStore.inMemory();
@@ -166,5 +170,46 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.textContaining('Nie wiem. Moje źródła tego nie opisują.'), findsOneWidget);
     expect(find.textContaining('112'), findsNothing);
+  });
+
+  testWidgets('pinned CPR host sits above the composer, no overflow at 360 dp / 1.5x', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final rig = Rig();
+    final store = ChatStore.inMemory();
+    final container = ProviderContainer(
+      overrides: [
+        answerServiceProvider.overrideWithValue(FakeAnswerService()),
+        chatStoreProvider.overrideWithValue(store),
+        cprSessionProvider.overrideWithValue(rig.session),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: buildBzTheme(),
+          builder: (c, child) => MediaQuery(
+            data: MediaQuery.of(c).copyWith(textScaler: const TextScaler.linear(1.5)),
+            child: child!,
+          ),
+          home: const ChatScreen(),
+        ),
+      ),
+    );
+    expect(find.byType(CprPinned), findsNothing);
+    rig.session.start(rkoConfig(), 'adult');
+    await tester.pump();
+    expect(find.byType(CprPinned), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.getBottomLeft(find.byType(CprPinned)).dy,
+      lessThanOrEqualTo(tester.getTopLeft(find.byType(TextField)).dy),
+    );
+    rig.session.stop();
+    await tester.pump();
+    expect(find.byType(CprPinned), findsNothing);
   });
 }

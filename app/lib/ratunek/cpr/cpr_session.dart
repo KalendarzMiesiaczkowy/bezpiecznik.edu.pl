@@ -158,7 +158,9 @@ class CprSession extends ChangeNotifier {
         case CprEventType.compressionsStart:
           if (!skipStartSpeech && voiceEnabled()) unawaited(voice.speak(cfg.voice.compress));
         case CprEventType.rescuerChange:
-          if (cfg.voice.change.isNotEmpty && voiceEnabled()) unawaited(voice.speak(cfg.voice.change));
+          // Silent while paused (pause() silenced voice); the engine keeps the
+          // change due, so the banner shows after resume.
+          if (cfg.voice.change.isNotEmpty && voiceEnabled() && snapshot?.phase != CprPhase.paused) unawaited(voice.speak(cfg.voice.change));
       }
     }
   }
