@@ -1,0 +1,2 @@
+# PDFs larger than 50 MB must stay out of git: list them here and record URL + sha256 in SOURCES.md.
+# (none at the moment - largest file is ~24 MB)

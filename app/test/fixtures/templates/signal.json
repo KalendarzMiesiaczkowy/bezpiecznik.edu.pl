@@ -1,0 +1,15 @@
+{
+  "_note": "Synthetic template fixture, not medical or safety content (verify:true, source: none).",
+  "verify": true,
+  "origin": "ai",
+  "panels": [
+    {
+      "type": "signal",
+      "modes": [
+        "sound",
+        "flashlight",
+        "screen"
+      ]
+    }
+  ]
+}

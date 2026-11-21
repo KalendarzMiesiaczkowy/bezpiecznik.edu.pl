@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "cards": [
+    {
+      "id": "rko",
+      "priority": 1,
+      "variants": [
+        "adult",
+        "child",
+        "infant"
+      ],
+      "phrases": [
+        "nie oddycha",
+        "nie oddychaja",
+        "brak oddechu",
+        "nie ma oddechu",
+        "bez oddechu",
+        "przestal oddychac",
+        "przestala oddychac",
+        "przestalo oddychac",
+        "nieprzytomny i nie oddycha",
+        "nieprzytomna i nie oddycha",
+        "zatrzymanie krazenia",
+        "zatrzymanie akcji serca",
+        "potrzebne rko",
+        "robic rko",
+        "reanimacja",
+        "nie ma krazenia",
+        "brak krazenia",
+        "brak tetna",
+        "nie ma tetna",
+        "serce nie bije",
+        "serce przestalo bic",
+        "masaz serca"
+      ]
+    },
+    {
+      "id": "choking",
+      "priority": 2,
+      "variants": [
+        "adult",
+        "child",
+        "infant"
+      ],
+      "phrases": [
+        "zadlawil",
+        "zadlawic",
+        "dlawi sie",
+        "sie dlawi",
+        "sie dusi",
+        "udlawil",
+        "zakrztusil",
+        "zakrztusila",
+        "dusi sie",
+        "udusil sie",
+        "cos utknelo w gardle",
+        "utknelo w gardle"
+      ]
+    },
+    {
+      "id": "bleeding",
+      "priority": 3,
+      "variants": [],
+      "phrases": [
+        "krwawi",
+        "krwawia",
+        "krwawienie",
+        "krwotok",
+        "=krew leci",
+        "=krew tryska",
+        "bardzo krwawi",
+        "mocno krwawi",
+        "zakrwawiony",
+        "broczy krwia",
+        "uciskac rane",
+        "tamowanie krwotoku"
+      ]
+    },
+    {
+      "id": "unconscious",
+      "priority": 5,
+      "variants": [],
+      "next_step": "check_breathing",
+      "phrases": [
+        "nieprzytomny",
+        "nieprzytomna",
+        "nieprzytomne",
+        "stracil przytomnosc",
+        "stracila przytomnosc",
+        "zemdlal",
+        "zemdlala",
+        "zaslabl",
+        "zaslablem",
+        "omdlenie",
+        "nie reaguje",
+        "nie odpowiada na pytania",
+        "lezy i sie nie rusza"
+      ]
+    },
+    {
+      "id": "aed",
+      "priority": 4,
+      "variants": [
+        "adult",
+        "child",
+        "infant"
+      ],
+      "phrases": [
+        "aed",
+        "defibrylator",
+        "defibrylatora",
+        "automatyczny defibrylator",
+        "defibrylacja",
+        "jak uzyc aed",
+        "jak uzyc defibrylatora",
+        "jak uzywac aed",
+        "jak uzywac defibrylatora",
+        "jak obslugiwac aed",
+        "jak obslugiwac defibrylator",
+        "uzyc aed",
+        "uzyc defibrylatora"
+      ]
+    }
+  ],
+  "variant_words": {
+    "child": [
+      "dziecko",
+      "dziecka",
+      "dziecku",
+      "dzieciak",
+      "dzieciaka",
+      "syn",
+      "syna",
+      "synek",
+      "synka",
+      "corka",
+      "corke",
+      "corki",
+      "coreczka",
+      "coreczke",
+      "kilkulatek",
+      "kilkulatka",
+      "dwulatek",
+      "trzylatek",
+      "czterolatek",
+      "pieciolatek",
+      "szesciolatek",
+      "chlopiec",
+      "dziewczynka",
+      "maluch",
+      "malucha",
+      "chlopczyk"
+    ],
+    "infant": [
+      "niemowle",
+      "niemowlaka",
+      "niemowlak",
+      "niemowlecia",
+      "bobas",
+      "bobasa",
+      "noworodek",
+      "noworodka",
+      "maluszek",
+      "maluszka",
+      "dzidzius",
+      "dzidziusia"
+    ]
+  }
+}

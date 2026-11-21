@@ -1,0 +1,10 @@
+{
+  "_note": "Synthetic template fixture, not medical or safety content (verify:true, source: none).",
+  "verify": true,
+  "origin": "rescue_card",
+  "panels": [
+    {
+      "type": "call"
+    }
+  ]
+}

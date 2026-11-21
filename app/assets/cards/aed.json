@@ -1,0 +1,392 @@
+{
+  "version": 1,
+  "id": "aed",
+  "name": "Jak użyć AED",
+  "priority": 4,
+  "verify": true,
+  "verify_note": "Parafraza wytycznych ERC/PRC 2025 do sprawdzenia przez ratownika medycznego lub instruktora PRC przed publikacją.",
+  "phrases": [
+    "aed",
+    "defibrylator",
+    "defibrylatora",
+    "automatyczny defibrylator",
+    "defibrylacja",
+    "jak uzyc aed",
+    "jak uzyc defibrylatora",
+    "jak uzywac aed",
+    "jak uzywac defibrylatora",
+    "jak obslugiwac aed",
+    "jak obslugiwac defibrylator",
+    "uzyc aed",
+    "uzyc defibrylatora"
+  ],
+  "variant_words": {
+    "child": [
+      "dziecko",
+      "dziecka",
+      "dziecku",
+      "dzieciak",
+      "dzieciaka",
+      "syn",
+      "syna",
+      "synek",
+      "synka",
+      "corka",
+      "corke",
+      "corki",
+      "coreczka",
+      "coreczke",
+      "kilkulatek",
+      "kilkulatka",
+      "dwulatek",
+      "trzylatek",
+      "czterolatek",
+      "pieciolatek",
+      "szesciolatek",
+      "chlopiec",
+      "dziewczynka",
+      "maluch",
+      "malucha",
+      "chlopczyk"
+    ],
+    "infant": [
+      "niemowle",
+      "niemowlaka",
+      "niemowlak",
+      "niemowlecia",
+      "bobas",
+      "bobasa",
+      "noworodek",
+      "noworodka",
+      "maluszek",
+      "maluszka",
+      "dzidzius",
+      "dzidziusia"
+    ]
+  },
+  "panels": [
+    {
+      "type": "steps",
+      "title": "Jak użyć AED",
+      "read_aloud": true,
+      "variants": [
+        {
+          "id": "adult",
+          "label": "Dorosły",
+          "items": [
+            {
+              "text": "Każdy może użyć AED, nawet bez szkolenia.",
+              "source_id": "erc-2025-kluczowe-bls-s1-f101"
+            },
+            {
+              "text": "AED nie wyzwoli wyładowania, jeśli nie wykryje odpowiednich warunków.",
+              "source_id": "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f101"
+            },
+            {
+              "text": "Jeśli jest więcej świadków, wyślij kogoś po najbliższe AED.",
+              "source_id": "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f102"
+            },
+            {
+              "text": "Użyj AED natychmiast, gdy tylko je masz.",
+              "source_id": "erc-2025-bls-s7-f101"
+            },
+            {
+              "text": "Otwórz obudowę AED, jeśli ją ma.",
+              "source_id": "erc-2025-bls-s7-f102"
+            },
+            {
+              "text": "Niektóre AED włączają się automatycznie po otwarciu.",
+              "source_id": "erc-2025-bls-s7-f102"
+            },
+            {
+              "text": "Jeśli nie, znajdź przycisk zasilania i włącz urządzenie.",
+              "source_id": "erc-2025-bls-s7-f102"
+            },
+            {
+              "text": "Postępuj zgodnie z poleceniami głosowymi i wizualnymi AED.",
+              "source_id": "erc-2025-bls-s7-f103"
+            },
+            {
+              "text": "Przyklej elektrody na odsłoniętą klatkę piersiową zgodnie z instrukcją na AED lub na elektrodach.",
+              "source_id": "erc-2025-bls-s7-f104"
+            },
+            {
+              "text": "Jedną elektrodę przyklej poniżej prawego obojczyka, przy prawym brzegu mostka, drugą poniżej lewej pachy.",
+              "source_id": "erc-2025-bls-s24-f101"
+            },
+            {
+              "text": "W miarę możliwości unikaj przyklejania elektrod na tkance gruczołu piersiowego.",
+              "source_id": "erc-2025-bls-s24-f102"
+            },
+            {
+              "text": "Jeśli biustonosz utrudnia przyklejenie elektrod, przesuń go.",
+              "source_id": "erc-2025-bls-s25-f101"
+            },
+            {
+              "text": "Jeśli jest więcej niż jeden ratownik, kontynuuj RKO podczas naklejania elektrod.",
+              "source_id": "erc-2025-bls-s7-f105"
+            },
+            {
+              "text": "Upewnij się, że nikt nie dotyka poszkodowanego, gdy AED analizuje rytm serca.",
+              "source_id": "erc-2025-bls-s7-f106"
+            },
+            {
+              "text": "Jeśli AED wskazuje defibrylację, upewnij się, że nikt nie dotyka poszkodowanego.",
+              "source_id": "erc-2025-bls-s7-f107"
+            },
+            {
+              "text": "W pełni automatyczne AED wykonają defibrylację same.",
+              "source_id": "erc-2025-bls-s7-f108"
+            },
+            {
+              "text": "W półautomatycznym AED naciśnij przycisk defibrylacji.",
+              "source_id": "erc-2025-bls-s7-f108"
+            },
+            {
+              "text": "Natychmiast po defibrylacji wznów uciśnięcia klatki piersiowej.",
+              "source_id": "erc-2025-bls-s7-f109"
+            },
+            {
+              "text": "Jeśli defibrylacja nie jest wskazana, natychmiast wznów RKO od uciśnięć klatki piersiowej.",
+              "source_id": "erc-2025-bls-s7-f110"
+            },
+            {
+              "text": "Kontynuuj RKO zgodnie z instrukcjami AED.",
+              "source_id": "erc-2025-bls-s7-f111"
+            },
+            {
+              "text": "AED po określonym czasie zaleci przerwę w RKO i ponownie zanalizuje rytm serca.",
+              "source_id": "erc-2025-bls-s7-f111",
+              "card_link": {
+                "label": "RKO",
+                "card_id": "rko"
+              }
+            }
+          ]
+        },
+        {
+          "id": "child",
+          "label": "Dziecko",
+          "items": [
+            {
+              "text": "Każdy może użyć AED, nawet bez szkolenia.",
+              "source_id": "erc-2025-kluczowe-bls-s1-f101"
+            },
+            {
+              "text": "AED nie wyzwoli wyładowania, jeśli nie wykryje odpowiednich warunków.",
+              "source_id": "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f101"
+            },
+            {
+              "text": "Jeśli jest więcej świadków, wyślij kogoś po najbliższe AED.",
+              "source_id": "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f102"
+            },
+            {
+              "text": "Użyj AED natychmiast, gdy tylko je masz.",
+              "source_id": "erc-2025-bls-s7-f101"
+            },
+            {
+              "text": "Otwórz obudowę AED, jeśli ją ma.",
+              "source_id": "erc-2025-bls-s7-f102"
+            },
+            {
+              "text": "Niektóre AED włączają się automatycznie po otwarciu.",
+              "source_id": "erc-2025-bls-s7-f102"
+            },
+            {
+              "text": "Jeśli nie, znajdź przycisk zasilania i włącz urządzenie.",
+              "source_id": "erc-2025-bls-s7-f102"
+            },
+            {
+              "text": "Postępuj zgodnie z poleceniami głosowymi i wizualnymi AED.",
+              "source_id": "erc-2025-bls-s7-f103"
+            },
+            {
+              "text": "Postępuj według instrukcji AED.",
+              "source_id": "erc-2025-podsumowanie-s68-f113"
+            },
+            {
+              "text": "Przyklej elektrody, minimalizując przerwy w RKO.",
+              "source_id": "erc-2025-podsumowanie-s68-f113"
+            },
+            {
+              "text": "Jedna osoba nakleja elektrody, druga prowadzi RKO.",
+              "source_id": "erc-2025-podsumowanie-s68-f113"
+            },
+            {
+              "text": "Niemowlę lub dziecko poniżej 25 kg (do ok. 8. r.ż.): włącz tryb pediatryczny, jeśli AED go ma.",
+              "source_id": "erc-2025-podsumowanie-s68-f111"
+            },
+            {
+              "text": "Większe dziecko i nastolatek: standardowy tryb dla dorosłych.",
+              "source_id": "erc-2025-podsumowanie-s68-f111"
+            },
+            {
+              "text": "Jeśli AED nie ma trybu pediatrycznego, stosuj tryb dla dorosłych.",
+              "source_id": "erc-2025-podsumowanie-s68-f111"
+            },
+            {
+              "text": "Elektrody w rozmiarze dla dorosłych, dziecko poniżej 25 kg: jedna z przodu, tuż na lewo od mostka.",
+              "source_id": "erc-2025-podsumowanie-s68-f114"
+            },
+            {
+              "text": "Druga elektroda na plecach, na środku, między łopatkami.",
+              "source_id": "erc-2025-podsumowanie-s68-f114"
+            },
+            {
+              "text": "Dziecko powyżej 25 kg i nastolatek: jedna elektroda poniżej prawego obojczyka, druga pod lewą pachą.",
+              "source_id": "erc-2025-podsumowanie-s68-f115"
+            },
+            {
+              "text": "U nastolatka, przy ułożeniu przednio-tylnym, unikaj elektrody na gruczole piersiowym.",
+              "source_id": "erc-2025-podsumowanie-s68-f116"
+            },
+            {
+              "text": "Jeśli jesteś sam, priorytetem jest wezwanie pogotowia i RKO, a nie przynoszenie AED.",
+              "source_id": "erc-2025-podsumowanie-s68-f102"
+            },
+            {
+              "text": "Nie dotykaj dziecka, gdy AED analizuje rytm.",
+              "source_id": "erc-2025-podsumowanie-s68-f112"
+            },
+            {
+              "text": "Po defibrylacji natychmiast wznów uciśnięcia klatki piersiowej.",
+              "source_id": "erc-2025-podsumowanie-s68-f112"
+            },
+            {
+              "text": "Kontynuuj RKO zgodnie z instrukcjami AED.",
+              "source_id": "erc-2025-bls-s7-f111",
+              "card_link": {
+                "label": "RKO",
+                "card_id": "rko"
+              }
+            }
+          ]
+        },
+        {
+          "id": "infant",
+          "label": "Niemowlę",
+          "items": [
+            {
+              "text": "Każdy może użyć AED, nawet bez szkolenia.",
+              "source_id": "erc-2025-kluczowe-bls-s1-f101"
+            },
+            {
+              "text": "AED nie wyzwoli wyładowania, jeśli nie wykryje odpowiednich warunków.",
+              "source_id": "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f101"
+            },
+            {
+              "text": "Jeśli jest więcej świadków, wyślij kogoś po najbliższe AED.",
+              "source_id": "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f102"
+            },
+            {
+              "text": "Użyj AED natychmiast, gdy tylko je masz.",
+              "source_id": "erc-2025-bls-s7-f101"
+            },
+            {
+              "text": "Otwórz obudowę AED, jeśli ją ma.",
+              "source_id": "erc-2025-bls-s7-f102"
+            },
+            {
+              "text": "Niektóre AED włączają się automatycznie po otwarciu.",
+              "source_id": "erc-2025-bls-s7-f102"
+            },
+            {
+              "text": "Jeśli nie, znajdź przycisk zasilania i włącz urządzenie.",
+              "source_id": "erc-2025-bls-s7-f102"
+            },
+            {
+              "text": "Postępuj zgodnie z poleceniami głosowymi i wizualnymi AED.",
+              "source_id": "erc-2025-bls-s7-f103"
+            },
+            {
+              "text": "Postępuj według instrukcji AED.",
+              "source_id": "erc-2025-podsumowanie-s68-f113"
+            },
+            {
+              "text": "Przyklej elektrody, minimalizując przerwy w RKO.",
+              "source_id": "erc-2025-podsumowanie-s68-f113"
+            },
+            {
+              "text": "Jedna osoba nakleja elektrody, druga prowadzi RKO.",
+              "source_id": "erc-2025-podsumowanie-s68-f113"
+            },
+            {
+              "text": "Niemowlę lub dziecko poniżej 25 kg (do ok. 8. r.ż.): włącz tryb pediatryczny, jeśli AED go ma.",
+              "source_id": "erc-2025-podsumowanie-s68-f111"
+            },
+            {
+              "text": "Większe dziecko i nastolatek: standardowy tryb dla dorosłych.",
+              "source_id": "erc-2025-podsumowanie-s68-f111"
+            },
+            {
+              "text": "Jeśli AED nie ma trybu pediatrycznego, stosuj tryb dla dorosłych.",
+              "source_id": "erc-2025-podsumowanie-s68-f111"
+            },
+            {
+              "text": "Elektrody w rozmiarze dla dorosłych, dziecko poniżej 25 kg: jedna z przodu, tuż na lewo od mostka.",
+              "source_id": "erc-2025-podsumowanie-s68-f114"
+            },
+            {
+              "text": "Druga elektroda na plecach, na środku, między łopatkami.",
+              "source_id": "erc-2025-podsumowanie-s68-f114"
+            },
+            {
+              "text": "Dziecko powyżej 25 kg i nastolatek: jedna elektroda poniżej prawego obojczyka, druga pod lewą pachą.",
+              "source_id": "erc-2025-podsumowanie-s68-f115"
+            },
+            {
+              "text": "U nastolatka, przy ułożeniu przednio-tylnym, unikaj elektrody na gruczole piersiowym.",
+              "source_id": "erc-2025-podsumowanie-s68-f116"
+            },
+            {
+              "text": "Jeśli jesteś sam, priorytetem jest wezwanie pogotowia i RKO, a nie przynoszenie AED.",
+              "source_id": "erc-2025-podsumowanie-s68-f102"
+            },
+            {
+              "text": "Nie dotykaj dziecka, gdy AED analizuje rytm.",
+              "source_id": "erc-2025-podsumowanie-s68-f112"
+            },
+            {
+              "text": "Po defibrylacji natychmiast wznów uciśnięcia klatki piersiowej.",
+              "source_id": "erc-2025-podsumowanie-s68-f112"
+            },
+            {
+              "text": "Kontynuuj RKO zgodnie z instrukcjami AED.",
+              "source_id": "erc-2025-bls-s7-f111",
+              "card_link": {
+                "label": "RKO",
+                "card_id": "rko"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "source_ids": [
+    "erc-2025-kluczowe-bls-s1-f101",
+    "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f101",
+    "erc-2025-broszura-resuscytacja-dla-kazdego-s27-f102",
+    "erc-2025-bls-s7-f101",
+    "erc-2025-bls-s7-f102",
+    "erc-2025-bls-s7-f103",
+    "erc-2025-bls-s7-f104",
+    "erc-2025-bls-s24-f101",
+    "erc-2025-bls-s24-f102",
+    "erc-2025-bls-s25-f101",
+    "erc-2025-bls-s7-f105",
+    "erc-2025-bls-s7-f106",
+    "erc-2025-bls-s7-f107",
+    "erc-2025-bls-s7-f108",
+    "erc-2025-bls-s7-f109",
+    "erc-2025-bls-s7-f110",
+    "erc-2025-bls-s7-f111",
+    "erc-2025-podsumowanie-s68-f113",
+    "erc-2025-podsumowanie-s68-f111",
+    "erc-2025-podsumowanie-s68-f114",
+    "erc-2025-podsumowanie-s68-f115",
+    "erc-2025-podsumowanie-s68-f116",
+    "erc-2025-podsumowanie-s68-f102",
+    "erc-2025-podsumowanie-s68-f112"
+  ]
+}

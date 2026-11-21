@@ -1,0 +1,138 @@
+{
+  "version": 1,
+  "id": "unconscious",
+  "name": "Utrata przytomności",
+  "priority": 5,
+  "verify": true,
+  "verify_note": "Parafraza wytycznych ERC 2025 do sprawdzenia przez ratownika medycznego lub instruktora PRC przed publikacją.",
+  "phrases": [
+    "nieprzytomny",
+    "nieprzytomna",
+    "nieprzytomne",
+    "stracil przytomnosc",
+    "stracila przytomnosc",
+    "zemdlal",
+    "zemdlala",
+    "zaslabl",
+    "zaslablem",
+    "omdlenie",
+    "nie reaguje",
+    "nie odpowiada na pytania",
+    "lezy i sie nie rusza"
+  ],
+  "panels": [
+    {
+      "type": "steps",
+      "title": "Utrata przytomności",
+      "read_aloud": true,
+      "items": [
+        {
+          "text": "Udrożnij drogi oddechowe i sprawdź oddech: patrz, słuchaj, czuj do 10 s",
+          "source_id": "erc-2025-pierwsza-pomoc-algorytmy-s3-f101",
+          "card_link": {
+            "label": "Nie oddycha → RKO",
+            "card_id": "rko"
+          }
+        },
+        {
+          "text": "Prawie brak oddechu albo nieregularne, powolne i głośne westchnienia oznaczają brak prawidłowego oddechu.",
+          "source_id": "erc-2025-bls-algorytmy-s3-f105"
+        },
+        {
+          "text": "Jeśli osoba oddycha prawidłowo, nie ma urazu i nie wymaga RKO, ułóż ją w pozycji bezpiecznej (na boku).",
+          "source_id": "erc-2025-pierwsza-pomoc-s9-f101"
+        },
+        {
+          "text": "Przy oddechu agonalnym (nieprawidłowym) nie układaj na boku – rozpocznij RKO.",
+          "source_id": "erc-2025-pierwsza-pomoc-s18-f101",
+          "card_link": {
+            "label": "Nie oddycha → RKO",
+            "card_id": "rko"
+          }
+        },
+        {
+          "text": "Po urazie zostaw poszkodowanego leżącego na plecach.",
+          "source_id": "erc-2025-pierwsza-pomoc-s18-f101"
+        },
+        {
+          "text": "Upewnij się, że nogi poszkodowanego są wyprostowane.",
+          "source_id": "erc-2025-pierwsza-pomoc-s18-f102"
+        },
+        {
+          "text": "Rękę bliższą Tobie ułóż pod kątem prostym względem tułowia, wyprostowaną lub zgiętą.",
+          "source_id": "erc-2025-pierwsza-pomoc-s18-f102"
+        },
+        {
+          "text": "Drugą rękę (dalszą) skrzyżuj przez klatkę piersiową poszkodowanego.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f101"
+        },
+        {
+          "text": "Przyłóż grzbiet jego dłoni do jego policzka po Twojej stronie.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f101"
+        },
+        {
+          "text": "Drugą ręką chwyć dalszą nogę tuż nad kolanem i unieś kolano, zostawiając stopę na podłożu.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f102"
+        },
+        {
+          "text": "Przyciskając jedną ręką dłoń do policzka, drugą pociągnij do siebie zgiętą nogę.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f103"
+        },
+        {
+          "text": "Ostrożnie przetocz poszkodowanego na bok.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f103"
+        },
+        {
+          "text": "Nogę leżącą na górze ułóż tak, aby biodro i kolano były zgięte pod kątem prostym.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f104"
+        },
+        {
+          "text": "Ostrożnie odchyl głowę do tyłu, aby drogi oddechowe były drożne.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f105"
+        },
+        {
+          "text": "W razie potrzeby popraw dłoń pod policzkiem, aby głowa była odchylona i zwrócona do podłoża.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f105"
+        },
+        {
+          "text": "Dzięki temu wydzielina może wypływać z jamy ustnej.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f105"
+        },
+        {
+          "text": "Regularnie sprawdzaj, czy poszkodowany prawidłowo oddycha.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f106"
+        },
+        {
+          "text": "Tylko jeśli to konieczne do wezwania pomocy, możesz go zostawić bez nadzoru.",
+          "source_id": "erc-2025-pierwsza-pomoc-s19-f106"
+        },
+        {
+          "text": "Jeśli oddech, drożność dróg oddechowych lub przytomność się pogarszają, ułóż poszkodowanego na plecach.",
+          "source_id": "erc-2025-pierwsza-pomoc-s18-f103"
+        },
+        {
+          "text": "W razie potrzeby rozpocznij RKO.",
+          "source_id": "erc-2025-pierwsza-pomoc-s18-f103",
+          "card_link": {
+            "label": "Nie oddycha → RKO",
+            "card_id": "rko"
+          }
+        }
+      ]
+    }
+  ],
+  "source_ids": [
+    "erc-2025-pierwsza-pomoc-algorytmy-s3-f101",
+    "erc-2025-bls-algorytmy-s3-f105",
+    "erc-2025-pierwsza-pomoc-s9-f101",
+    "erc-2025-pierwsza-pomoc-s18-f101",
+    "erc-2025-pierwsza-pomoc-s18-f102",
+    "erc-2025-pierwsza-pomoc-s19-f101",
+    "erc-2025-pierwsza-pomoc-s19-f102",
+    "erc-2025-pierwsza-pomoc-s19-f103",
+    "erc-2025-pierwsza-pomoc-s19-f104",
+    "erc-2025-pierwsza-pomoc-s19-f105",
+    "erc-2025-pierwsza-pomoc-s19-f106",
+    "erc-2025-pierwsza-pomoc-s18-f103"
+  ]
+}

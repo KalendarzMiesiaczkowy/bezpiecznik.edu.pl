@@ -1,1 +1,11 @@
 *.zip
+# Generated artifacts (rebuilt by tools/), never committed
+app/assets/generated/*
+!app/assets/generated/.gitkeep
+*.mbtiles
+*.litertlm
+*.gguf
+*.osm.pbf
+dist/
+__pycache__/
+.venv/
