@@ -18,7 +18,7 @@ const mbtilesPlaceholder = '{MBTILES_PATH}';
 const glyphsPlaceholder = '{GLYPHS_DIR}';
 
 /// Bump when the bundled tiles or glyphs change: forces a fresh copy.
-const mapAssetsVersion = 1;
+const mapAssetsVersion = 2;
 
 const _markerName = '.installed.json';
 const _chunkSize = 1024 * 1024;

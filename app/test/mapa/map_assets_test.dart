@@ -184,4 +184,55 @@ void main() {
       expect(await inst.isInstalled(), isFalse);
     });
   });
+
+  group('bundled style and glyphs', () {
+    final style = jsonDecode(File('assets/map/style.json').readAsStringSync())
+        as Map<String, dynamic>;
+    final glyphDirs = Directory('assets/map/glyphs')
+        .listSync()
+        .whereType<Directory>()
+        .map((d) => p.basename(d.path))
+        .toSet();
+
+    // First field of the first fontstack message of a glyph PBF (its name).
+    String stackName(File f) {
+      final b = f.readAsBytesSync();
+      // 0x0A len (fontstack) | 0x0A len name ...
+      expect(b[0], 0x0A);
+      var i = 1;
+      while (b[i] & 0x80 != 0) {
+        i++;
+      }
+      i++;
+      expect(b[i], 0x0A);
+      final len = b[i + 1];
+      return utf8.decode(b.sublist(i + 2, i + 2 + len));
+    }
+
+    test('every symbol layer has a text-field, visible, with bundled fonts', () {
+      final symbols = (style['layers'] as List)
+          .cast<Map<String, dynamic>>()
+          .where((l) => l['type'] == 'symbol')
+          .toList();
+      expect(symbols, isNotEmpty);
+      for (final l in symbols) {
+        final layout = l['layout'] as Map<String, dynamic>;
+        expect(layout['text-field'], isNotNull, reason: l['id'] as String);
+        expect(layout['visibility'], isNot('none'), reason: l['id'] as String);
+        for (final font in layout['text-font'] as List) {
+          expect(glyphDirs, contains(font), reason: l['id'] as String);
+        }
+      }
+    });
+
+    test('glyph PBF fontstack name equals its directory name', () {
+      for (final dir in glyphDirs) {
+        final files = Directory('assets/map/glyphs/$dir').listSync().whereType<File>();
+        expect(files, isNotEmpty);
+        for (final f in files) {
+          expect(stackName(f), dir, reason: f.path);
+        }
+      }
+    });
+  });
 }
