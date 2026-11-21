@@ -2,6 +2,9 @@ import 'package:bezpiecznik/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:bezpiecznik/profil/profile_store.dart';
+
+import 'support/harness.dart';
 
 /// Shell E2E: opens every screen and goes back with the in-app Back button.
 /// Run: `flutter test integration_test/shell_test.dart -d emulator-5554`.
@@ -9,8 +12,14 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('navigate to every screen and back', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: BezpiecznikApp()));
-    await tester.pumpAndSettle();
+    final profile = await onboardedProfileStore();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [profileStoreProvider.overrideWithValue(profile)],
+        child: const BezpiecznikApp(),
+      ),
+    );
+    await pumpUntil(tester, find.text('Co się dzieje?'));
 
     final menu = find.bySemanticsLabel('Menu');
     final map = find.bySemanticsLabel('Mapa');

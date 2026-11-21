@@ -3,6 +3,9 @@ import 'package:bezpiecznik/mapa/map_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:bezpiecznik/profil/profile_store.dart';
+
+import 'support/harness.dart';
 
 /// Map E2E (gate h2): chat -> island map button -> map (first run copies the
 /// MBTiles, up to 30 s) -> attribution visible. Street labels in airplane mode
@@ -12,8 +15,14 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('open the map from the island and see the attribution', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: BezpiecznikApp()));
-    await tester.pumpAndSettle();
+    final profile = await onboardedProfileStore();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [profileStoreProvider.overrideWithValue(profile)],
+        child: const BezpiecznikApp(),
+      ),
+    );
+    await pumpUntil(tester, find.bySemanticsLabel('Mapa'));
 
     await tester.tap(find.bySemanticsLabel('Mapa'));
     await tester.pump();
