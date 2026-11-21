@@ -335,4 +335,56 @@ void main() {
     expect(top, greaterThanOrEqualTo(bandBottom - 0.5));
     expect(top, lessThan(bandBottom + 60));
   });
+
+  testWidgets('delayed 2nd tall answer lands at its start; no pill', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final service = FakeAnswerService(
+      script: (q, c) async* {
+        yield const AnswerThinking();
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+        yield AnswerReady(AssistantAnswer.fromJson({
+          'origin': 'ai',
+          'panels': [
+            {
+              'type': 'steps',
+              'title': 'Teraz $q',
+              'items': [
+                for (var i = 0; i < 25; i++)
+                  {'text': 'Krok $q-$i', 'source_id': 'fake-s1-f1'},
+              ],
+            },
+          ],
+          'sources': {
+            'fake-s1-f1': {
+              'source_id': 'fake-s1-f1',
+              'doc_id': 'fake',
+              'doc_title': 'Dokument przykładowy',
+              'doc_short': 'Przykład',
+              'page_label': '14',
+              'pdf_page': 16,
+              'text': 'Przykładowy fragment źródła.',
+            },
+          },
+        }));
+      },
+    );
+    await pumpChat(tester, service);
+    for (final q in ['A', 'B']) {
+      await tester.enterText(find.byKey(const Key('composer-field')), q);
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('composer-send')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 1500));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    final bandBottom = 48 + 48 + BzTokens.dark.space2;
+    final top = tester.getTopLeft(find.text('Teraz B')).dy;
+    expect(top, greaterThanOrEqualTo(bandBottom - 0.5));
+    expect(top, lessThan(bandBottom + 60));
+    expect(find.byKey(const Key('jump-to-answer')), findsNothing);
+  });
 }

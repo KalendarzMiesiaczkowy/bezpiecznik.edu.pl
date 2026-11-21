@@ -29,6 +29,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _keys = <String, GlobalKey>{};
   bool _atBottom = true;
 
+  /// True from sending a question until the user drags the list themselves:
+  /// the answer then scrolls to its start. Lazy-list extents are estimates, so
+  /// `_atBottom` alone can be spuriously false after the question's own
+  /// scroll-to-end (BG83).
+  bool _follow = true;
+  String? _chatId;
+
   /// Height of the band covered by the island/SOS; set in build.
   double _listTop = 0;
 
@@ -44,15 +51,29 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   GlobalKey _keyFor(String id) => _keys.putIfAbsent(id, GlobalKey.new);
 
   bool _onScroll(ScrollNotification n) {
+    if (n is ScrollStartNotification && n.dragDetails != null) _follow = false;
     final m = n.metrics;
     final atBottom = m.pixels >= m.maxScrollExtent - 80;
-    if (atBottom != _atBottom || (atBottom && _unseenAnswerId != null)) {
+    final seen = _unseenAnswerId != null &&
+        (atBottom || !_endBelowViewport(_unseenAnswerId!));
+    if (atBottom != _atBottom || seen) {
       setState(() {
         _atBottom = atBottom;
-        if (atBottom) _unseenAnswerId = null;
+        if (seen) _unseenAnswerId = null;
       });
     }
     return false;
+  }
+
+  /// Whether the end of message [id] is below the visible list (unbuilt items
+  /// count as below).
+  bool _endBelowViewport(String id) {
+    final box = _keys[id]?.currentContext?.findRenderObject();
+    if (box == null || !_scroll.hasClients) return true;
+    final viewport = RenderAbstractViewport.maybeOf(box);
+    if (viewport == null) return true;
+    final end = viewport.getOffsetToReveal(box, 1).offset;
+    return end > _scroll.position.pixels + 1;
   }
 
   void _toEnd() {
@@ -111,6 +132,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ScaffoldMessenger.maybeOf(context)
           ?.showSnackBar(const SnackBar(content: Text(saveErrorText)));
     }
+    if (next.chatId != _chatId) {
+      // Another chat (or a fresh one): drop state tied to the previous list.
+      _chatId = next.chatId;
+      if (prev != null && prev.chatId != next.chatId && _unseenAnswerId != null) {
+        setState(() => _unseenAnswerId = null);
+      }
+    }
     final before = prev?.messages ?? const [];
     if (next.messages.length == before.length + 1 &&
         before.isNotEmpty &&
@@ -125,6 +153,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
     if (next.messages.length > before.length) {
       // A new question: show it with the thinking bubble.
+      _follow = true;
       _toEnd();
       return;
     }
@@ -137,10 +166,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         last.answer != null) {
       // Spec: scroll to the START of the new answer, not to the end; when the
       // user is reading higher up, only offer the pill.
-      if (_atBottom) {
+      if (_follow || _atBottom) {
         _toStartOf(last.id);
       } else {
-        setState(() => _unseenAnswerId = last.id);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _endBelowViewport(last.id)) {
+            setState(() => _unseenAnswerId = last.id);
+          }
+        });
       }
     }
   }
