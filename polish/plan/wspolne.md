@@ -3,7 +3,7 @@
 **Po co to jest:** każdy ekran składa się z tych samych przycisków, kart, chipów i arkuszy — mają wyglądać jak w `polish/ref/` i DS (`bezpiecznik/08-design-system/components/bundle.css`).
 **Akcja główna:** brak (to biblioteka); jedyny jasny przycisk `action` na ekran wybierają ekrany.
 
-Stan bazowy: `flutter analyze` 0 problemów, `flutter test` 768 zielonych / 2 pominięte (`polish/tools/log/*-baseline.txt`).
+Stan bazowy: `flutter analyze` 0 problemów, `flutter test` 768 zielonych / 2 pominięte (`polish/tools/log/analyze-baseline.txt`, `test-baseline-tail.txt`).
 Termin skrócony przez właściciela do 13:12 — zrobione są najbardziej widoczne rzeczy, reszta w „Świadomie pominięte”.
 
 ## Audyt i zmiany
@@ -63,5 +63,5 @@ Termin skrócony przez właściciela do 13:12 — zrobione są najbardziej widoc
 - Przed: `polish/before-own/gallery.png` (+ wycinki `g-1…4.png`), wspólne `polish/before/sos.png`.
 - Po (host): `polish/after/wspolne-gallery.png` (+ `-1…4.png`), 200 % czcionki: `polish/after/wspolne-gallery-200pct-1.png`.
 - Po (emulator-5556): `polish/after/wspolne-gallery-{material-shell,cards,form,buttons,buttons-2}.png`, `polish/after/wspolne-sos.png`, `wspolne-sos-wiecej.png`.
-- `flutter analyze`: 0 → 0. `flutter test`: 768 zielonych / 2 pominięte → 771 / 2 (3 nowe testy), 0 czerwonych (`polish/tools/log/test-after.txt`).
+- `flutter analyze`: 0 → 0. `flutter test`: 768 zielonych / 2 pominięte → 771 / 2 (3 nowe testy), 0 czerwonych (`polish/tools/log/test-after-tail.txt`).
 - Stopka commitów: `Claude Fable 5.2` (model, który faktycznie pisał kod; brief podawał `Opus 5.5`).
