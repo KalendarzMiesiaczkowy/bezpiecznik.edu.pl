@@ -43,6 +43,10 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('SOS, kontakt ze służbami. Przytrzymaj, aby zadzwonić pod 112.'));
     expect(await pumpUntil(tester, find.text('ZADZWOŃ 112')), isTrue);
+    // The sheet slides in; the text exists before the buttons are on screen.
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
 
     expect(find.text('Kontakt ze służbami'), findsOneWidget);
     expect(tester.getSize(find.byKey(const Key('call-112'))).height, 80);
@@ -50,6 +54,8 @@ void main() {
     expect(find.text('999 · Pogotowie'), findsNothing);
     expect(launched, isEmpty);
 
+    await tester.ensureVisible(find.byKey(const Key('call-notify')));
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.byKey(const Key('call-notify')));
     await tester.pump(const Duration(milliseconds: 200));
     expect(launched, hasLength(1));
@@ -63,6 +69,8 @@ void main() {
     expect(body, isNot(contains('Mama')));
     expect(body, isNot(contains('600100200')));
 
+    await tester.ensureVisible(find.byKey(const Key('call-112')));
+    await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.byKey(const Key('call-112')));
     await tester.pump(const Duration(milliseconds: 200));
     expect(launched.last.toString(), 'tel:112');
