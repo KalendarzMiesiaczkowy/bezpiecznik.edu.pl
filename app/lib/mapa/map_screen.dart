@@ -10,6 +10,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../wspolne/shell/shell_icon_button.dart';
 import '../wspolne/shell/sos_button.dart';
+import '../wspolne/theme/bz_buttons.dart';
 import '../wspolne/theme/bz_theme.dart';
 import 'kompas/compass_screen.dart';
 import 'gps_status.dart';
@@ -37,7 +38,7 @@ const openPhoneSettingsText = 'Otwórz ustawienia telefonu'; // spec Stany: brak
 const recenterLabel = 'Wyśrodkuj mapę na mojej pozycji'; // verify:true
 const layersButtonText = 'Warstwy'; // spec: przycisk Warstwy (ekran-2-mapa.md)
 const preparingTitle = 'Przygotowuję mapę…'; // verify:true
-const preparingBody = 'Kopiuję mapę na telefon. Dzieje się to tylko raz. Potem mapa działa bez internetu.'; // verify:true
+const preparingBody = 'Dzieje się to tylko raz. Potem mapa działa bez internetu.'; // verify:true
 const installErrorText = 'Nie mogę przygotować mapy.'; // verify:true
 const installNoSpaceText = 'Za mało miejsca w telefonie. Mapa potrzebuje ok. 110 MB. Zwolnij miejsce i spróbuj ponownie.';
 const retryText = 'Spróbuj ponownie'; // verify:true
@@ -364,7 +365,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: context.bz.bg100,
       builder: (sheetContext) => PointSheet(
         point: p,
         fromLat: pos?.latitude,
@@ -403,7 +403,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (!mounted) return;
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: context.bz.bg200,
       builder: (sheetContext) => NearestList(
         points: points,
         fromLat: pos?.latitude,
@@ -421,17 +420,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final bz = context.bz;
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: bz.bg200,
       builder: (sheetContext) => StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(bz.space4, bz.space4, bz.space4, bz.space2),
+            padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, bz.space5),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(layersButtonText, style: bz.title), // map.layers.title
-                SizedBox(height: bz.space2),
+                SizedBox(height: bz.space3),
                 ShelterLayerToggle(
                   on: _sheltersOn,
                   onChanged: (v) {
@@ -528,18 +526,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           if (access.hasValue) ...[
             Positioned(
               // Below Back (left) and SOS (right), never over them.
-              top: topInset + SosButton.size + 8,
-              left: 16,
-              right: 16,
+              top: topInset + SosButton.size + bz.space2,
+              left: bz.space4,
+              right: bz.space4,
               child: _notice(access.requireValue, live, fix, startAt),
             ),
           ],
           Positioned(
             // Spec layout: [Warstwy] above [◎] (right-aligned), then the
             // full-width "Najbliższy schron" button, then the attribution.
-            left: 16,
-            right: 16,
-            bottom: 16 + bottom,
+            left: bz.space4,
+            right: bz.space4,
+            bottom: bz.space4 + bottom,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -551,7 +549,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       LayersButton(onPressed: _showLayers),
-                      SizedBox(height: bz.space2 + 2),
+                      SizedBox(height: bz.space2),
                       RecenterButton(
                         enabled: granted && live,
                         active: granted && live && _tracking,
@@ -560,15 +558,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: bz.space2),
+                SizedBox(height: bz.space3),
                 _detailIndicator(),
-                SizedBox(height: bz.space2),
-                ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: bz.minTouchTarget),
-                  child: FilledButton(
-                    onPressed: _showNearest,
-                    child: const Text(nearestButtonText),
-                  ),
+                // The one primary action of the screen.
+                BzButton(
+                  label: nearestButtonText,
+                  icon: LucideIcons.shield,
+                  onPressed: _showNearest,
+                  variant: BzButtonVariant.primary,
+                  size: BzButtonSize.xl,
+                  fullWidth: true,
                 ),
                 SizedBox(height: bz.space2),
                 const Align(
@@ -583,24 +582,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
   }
 
-  /// DS DetailIndicator: pill above the nearest button; hidden without GPS.
+  /// DS DetailIndicator: shown only outside the detailed map (inside it
+  /// says nothing the user can act on); same bar look as the GPS notice.
   Widget _detailIndicator() {
-    final outside = ref.watch(outsideRegionProvider).value;
-    if (outside == null) return const SizedBox.shrink();
-    final bz = context.bz;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        key: const ValueKey('detail-indicator'),
-        padding: EdgeInsets.symmetric(horizontal: bz.space3, vertical: bz.space2),
-        decoration: BoxDecoration(
-          color: bz.bg200,
-          borderRadius: BorderRadius.circular(bz.radiusLg),
-        ),
-        child: Text(
-          outside ? outsideRegionText : '● $detailedMapText',
-          style: bz.caption.copyWith(color: bz.ink100),
-        ),
+    if (ref.watch(outsideRegionProvider).value != true) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(bottom: context.bz.space3),
+      child: const MapNotice(
+        key: ValueKey('detail-indicator'),
+        text: outsideRegionText,
+        icon: LucideIcons.mapPinOff,
       ),
     );
   }
@@ -608,6 +599,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Widget _notice(LocationAccess access, bool live, GpsFix fix, Position? at) {
     if (access != LocationAccess.granted) {
       return MapNotice(
+        icon: LucideIcons.locateOff,
         text: permissionDeniedText,
         actionLabel: openPhoneSettingsText,
         onAction: () => ref.read(locationGatewayProvider).openSettings(),
@@ -621,7 +613,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       searchLong: _searchLong,
     );
     if (line == null) return const SizedBox.shrink();
-    return MapNotice(text: line.text, detail: line.detail);
+    return MapNotice(icon: LucideIcons.locateOff, text: line.text, detail: line.detail);
   }
 }
 
@@ -658,7 +650,7 @@ class RecenterButton extends StatelessWidget {
       onTap: enabled ? onPressed : null,
       excludeSemantics: true,
       child: Opacity(
-        opacity: enabled ? 1 : 0.45,
+        opacity: enabled ? 1 : 0.38, // same as BzButton disabled
         child: DecoratedBox(
           decoration: shellFloatDecoration(context, circle: true),
           child: SizedBox(
@@ -669,7 +661,8 @@ class RecenterButton extends StatelessWidget {
               child: InkResponse(
                 onTap: enabled ? onPressed : null,
                 customBorder: const CircleBorder(),
-                child: Icon(LucideIcons.locateFixed, size: 22, color: active ? bz.info : bz.ink100),
+                highlightColor: bz.overlayPress,
+                child: Icon(LucideIcons.locateFixed, size: BzButtonSize.md.iconSize, color: active ? bz.info : bz.ink100),
               ),
             ),
           ),
@@ -702,13 +695,14 @@ class LayersButton extends StatelessWidget {
             type: MaterialType.transparency,
             child: InkWell(
               borderRadius: BorderRadius.circular(bz.radiusFull),
+              highlightColor: bz.overlayPress,
               onTap: onPressed,
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: bz.space4),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(LucideIcons.layers, size: 18, color: bz.ink100),
+                    Icon(LucideIcons.layers, size: BzButtonSize.md.iconSize, color: bz.ink100),
                     SizedBox(width: bz.space2),
                     Text(layersButtonText, style: bz.label.copyWith(color: bz.ink100)),
                   ],
@@ -724,9 +718,10 @@ class LayersButton extends StatelessWidget {
 
 /// Bar notice (spec: `Notice`, variant `bar`).
 class MapNotice extends StatelessWidget {
-  const MapNotice({super.key, required this.text, this.detail, this.actionLabel, this.onAction});
+  const MapNotice({super.key, required this.text, this.icon, this.detail, this.actionLabel, this.onAction});
 
   final String text;
+  final IconData? icon;
   final String? detail;
   final String? actionLabel;
   final VoidCallback? onAction;
@@ -745,40 +740,30 @@ class MapNotice extends StatelessWidget {
         ),
         child: Padding(
           padding: EdgeInsets.all(bz.space3),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(text, style: bz.label.copyWith(color: bz.ink100)),
-              if (detail != null) Text(detail!, style: bz.caption.copyWith(color: bz.ink200)),
-              if (actionLabel != null) ...[
-                SizedBox(height: bz.space2),
-                BzButtonLike(label: actionLabel!, onPressed: onAction),
+              if (icon != null) ...[
+                Icon(icon, size: BzButtonSize.md.iconSize, color: bz.ink200),
+                SizedBox(width: bz.space3),
               ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(text, style: bz.label.copyWith(color: bz.ink100)),
+                    if (detail != null) Text(detail!, style: bz.caption.copyWith(color: bz.ink200)),
+                    if (actionLabel != null) ...[
+                      SizedBox(height: bz.space2),
+                      BzButton(label: actionLabel!, onPressed: onAction, size: BzButtonSize.md),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Minimal >= 48 dp text button (kept local; shared buttons live in the theme).
-class BzButtonLike extends StatelessWidget {
-  const BzButtonLike({super.key, required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final bz = context.bz;
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: bz.minTouchTarget),
-      child: TextButton(
-        onPressed: onPressed,
-        style: TextButton.styleFrom(foregroundColor: bz.signal),
-        child: Text(label, style: bz.label.copyWith(color: bz.signal)),
       ),
     );
   }
@@ -796,7 +781,7 @@ class AttributionLabel extends StatelessWidget {
         borderRadius: BorderRadius.circular(bz.radiusSm),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: bz.space2, vertical: 2),
+        padding: EdgeInsets.symmetric(horizontal: bz.space2, vertical: bz.space1 / 2),
         child: Text(attributionText, style: bz.caption.copyWith(color: bz.ink200)),
       ),
     );
@@ -830,6 +815,7 @@ class _Preparing extends StatelessWidget {
               builder: (context, value, _) => LinearProgressIndicator(
                 value: value, // determinate: calm, no endless animation
                 minHeight: 4,
+                borderRadius: BorderRadius.circular(bz.radiusFull),
                 color: bz.signal,
                 backgroundColor: bz.bg300,
               ),
@@ -851,17 +837,29 @@ class _InstallError extends StatelessWidget {
   Widget build(BuildContext context) {
     final bz = context.bz;
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(installErrorText, style: bz.title, textAlign: TextAlign.center),
-          if (noSpace) ...[
-            SizedBox(height: bz.space2),
-            Text(installNoSpaceText, style: bz.chat, textAlign: TextAlign.center),
+      child: Padding(
+        padding: EdgeInsets.all(bz.space6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(installErrorText, style: bz.title, textAlign: TextAlign.center),
+            if (noSpace) ...[
+              SizedBox(height: bz.space2),
+              Text(
+                installNoSpaceText,
+                style: bz.chat.copyWith(color: bz.ink200),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            SizedBox(height: bz.space5),
+            BzButton(
+              label: retryText,
+              onPressed: onRetry,
+              variant: BzButtonVariant.primary,
+              size: BzButtonSize.lg,
+            ),
           ],
-          SizedBox(height: bz.space3),
-          BzButtonLike(label: retryText, onPressed: onRetry),
-        ],
+        ),
       ),
     );
   }

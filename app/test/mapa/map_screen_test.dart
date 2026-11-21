@@ -4,6 +4,7 @@ import 'dart:ui' show Tristate;
 
 import 'package:bezpiecznik/mapa/map_assets.dart';
 import 'package:bezpiecznik/mapa/map_screen.dart';
+import 'package:bezpiecznik/wspolne/theme/bz_buttons.dart';
 import 'package:bezpiecznik/mapa/position_provider.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:flutter/services.dart';
@@ -102,10 +103,12 @@ void main() {
         ),
       ),
     );
-    // Real file IO: let the installer finish.
-    for (var i = 0; i < 20; i++) {
+    // Real file IO: let the installer finish (up to ~2 s; fixed 0.4 s was
+    // flaky when the whole suite runs in parallel).
+    for (var i = 0; i < 100; i++) {
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
       await tester.pump();
+      if (i >= 19 && find.text(preparingTitle).evaluate().isEmpty) break;
     }
     return gw;
   }
@@ -173,7 +176,7 @@ void main() {
     addTearDown(controller.close);
     await pump(tester, LocationAccess.granted, stream: controller.stream);
     final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
-    final nearest = find.ancestor(of: find.text('Najbliższy schron'), matching: find.byType(FilledButton));
+    final nearest = find.ancestor(of: find.text('Najbliższy schron'), matching: find.byType(BzButton));
     expect(nearest, findsOneWidget);
     final rect = tester.getRect(nearest);
     expect(rect.width, screenWidth - 32);
