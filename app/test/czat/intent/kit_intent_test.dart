@@ -20,6 +20,7 @@ void main() {
     'co zapakować na wypadek ewakuacji',
     'zestaw ewakuacyjny',
     'plecak awaryjny',
+    'jakie dokumenty spakować do plecaka',
   ];
   const negatives = [
     'gdzie schron',
@@ -33,6 +34,8 @@ void main() {
     'dlaczego warto mieć plecak',
     'placek z jabłkami',
     'przepis na pierogi',
+    'jakie dokumenty zabrac przy ewakuacji',
+    'Jakie dokumenty zabrać przy ewakuacji?',
     '',
   ];
 

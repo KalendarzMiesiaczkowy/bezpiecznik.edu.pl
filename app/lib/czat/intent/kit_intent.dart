@@ -15,6 +15,10 @@ bool detectKitIntent(String text) {
   // "plecak", "plecaka ewakuacyjnego", typo "plecka" (one edit in the stem).
   if (tokens.any(_isBackpack)) return true;
 
+  // "jakie dokumenty zabrać przy ewakuacji" asks about one item group that the
+  // KB answers on its own (RCB "Przygotuj do zabrania"), not for the full list.
+  if (tokens.any((t) => t.startsWith('dokument'))) return false;
+
   final pack = tokens.any(_packVerbs.contains);
   final context = tokens.any((t) => _evacStems.any(t.startsWith));
   if (pack && context) return true;

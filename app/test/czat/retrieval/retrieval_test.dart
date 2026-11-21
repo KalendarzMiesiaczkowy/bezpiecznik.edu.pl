@@ -267,6 +267,28 @@ void main() {
       }
     }, skip: _hasKb ? false : _skip);
 
+    // QA 07:45 B-06/B-10: "dzien" alone stems to "dzie*" (= "dzieci"), so the
+    // AED-for-children chunk won; "na dzień" <-> "na dobę" reaches the KB wording.
+    test(
+      'water per day and evacuation documents hit the right chunk',
+      () async {
+        for (final (q, id) in [
+          ('ile wody na osobe na dzien', 'rcb-poradnik-2025-s21-f1'),
+          ('ile wody pic dziennie', 'rcb-poradnik-2025-s21-f1'),
+          ('zapas wody na osobe', 'rcb-poradnik-2025-s21-f1'),
+          (
+            'jakie dokumenty zabrac przy ewakuacji',
+            'rcb-powodz-poradnik-2024-s20-f1',
+          ),
+        ]) {
+          final res = await r.search(q);
+          expect(res.decision, RetrievalDecision.found, reason: q);
+          expect(res.chunks.first.id, id, reason: q);
+        }
+      },
+      skip: _hasKb ? false : _skip,
+    );
+
     test('typos and missing diacritics are still found', () async {
       for (final q in [
         'co robic gdy wyje syrena',
