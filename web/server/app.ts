@@ -1,9 +1,9 @@
 // The Hono app: release API, APK download, the /pobierz short link and the prerendered static site.
 import { Hono, type Context } from 'hono';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { buildRelease, DOWNLOAD_PATH, findApk } from '../shared/release.ts';
+import { buildRelease, DOWNLOAD_PATH, findApk, findPack } from '../shared/release.ts';
 import type { Config } from './config.ts';
-import { sendApk } from './download.ts';
+import { sendApk, sendFile } from './download.ts';
 
 const CSP = [
   "default-src 'self'",
@@ -20,7 +20,7 @@ const CSP = [
 
 const NOT_FOUND_HTML = `<!doctype html><html lang="pl"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nie znaleziono · Bezpiecznik</title><body style="font:18px/1.5 system-ui,sans-serif;background:#100f0e;color:#f4f1ec;padding:2rem"><h1>Nie ma takiej strony</h1><p><a href="/" style="color:inherit">Wróć na stronę główną Bezpiecznika</a></p></body></html>`;
 
-const isApiPath = (path: string) => path.startsWith('/api/') || path.startsWith('/download/');
+const isApiPath = (path: string) => path.startsWith('/api/') || path.startsWith('/download/') || path.startsWith('/paczki/');
 
 export function createApp(config: Config) {
   const app = new Hono();
@@ -61,6 +61,14 @@ export function createApp(config: Config) {
     const apk = await apkOr404(c);
     if (apk instanceof Response) return apk;
     return sendApk(c, apk, config.meta.version);
+  });
+
+  // Data packs for the app (the offline map). The client is the app, which resumes with `Range: bytes=N-`
+  // and checks size and sha256 itself, so a replaced file is caught there too.
+  app.get('/paczki/:name', async (c) => {
+    const pack = await findPack(config.packsDir, c.req.param('name'));
+    if (!pack) return c.json({ error: 'not found' }, 404);
+    return sendFile(c, pack, 'application/octet-stream', c.req.param('name'));
   });
 
   app.get('/pobierz', (c) => {

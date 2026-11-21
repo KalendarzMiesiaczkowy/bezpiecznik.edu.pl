@@ -1,6 +1,6 @@
 # Bezpiecznik landing page
 
-Static, prerendered React page plus a small Hono server that serves it, the APK and its release facts.
+Static, prerendered React page plus a small Hono server that serves it, the APK with its release facts, and the data packs the app downloads after install.
 Needs Node >= 22.18: the server and scripts run as TypeScript directly (`node server/index.ts`, type stripping), so there is no server build step.
 
 ## Develop
@@ -22,6 +22,17 @@ npm run typecheck
 
 `npm run build` runs `prebuild` first, which is `npm run release` (`scripts/gen-release.ts`): it writes `src/generated/release.json` (size, sha256, file date, QR code for `https://bezpiecznik.edu.pl/pobierz`) so the prerendered page shows the real file. `version`, `minAndroid` and `abi` are kept from that file unless `APP_VERSION`, `MIN_ANDROID` or `ABI` are set. No APK: it warns and leaves the file alone. Commit the regenerated `release.json` with each release.
 
+### Data packs (offline map)
+
+The app downloads the map tiles on first start from `https://bezpiecznik.edu.pl/paczki/zachodniopomorskie.mbtiles` (`app/lib/paczki/pack.dart`). Put the file in `packs/` (gitignored; a symlink is fine) and it is served at `/paczki/<file name>`, no restart needed. The app is built with the file's size and sha256, so build the APK from the same file:
+
+```sh
+stat -f %z packs/zachodniopomorskie.mbtiles      # MAP_PACK_BYTES (Linux: stat -c %s)
+shasum -a 256 packs/zachodniopomorskie.mbtiles   # MAP_PACK_SHA256
+```
+
+Replace the pack and the already released app rejects it (size or checksum mismatch) until a new APK is out.
+
 At runtime the server reads the APK again for every request (stat only), so replacing the file without a restart is picked up by `/api/release` and `/download`. The sha256 is computed once per (path, size, mtime), at start and after a change. The prerendered page only changes after a rebuild.
 
 ## Routes
@@ -31,6 +42,7 @@ At runtime the server reads the APK again for every request (stat only), so repl
 | `GET /` and static files | `dist/client`. HTML `no-cache`, `/assets/*` `max-age=1y, immutable`. Unknown path: 404 page, no SPA fallback. |
 | `GET /api/release` | `{ version, fileName, sizeBytes, sha256, builtAt, url, minAndroid, abi }` from the APK on disk. |
 | `GET`/`HEAD /download/bezpiecznik.apk` | The APK, streamed, saved as `bezpiecznik-<version>.apk`. ETag = sha256. Single `Range` (206/416), `If-Range`, `If-None-Match`. |
+| `GET`/`HEAD /paczki/<name>` | A data pack from `PACKS_DIR`: a file name ending in `.mbtiles` or `.litertlm`, no sub-directories. Streamed like the APK: ETag = sha256, single `Range` (the app resumes with `bytes=N-`), `If-Range`, `If-None-Match`. Anything else: JSON 404. |
 | `GET /pobierz` | The QR code target. Android: 302 to the APK. Anything else: 302 to `/#pobierz`. |
 | `GET /healthz` | `ok` |
 
@@ -42,6 +54,7 @@ At runtime the server reads the APK again for every request (stat only), so repl
 | `HOST` | all interfaces | Use `127.0.0.1` behind a proxy on the same machine. |
 | `RELEASE_DIR` | `web/releases` | |
 | `APK_FILE` | the single `*.apk` in `RELEASE_DIR` | Relative to `RELEASE_DIR`. |
+| `PACKS_DIR` | `web/packs` | Data packs served at `/paczki/`. May be missing. |
 | `STATIC_DIR` | `web/dist/client` | |
 | `PUBLIC_ORIGIN` | unset | e.g. `https://bezpiecznik.edu.pl`. Makes `url` in `/api/release` absolute; in `gen-release` sets the QR origin. |
 | `TRUST_HTTPS` | `0` | `1` adds HSTS. Set only when the site is reachable over HTTPS alone. |
@@ -52,7 +65,7 @@ Relative paths in env resolve against the working directory. Invalid values stop
 ## Deploy
 
 Run `npm start` under a process manager (systemd, a container) behind a reverse proxy that terminates TLS (Caddy, nginx), with `HOST=127.0.0.1` and `TRUST_HTTPS=1`. The server shuts down on SIGTERM/SIGINT, giving running downloads 10 s.
-Notes for the proxy: do not buffer or gzip `/download/` (the APK is already compressed, and buffering breaks range resumes), and do not log IPs or User-Agents there either, or the promise below is only half kept.
+Notes for the proxy: do not buffer or gzip `/download/` and `/paczki/` (the files are already compressed, and buffering breaks range resumes), and do not log IPs or User-Agents there either, or the promise below is only half kept.
 
 ## Privacy and security the server enforces
 

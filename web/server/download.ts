@@ -1,4 +1,5 @@
-// Streams the APK with single-range and conditional-request support, so a flaky mobile download can resume.
+// Streams a file (the APK, a data pack) with single-range and conditional-request support, so a flaky
+// mobile download can resume.
 import { createReadStream } from 'node:fs';
 import type { Context } from 'hono';
 import { createStreamBody } from '@hono/node-server/utils/stream';
@@ -29,7 +30,11 @@ const etagMatches = (list: string, etag: string) =>
     return t === '*' || t.replace(/^W\//, '') === etag;
   });
 
-export async function sendApk(c: Context, apk: ApkFile, version: string): Promise<Response> {
+export const sendApk = (c: Context, apk: ApkFile, version: string): Promise<Response> =>
+  sendFile(c, apk, 'application/vnd.android.package-archive', downloadName(version));
+
+/** [file] as `contentType`, saved as `saveAs`. ETag = sha256 of the file. */
+export async function sendFile(c: Context, apk: ApkFile, contentType: string, saveAs: string): Promise<Response> {
   const etag = `"${await sha256File(apk)}"`;
   const lastModified = apk.mtime.toUTCString();
   const headers: Record<string, string> = {
@@ -50,8 +55,8 @@ export async function sendApk(c: Context, apk: ApkFile, version: string): Promis
     if (!same) range = undefined;
   }
 
-  headers['Content-Type'] = 'application/vnd.android.package-archive';
-  headers['Content-Disposition'] = `attachment; filename="${downloadName(version)}"`;
+  headers['Content-Type'] = contentType;
+  headers['Content-Disposition'] = `attachment; filename="${saveAs}"`;
 
   if (range === null) {
     headers['Content-Range'] = `bytes */${apk.size}`;

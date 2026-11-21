@@ -9,6 +9,8 @@ import { loadConfig } from './config.ts';
 
 const APK = Buffer.from(Array.from({ length: 1000 }, (_, i) => (i * 7) % 256));
 const SHA = createHash('sha256').update(APK).digest('hex');
+const PACK = Buffer.from(Array.from({ length: 5000 }, (_, i) => (i * 13) % 256));
+const PACK_SHA = createHash('sha256').update(PACK).digest('hex');
 const ANDROID = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36';
 const DESKTOP = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36';
 
@@ -34,7 +36,11 @@ before(async () => {
   await writeFile(join(dir, 'static/assets/font.woff2'), 'w');
   await writeFile(join(dir, 'static/assets/icon.svg'), '<svg/>');
   await writeFile(join(dir, 'secret.txt'), 'outside STATIC_DIR');
-  const env = { RELEASE_DIR: join(dir, 'releases'), STATIC_DIR: join(dir, 'static'), TRUST_HTTPS: '1' };
+  await mkdir(join(dir, 'packs/nested'), { recursive: true });
+  await writeFile(join(dir, 'packs/zachodniopomorskie.mbtiles'), PACK);
+  await writeFile(join(dir, 'packs/notes.txt'), 'not a pack');
+  await writeFile(join(dir, 'packs/nested/inner.mbtiles'), 'nested');
+  const env = { RELEASE_DIR: join(dir, 'releases'), STATIC_DIR: join(dir, 'static'), PACKS_DIR: join(dir, 'packs'), TRUST_HTTPS: '1' };
   app = createApp(loadConfig(env, { version: '1.0.0', minAndroid: 'Android 11', abi: 'arm64-v8a' }));
 });
 after(() => rm(dir, { recursive: true, force: true }));
@@ -100,6 +106,51 @@ test('download: ranges, conditionals, HEAD', async () => {
   assert.equal(res.status, 200);
   assert.equal(res.headers.get('content-length'), '1000');
   assert.equal((await res.arrayBuffer()).byteLength, 0);
+});
+
+// The app downloads data packs (the offline map) from here, resuming after a dropped connection.
+test('packs: full file with the headers a resumable download needs', async () => {
+  const res = await req('/paczki/zachodniopomorskie.mbtiles');
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('content-type'), 'application/octet-stream');
+  assert.equal(res.headers.get('content-length'), '5000');
+  assert.equal(res.headers.get('accept-ranges'), 'bytes');
+  assert.equal(res.headers.get('etag'), `"${PACK_SHA}"`);
+  assert.equal(res.headers.get('content-disposition'), 'attachment; filename="zachodniopomorskie.mbtiles"');
+  assert.deepEqual(Buffer.from(await res.arrayBuffer()), PACK);
+});
+
+test('packs: the app resumes with an open-ended range', async () => {
+  let res = await req('/paczki/zachodniopomorskie.mbtiles', { headers: { Range: 'bytes=4000-' } });
+  assert.equal(res.status, 206);
+  assert.equal(res.headers.get('content-range'), 'bytes 4000-4999/5000');
+  assert.deepEqual(Buffer.from(await res.arrayBuffer()), PACK.subarray(4000));
+
+  res = await req('/paczki/zachodniopomorskie.mbtiles', { headers: { Range: 'bytes=5000-' } });
+  assert.equal(res.status, 416, 'a partial file as long as the pack: nothing left to send');
+  assert.equal(res.headers.get('content-range'), 'bytes */5000');
+
+  res = await req('/paczki/zachodniopomorskie.mbtiles', { method: 'HEAD' });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('content-length'), '5000');
+});
+
+test('packs: only pack files directly in PACKS_DIR are served', async () => {
+  for (const p of [
+    '/paczki/missing.mbtiles',
+    '/paczki/notes.txt', // not a pack extension
+    '/paczki/nested/inner.mbtiles', // no sub-directories
+    '/paczki/..%2Fsecret.txt',
+    '/paczki/%2e%2e%2fsecret.txt',
+    '/paczki/.mbtiles',
+    '/paczki/',
+  ]) {
+    const res = await req(`http://localhost${p}`);
+    assert.equal(res.status, 404, p);
+    assert.doesNotMatch(await res.text(), /outside STATIC_DIR|not a pack|nested/, p);
+  }
+  const res = await req('/paczki/missing.mbtiles');
+  assert.deepEqual(await res.json(), { error: 'not found' }, 'JSON, not the HTML page: the client is the app');
 });
 
 test('/pobierz sends Android to the APK and others to the page', async () => {

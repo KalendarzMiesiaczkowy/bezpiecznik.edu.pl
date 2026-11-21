@@ -58,6 +58,26 @@ export async function findApk(releaseDir: string, apkFile?: string): Promise<Apk
   }
 }
 
+/** Data packs the app downloads after install: the offline map tiles and, optionally, the model. */
+const PACK_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}\.(mbtiles|litertlm)$/;
+
+/**
+ * Resolves a pack by file name inside `packsDir`. Null for anything that is not a plain pack file
+ * name (so no path can leave the directory), for a missing file and for a non-file.
+ */
+export async function findPack(packsDir: string, name: string): Promise<ApkFile | null> {
+  if (!PACK_NAME.test(name)) return null;
+  try {
+    const path = join(packsDir, name);
+    const s = await stat(path); // follows symlinks, like the APK
+    return s.isFile() ? { path, size: s.size, mtime: s.mtime } : null;
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') return null;
+    throw err;
+  }
+}
+
 // One entry per path; a new size or mtime replaces it, so the cache never grows past the number of APKs.
 const hashCache = new Map<string, { key: string; hash: Promise<string> }>();
 /** How many times a file was actually read for hashing (tests use it to see cache hits). */

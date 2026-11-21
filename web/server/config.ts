@@ -8,6 +8,8 @@ export interface Config {
   host: string | undefined;
   releaseDir: string;
   apkFile: string | undefined;
+  /** Data packs the app downloads (`/paczki/<name>`); a missing directory just means no packs. */
+  packsDir: string;
   staticDir: string;
   /** e.g. https://bezpiecznik.edu.pl, without a trailing slash; '' keeps URLs relative. */
   publicOrigin: string;
@@ -39,6 +41,8 @@ export function loadConfig(env: NodeJS.ProcessEnv, saved: Partial<ReleaseMeta> |
   const apkFile = env.APK_FILE || undefined;
   if (apkFile && !existsSync(resolve(releaseDir, apkFile))) errors.push(`APK_FILE ${resolve(releaseDir, apkFile)} does not exist`);
 
+  const packsDir = resolve(env.PACKS_DIR || join(WEB_ROOT, 'packs'));
+
   const staticDir = resolve(env.STATIC_DIR || join(WEB_ROOT, 'dist/client'));
   // Not fatal: the API is useful while the frontend runs on vite dev. Every page answers 404 meanwhile.
   if (!existsSync(staticDir) || !statSync(staticDir).isDirectory()) console.warn(`STATIC_DIR ${staticDir} is not a directory (run npm run build)`);
@@ -48,5 +52,5 @@ export function loadConfig(env: NodeJS.ProcessEnv, saved: Partial<ReleaseMeta> |
   if (!/^[0-9A-Za-z.+_-]{1,40}$/.test(meta.version)) errors.push(`APP_VERSION "${meta.version}" must match [0-9A-Za-z.+_-]`);
 
   if (errors.length) throw new Error(`Invalid configuration:\n  ${errors.join('\n  ')}`);
-  return { port, host: env.HOST || undefined, releaseDir, apkFile, staticDir, publicOrigin, trustHttps: trust === '1', meta };
+  return { port, host: env.HOST || undefined, releaseDir, apkFile, packsDir, staticDir, publicOrigin, trustHttps: trust === '1', meta };
 }
