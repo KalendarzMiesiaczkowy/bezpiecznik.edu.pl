@@ -29,9 +29,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    // Start loading the model once the first frame is on screen.
+    // Start loading the model once the first frame is on screen. Listening
+    // (not a one-off read) keeps the provider active, so it loads the model
+    // by itself when the in-app download finishes later.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(llmWarmUpProvider);
+      if (mounted) ref.listenManual(llmWarmUpProvider, (_, _) {});
     });
   }
 

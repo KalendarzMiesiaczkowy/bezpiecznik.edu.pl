@@ -3,6 +3,8 @@ import 'package:flutter_edge_ai_litertlm/flutter_edge_ai_litertlm.dart'
     show LiteRtLmEngine;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../paczki/pack.dart' show modelPackId;
+import '../../paczki/pack_controller.dart';
 import '../../ustawienia/settings_store.dart';
 import '../../wspolne/config.dart';
 import 'llm_engine.dart';
@@ -54,5 +56,9 @@ final llmEngineProvider = Provider<LlmEngine>((ref) {
 /// retries the load and reports the error in the chat.
 final llmWarmUpProvider = FutureProvider<void>((ref) async {
   if ((await ref.watch(settingsProvider.future)).noAiMode) return;
+  // The model file may still be downloading (lib/paczki): wait for it, and
+  // load as soon as the download finishes. Null: not a pack of this build.
+  final model = ref.watch(packsProvider.select((s) => s.byId(modelPackId)?.phase));
+  if (model != null && model != PackPhase.done) return;
   await ref.read(llmEngineProvider).warmUp();
 });
