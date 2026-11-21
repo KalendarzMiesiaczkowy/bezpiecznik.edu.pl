@@ -54,7 +54,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (n is ScrollStartNotification && n.dragDetails != null) _follow = false;
     final m = n.metrics;
     final atBottom = m.pixels >= m.maxScrollExtent - 80;
-    final seen = _unseenAnswerId != null &&
+    final seen =
+        _unseenAnswerId != null &&
         (atBottom || !_endBelowViewport(_unseenAnswerId!));
     if (atBottom != _atBottom || seen) {
       setState(() {
@@ -135,7 +136,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (next.chatId != _chatId) {
       // Another chat (or a fresh one): drop state tied to the previous list.
       _chatId = next.chatId;
-      if (prev != null && prev.chatId != next.chatId && _unseenAnswerId != null) {
+      if (prev != null &&
+          prev.chatId != next.chatId &&
+          _unseenAnswerId != null) {
         setState(() => _unseenAnswerId = null);
       }
     }
@@ -158,20 +161,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
     if (before.isEmpty || next.messages.isEmpty) return;
-    final wasThinking = before.last.isThinking;
-    final last = next.messages.last;
-    if (wasThinking &&
-        !last.isUser &&
-        !last.isThinking &&
-        last.answer != null) {
+    // Match by id: a card inserted meanwhile may sit after the still-thinking
+    // message, so it is not necessarily the last one.
+    final thinkingIds = {
+      for (final m in before)
+        if (m.isThinking) m.id,
+    };
+    ChatMessage? last;
+    for (final m in next.messages) {
+      if (thinkingIds.contains(m.id) &&
+          !m.isUser &&
+          !m.isThinking &&
+          m.answer != null) {
+        last = m;
+      }
+    }
+    if (last != null) {
+      final answerId = last.id;
       // Spec: scroll to the START of the new answer, not to the end; when the
       // user is reading higher up, only offer the pill.
       if (_follow || _atBottom) {
-        _toStartOf(last.id);
+        _toStartOf(answerId);
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _endBelowViewport(last.id)) {
-            setState(() => _unseenAnswerId = last.id);
+          if (mounted && _endBelowViewport(answerId)) {
+            setState(() => _unseenAnswerId = answerId);
           }
         });
       }
