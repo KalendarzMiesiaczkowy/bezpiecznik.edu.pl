@@ -47,29 +47,46 @@ const int kMaxItemChars = 240;
 const int kMaxTitleChars = 30;
 const int kMaxItemsPerPanel = 8;
 
-/// Minimum share of an item's content stems that must occur in the cited chunk.
-const double kMinOverlap = 0.5;
+/// Panel titles the UI may show (spec szablony-czatu.md examples + the
+/// defaults). Anything else the model writes is replaced by a default, so a
+/// title can never carry an invented instruction.
+const List<String> kAllowedTitles = [
+  'Teraz',
+  'Kroki',
+  'Co zrobić',
+  'Najważniejsze',
+  'Do zapamiętania',
+  'Do plecaka',
+  'RKO',
+  'Gdy straci przytomność',
+];
+
+String _safeTitle(Object? raw, String type) {
+  if (raw is String) {
+    final n = normalizePl(raw);
+    for (final t in kAllowedTitles) {
+      if (normalizePl(t) == n) return t;
+    }
+  }
+  return type == 'steps' ? 'Co zrobić' : 'Najważniejsze';
+}
 
 class _ChunkFacts {
   _ChunkFacts(KbChunk c) {
     final text = [c.text, if (c.original != null) c.original!].join('\n');
-    numbers = numbersIn(text);
+    numbers = numberFacts(text);
     final scan = scanNegations(text);
     negated = scan.negated;
     affirmed = scan.affirmed;
     hasNegation = scan.hasNegation;
-    for (final t in tokens(text)) {
-      words.add(t);
-      stems.add(stem(t));
-    }
+    words = tokens(text).toSet();
   }
 
-  late final Set<String> numbers;
+  late final List<NumberFact> numbers;
   late final Set<String> negated;
   late final Set<String> affirmed;
   late final bool hasNegation;
-  final Set<String> words = {};
-  final Set<String> stems = {};
+  late final Set<String> words;
 }
 
 class AnswerValidator {
@@ -82,44 +99,54 @@ class AnswerValidator {
   RejectReason? checkItem(String text, KbChunk chunk) =>
       _check(text, _ChunkFacts(chunk));
 
+  bool _isContent(String w) =>
+      w.length >= 3 &&
+      numericValue(w) == null &&
+      !functionWords.contains(w) &&
+      !_stop.contains(w) &&
+      !isNegationWord(w);
+
   RejectReason? _check(String text, _ChunkFacts f) {
     final t = text.trim();
     if (t.isEmpty) return RejectReason.emptyText;
     if (t.length > kMaxItemChars) return RejectReason.tooLong;
 
-    // Numbers, doses and times: every digit string must be in the chunk.
-    for (final n in numbersIn(t)) {
-      if (!f.numbers.contains(n)) return RejectReason.invalidNumber;
-    }
-    final toks = tokens(t);
-    for (final w in toks) {
-      if (numeralWords.contains(w) && !f.words.contains(w)) {
-        return RejectReason.invalidNumber;
-      }
+    // Numbers, doses and times: each number must be in the chunk, bound to
+    // the same unit / counted noun ("30 razy" is not "30 oddechów").
+    for (final n in numberFacts(t)) {
+      final cands = f.numbers.where((c) => c.value == n.value);
+      if (cands.isEmpty) return RejectReason.invalidNumber;
+      if (n.following.isEmpty) continue;
+      final ok = cands.any(
+        (c) => c.following.isEmpty || anySame(c.following, n.following.first),
+      );
+      if (!ok) return RejectReason.invalidNumber;
     }
 
     // Negations.
     final item = scanNegations(t);
-    for (final s in item.affirmed) {
-      if (f.negated.contains(s) && !f.affirmed.contains(s)) {
-        return RejectReason.droppedNegation;
+    // A clause that uses a word the source only mentions under a negation
+    // must itself negate it (any verb form, any word order).
+    for (final clause in clauses(t)) {
+      final neg = negatedIn(clause);
+      for (final w in clause) {
+        if (w.length < 3 || functionWords.contains(w) || isNegationWord(w)) continue;
+        if (anySame(f.negated, w) && !anySame(f.affirmed, w) && !neg.contains(w)) {
+          return RejectReason.droppedNegation;
+        }
       }
     }
-    for (final s in item.negated) {
-      if (f.affirmed.contains(s) && !f.negated.contains(s)) {
+    for (final w in item.negated) {
+      if (anySame(f.affirmed, w) && !anySame(f.negated, w)) {
         return RejectReason.addedNegation;
       }
     }
     if (item.hasNegation && !f.hasNegation) return RejectReason.addedNegation;
 
-    // Keyword coverage.
-    final content = {
-      for (final w in toks)
-        if (w.length >= 4 && !_stop.contains(w) && !isNegationWord(w)) stem(w),
-    };
-    if (content.isNotEmpty) {
-      final hit = content.where(f.stems.contains).length;
-      if (hit / content.length < kMinOverlap) return RejectReason.lowOverlap;
+    // Coverage: every content word of the item must occur in the chunk.
+    for (final w in tokens(t)) {
+      if (!_isContent(w)) continue;
+      if (!anySame(f.words, w)) return RejectReason.lowOverlap;
     }
     return null;
   }
@@ -170,9 +197,7 @@ class AnswerValidator {
         if (kept.length >= kMaxItemsPerPanel) break;
       }
       if (kept.isEmpty) continue;
-      var title = (p['title'] is String ? (p['title'] as String).trim() : '');
-      if (title.length > kMaxTitleChars) title = title.substring(0, kMaxTitleChars).trim();
-      if (title.isEmpty) title = type == 'steps' ? 'Co zrobić' : 'Najważniejsze';
+      final title = _safeTitle(p['title'], type as String);
       out.add({'type': type, 'title': title, 'items': kept});
     }
     return ValidatedAnswer(panels: out, rejected: rejected);

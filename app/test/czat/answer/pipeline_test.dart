@@ -340,4 +340,42 @@ void main() {
     );
     expect(types(ready(await s.answer('pożar', ctx).toList())), ['steps']);
   });
+
+  group('noAi (per-request "Tryb bez AI")', () {
+    test('awaited setting true: model never called, no_ai quotes', () async {
+      final e = FakeEngine([
+        [good()],
+      ]);
+      final s = PipelineAnswerService(
+        search: (_) async => found([lift]),
+        engine: e,
+        isRisk: (_) => false,
+        noAi: () async {
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+          return true;
+        },
+      );
+      final a = ready(await s.answer('pożar', ctx).toList());
+      expect(e.requests, isEmpty);
+      expect(a.origin, AnswerOrigin.noAi);
+      expect(types(a), ['quote']);
+    });
+
+    test('false or failing setting keeps the model', () async {
+      for (final f in <Future<bool> Function()>[
+        () async => false,
+        () async => throw StateError('settings'),
+      ]) {
+        final s = PipelineAnswerService(
+          search: (_) async => found([lift]),
+          engine: FakeEngine([
+            [good()],
+          ]),
+          isRisk: (_) => false,
+          noAi: f,
+        );
+        expect(types(ready(await s.answer('pożar', ctx).toList())), ['steps']);
+      }
+    });
+  });
 }

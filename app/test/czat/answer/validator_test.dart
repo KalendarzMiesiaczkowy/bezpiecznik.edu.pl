@@ -161,13 +161,100 @@ void main() {
         ]),
         chunks,
       );
-      expect((r.panels[0]['title'] as String).length, kMaxTitleChars);
+      expect(r.panels[0]['title'], 'Co zrobić');
       expect(r.panels[1]['title'], 'Najważniejsze');
+    });
+
+    test('titles come from the fixed list only', () {
+      String titleOf(Object? t) {
+        final r = v.validate(
+          panels([
+            {
+              'type': 'steps',
+              'title': t,
+              'items': [
+                {'text': 'Nie wchodź do windy.', 'source_id': 'c1'},
+              ],
+            },
+          ]),
+          chunks,
+        );
+        return r.panels.single['title'] as String;
+      }
+
+      expect(titleOf('Podaj 2 tabletki'), 'Co zrobić');
+      expect(titleOf('teraz'), 'Teraz');
+      expect(titleOf('Do zapamiętania'), 'Do zapamiętania');
+      expect(titleOf(42), 'Co zrobić');
     });
 
     test('garbage structures do not throw', () {
       expect(v.validate({'panels': 'x'}, chunks).hasContent, isFalse);
       expect(v.validate({'panels': [1, null, {'type': 'steps', 'items': 3}]}, chunks).hasContent, isFalse);
+    });
+  });
+
+  group('strict coverage (BG07)', () {
+    final cprFull = chunk(
+      'c7',
+      'Połóż poszkodowanego na plecach na twardym, płaskim podłożu. '
+      'Uciskaj środek klatki piersiowej 30 razy, potem wykonaj 2 oddechy.',
+    );
+    final drink = chunk('c8', 'Nie podawaj nic do picia osobie nieprzytomnej.');
+    final fire = chunk('c9', 'Nie wchodź do windy podczas pożaru.');
+    final ice = chunk('c10', 'Na oparzenie przyłóż lód i zadzwoń po pomoc.');
+
+    test('invented actions and drugs are rejected', () {
+      for (final t in [
+        'Połóż poszkodowanego na plecach i podaj aspirynę',
+        'Uciskaj środek klatki piersiowej 30 razy i podaj nitroglicerynę pod język',
+        'Połóż poszkodowanego na brzuchu na twardym podłożu',
+      ]) {
+        expect(check(t, cprFull), isNotNull, reason: t);
+      }
+    });
+
+    test('short content words are checked too', () {
+      expect(check('Przyłóż lód.', ice), isNull);
+      expect(check('Przyłóż gaz.', ice), isNotNull);
+      expect(check('Przyłóż lód na oko.', ice), isNotNull);
+      expect(check('Zadzwoń po pomoc i przyłóż lód.', ice), isNull);
+    });
+
+    test('negation survives a different verb form', () {
+      for (final t in [
+        'Podaj osobie nieprzytomnej coś do picia',
+        'Osobie nieprzytomnej podaj wodę do picia',
+        'Podaj osobie nieprzytomnej do picia',
+      ]) {
+        expect(check(t, drink), isNotNull, reason: t);
+      }
+      expect(check('Zjedź windą podczas pożaru na parter', fire), isNotNull);
+      expect(check('Skorzystaj z windy podczas pożaru', fire), isNotNull);
+      expect(check('Jedź windą podczas pożaru', fire), isNotNull);
+    });
+
+    test('numbers are bound to their units', () {
+      expect(check('Uciskaj 2 razy, potem wykonaj 30 oddechów', cprFull), RejectReason.invalidNumber);
+      expect(check('Uciskaj klatkę piersiową 30 sekund', cprFull), RejectReason.invalidNumber);
+      expect(check('Uciskaj klatkę piersiową przez piętnaście minut', cprFull), RejectReason.invalidNumber);
+      expect(check('Uciskaj klatkę piersiową kilka razy', cprFull), RejectReason.invalidNumber);
+      expect(check('Uciskaj klatkę piersiową sto razy', cprFull), RejectReason.invalidNumber);
+    });
+
+    test('numeral words equal digits when bound to the same unit', () {
+      expect(check('Wykonaj dwa oddechy.', cprFull), isNull);
+      expect(check('Uciskaj środek klatki piersiowej trzydzieści razy.', cprFull), isNull);
+    });
+
+    test('legit paraphrases still pass', () {
+      expect(check('Połóż poszkodowanego na plecach na twardym, płaskim podłożu.', cprFull), isNull);
+      expect(check('Na twardym płaskim podłożu połóż poszkodowanego na plecach.', cprFull), isNull);
+      expect(check('Uciskaj środek klatki piersiowej 30 razy, potem wykonaj 2 oddechy.', cprFull), isNull);
+      expect(check('Uciskaj klatkę piersiową 30 razy.', cprFull), isNull);
+      expect(check('Nie podawaj osobie nieprzytomnej nic do picia.', drink), isNull);
+      expect(check('Nie wchodź do windy podczas pożaru.', fire), isNull);
+      expect(check('Podczas pożaru nie wchodź do windy.', fire), isNull);
     });
   });
 }

@@ -31,6 +31,7 @@ class PipelineAnswerService implements AnswerService {
     required this.engine,
     required this.isRisk,
     this.profileContext,
+    this.noAi,
     AnswerValidator? validator,
     this.onLog,
   }) : validator = validator ?? AnswerValidator();
@@ -44,6 +45,10 @@ class PipelineAnswerService implements AnswerService {
   /// Compact profile context for the prompt; empty / null when unavailable.
   final Future<String> Function()? profileContext;
   final AnswerValidator validator;
+
+  /// "Tryb bez AI", asked once per request (the setting may still be loading
+  /// at a cold start). When true the model is never called: source quotes only.
+  final Future<bool> Function()? noAi;
 
   /// Diagnostics (rejected items, retries); no user data beyond the question.
   final void Function(String message)? onLog;
@@ -70,6 +75,8 @@ class PipelineAnswerService implements AnswerService {
     }
 
     try {
+      if (await _noAiMode()) run.engine = OffEngine();
+      if (run.cancelled) return;
       emit(const AnswerThinking(ThinkingPhase.searching));
       final result = await search(question);
       if (run.cancelled) return;
@@ -104,6 +111,14 @@ class PipelineAnswerService implements AnswerService {
       emit(const AnswerFailed('Nie udało się przygotować odpowiedzi. Spróbuj ponownie.'));
     } finally {
       if (!out.isClosed) await out.close();
+    }
+  }
+
+  Future<bool> _noAiMode() async {
+    try {
+      return await noAi?.call() ?? false;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -170,7 +185,7 @@ class PipelineAnswerService implements AnswerService {
 class _Run {
   _Run(this.engine);
 
-  final LlmEngine engine;
+  LlmEngine engine;
   bool cancelled = false;
   StreamSubscription<String>? _sub;
   Completer<String>? _pending;
@@ -215,8 +230,10 @@ final answerRiskDetectorProvider = FutureProvider<RiskDetector>(
 final pipelineAnswerServiceProvider = Provider<AnswerService>((ref) {
   return PipelineAnswerService(
     search: (q) async => (await ref.read(retrieverProvider.future)).search(q),
-    // "Tryb bez AI" (opt-in setting): answers are source quotes only.
-    engine: ref.watch(noAiModeProvider) ? OffEngine() : ref.watch(llmEngineProvider),
+    engine: ref.watch(llmEngineProvider),
+    // "Tryb bez AI" (opt-in): awaits the settings so the first question after
+    // a cold start already honours it.
+    noAi: () async => (await ref.read(settingsProvider.future)).noAiMode,
     isRisk: (q) async {
       try {
         return (await ref.read(answerRiskDetectorProvider.future)).isRisk(q);
