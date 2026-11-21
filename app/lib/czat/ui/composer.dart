@@ -11,8 +11,9 @@ const String composerStopLabel = 'Zatrzymaj';
 /// Message length limit (spec "Pole wiadomości").
 const int composerMaxLength = 1000;
 
-/// DS `Composer`: pill (radius 28, min 52 dp), grows to 4 lines, Enter = new
-/// line. Send is always visible (also while generating: sending then
+/// DS `Composer`: pill (radius 28, min 52 dp incl. border), grows to 4 lines,
+/// Enter = new line. Layout: 1 dp border + 48 dp row (36 dp visual buttons with
+/// a 48 dp hit area, text padded to the same 48 dp so one line is centred). Send is always visible (also while generating: sending then
 /// interrupts); Stop appears left of the field only while generating.
 class Composer extends StatefulWidget {
   const Composer({
@@ -61,7 +62,7 @@ class _ComposerState extends State<Composer> {
     final t = context.bz;
     return Container(
       constraints: const BoxConstraints(minHeight: 52),
-      padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
+      padding: const EdgeInsets.all(1),
       decoration: BoxDecoration(
         color: t.bg200,
         border: Border.all(color: t.line150),
@@ -81,29 +82,50 @@ class _ComposerState extends State<Composer> {
             ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: t.space2, vertical: 10),
-              child: TextField(
-                key: const Key('composer-field'),
-                controller: _controller,
-                focusNode: _focus,
-                minLines: 1,
-                maxLines: 4,
-                maxLength: composerMaxLength,
-                keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.newline,
-                textCapitalization: TextCapitalization.sentences,
-                inputFormatters: [LengthLimitingTextInputFormatter(composerMaxLength)],
-                style: t.chat.copyWith(fontSize: 16, height: 24 / 16),
-                cursorColor: t.ink100,
-                decoration: InputDecoration(
-                  isCollapsed: true,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  filled: false,
-                  counterText: '',
-                  hintText: composerHint,
-                  hintStyle: t.chat.copyWith(fontSize: 16, height: 24 / 16, color: t.ink300),
+              // 12 + 24 (line) + 12 = 48 = button hit area -> single line centred
+              // with the send arrow; extra lines grow upwards from the bottom.
+              padding: EdgeInsets.fromLTRB(
+                widget.generating ? 4 : 16,
+                12,
+                4,
+                12,
+              ),
+              // The app-wide field theme (minHeight 48, 14/12 content padding)
+              // leaks into this bare field and made the pill 76 dp: reset it.
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  inputDecorationTheme: const InputDecorationThemeData(),
+                ),
+                child: TextField(
+                  key: const Key('composer-field'),
+                  controller: _controller,
+                  focusNode: _focus,
+                  minLines: 1,
+                  maxLines: 4,
+                  // No `maxLength`: it reserves an invisible counter row under the
+                  // text (taller pill, misaligned arrow). The formatter enforces it.
+                  keyboardType: TextInputType.multiline,
+                  textInputAction: TextInputAction.newline,
+                  textCapitalization: TextCapitalization.sentences,
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(composerMaxLength),
+                  ],
+                  style: t.chat.copyWith(fontSize: 16, height: 24 / 16),
+                  cursorColor: t.ink100,
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    filled: false,
+                    counterText: '',
+                    hintText: composerHint,
+                    hintStyle: t.chat.copyWith(
+                      fontSize: 16,
+                      height: 24 / 16,
+                      color: t.ink300,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -122,7 +144,7 @@ class _ComposerState extends State<Composer> {
   }
 }
 
-/// 40 dp circle with a 48 dp hit area.
+/// 36 dp circle (DS Button md icon) with a 48 dp hit area.
 class _RoundAction extends StatelessWidget {
   const _RoundAction({
     super.key,
@@ -158,8 +180,8 @@ class _RoundAction extends StatelessWidget {
             child: Opacity(
               opacity: onTap == null ? 0.38 : 1,
               child: Container(
-                width: 40,
-                height: 40,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
                 child: Icon(icon, size: 20, color: color),
               ),
