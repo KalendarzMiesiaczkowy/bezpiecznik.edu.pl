@@ -41,6 +41,7 @@ class _ComposerState extends State<Composer> {
   void initState() {
     super.initState();
     _controller.addListener(() => setState(() {}));
+    _focus.addListener(() => setState(() {}));
   }
 
   @override
@@ -63,12 +64,14 @@ class _ComposerState extends State<Composer> {
   @override
   Widget build(BuildContext context) {
     final t = context.bz;
-    return Container(
+    return AnimatedContainer(
+      duration: t.durationFast,
       constraints: const BoxConstraints(minHeight: 52),
       padding: const EdgeInsets.all(1),
       decoration: BoxDecoration(
         color: t.bg200,
-        border: Border.all(color: t.line150),
+        // DS Composer: `line-150` frame, `line-200` while focused.
+        border: Border.all(color: _focus.hasFocus ? t.line200 : t.line150),
         borderRadius: BorderRadius.circular(t.radiusXl),
       ),
       child: Row(
@@ -91,10 +94,10 @@ class _ComposerState extends State<Composer> {
               // 12 + 24 (line) + 12 = 48 = button hit area -> single line centred
               // with the send arrow; extra lines grow upwards from the bottom.
               padding: EdgeInsets.fromLTRB(
-                widget.generating ? 4 : 16,
-                12,
-                4,
-                12,
+                widget.generating ? t.space1 : t.space4,
+                t.space3,
+                t.space1,
+                t.space3,
               ),
               // The app-wide field theme (minHeight 48, 14/12 content padding)
               // leaks into this bare field and made the pill 76 dp: reset it.
@@ -151,7 +154,7 @@ class _ComposerState extends State<Composer> {
 }
 
 /// 36 dp circle (DS Button md icon) with a 48 dp hit area.
-class _RoundAction extends StatelessWidget {
+class _RoundAction extends StatefulWidget {
   const _RoundAction({
     super.key,
     required this.icon,
@@ -170,16 +173,32 @@ class _RoundAction extends StatelessWidget {
   final Color color;
 
   @override
+  State<_RoundAction> createState() => _RoundActionState();
+}
+
+class _RoundActionState extends State<_RoundAction> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final t = context.bz;
+    final onTap = widget.onTap;
+    final color = widget.color;
+    void press(bool v) {
+      if (onTap != null) setState(() => _pressed = v);
+    }
+
     return Semantics(
       button: true,
       enabled: onTap != null,
-      label: label,
+      label: widget.label,
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTapDown: (_) => press(true),
+        onTapCancel: () => press(false),
+        onTapUp: (_) => press(false),
         onTap: onTap,
         child: SizedBox(
           width: t.minTouchTarget,
@@ -190,8 +209,13 @@ class _RoundAction extends StatelessWidget {
               child: Container(
                 width: 36,
                 height: 36,
-                decoration: BoxDecoration(color: fill, shape: BoxShape.circle),
-                child: filledSquare
+                decoration: BoxDecoration(
+                  color: _pressed
+                      ? Color.alphaBlend(t.overlayPress, widget.fill)
+                      : widget.fill,
+                  shape: BoxShape.circle,
+                ),
+                child: widget.filledSquare
                     ? Center(
                         child: Container(
                           width: 12,
@@ -202,7 +226,7 @@ class _RoundAction extends StatelessWidget {
                           ),
                         ),
                       )
-                    : Icon(icon, size: 20, color: color),
+                    : Icon(widget.icon, size: 20, color: color),
               ),
             ),
           ),

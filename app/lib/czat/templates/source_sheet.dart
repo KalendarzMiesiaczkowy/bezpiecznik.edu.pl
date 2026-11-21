@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../wspolne/theme/bz_buttons.dart';
 import '../../wspolne/theme/bz_theme.dart';
 import 'panel_model.dart';
+import 'quote_panel.dart';
 
 /// Default source opener: bottom sheet pushed from the tapped widget's own
 /// [context], like the Settings/map sheets, so it stays below the SOS overlay.
@@ -37,29 +38,47 @@ class SourceSheet extends StatelessWidget {
           maxHeight: MediaQuery.sizeOf(context).height * 0.8,
         ),
         child: Padding(
-          padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, 24),
+          padding: EdgeInsets.fromLTRB(bz.space4, 0, bz.space4, bz.space5),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Same hierarchy as the `quote` card (reference czat-zrodlo.png):
+              // document, one quiet line of page and publisher, then the
+              // fragment on paper.
               Text(
                 s.docTitle.isEmpty ? s.docShort : s.docTitle,
-                style: bz.title,
+                style: bz.step,
               ),
-              if (meta.isNotEmpty) Text(meta, style: bz.caption),
-              if (s.pageLabel.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text('Strona ${s.pageLabel}', style: bz.chat),
-              ],
+              SizedBox(height: bz.space1),
+              Wrap(
+                spacing: bz.space1,
+                children: [
+                  if (s.pageLabel.isNotEmpty)
+                    Text(
+                      'Strona ${s.pageLabel}',
+                      style: bz.caption.copyWith(color: bz.ink200),
+                    ),
+                  if (meta.isNotEmpty)
+                    Text(
+                      s.pageLabel.isEmpty ? meta : '· $meta',
+                      style: bz.caption.copyWith(color: bz.ink300),
+                    ),
+                ],
+              ),
               if (s.text.isNotEmpty) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: bz.space3),
                 Flexible(
-                  child: SingleChildScrollView(
-                    child: Text(s.text, style: bz.chat),
+                  // The clip stays put while the page scrolls under it.
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(bz.radiusMd),
+                    child: SingleChildScrollView(
+                      child: QuotePaper(text: s.text, expanded: true),
+                    ),
                   ),
                 ),
               ],
-              const SizedBox(height: 16),
+              SizedBox(height: bz.space4),
               BzButton(
                 label: 'Zamknij',
                 fullWidth: true,

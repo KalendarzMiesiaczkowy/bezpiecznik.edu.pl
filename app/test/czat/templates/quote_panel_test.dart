@@ -5,6 +5,7 @@ import 'package:bezpiecznik/czat/templates/quote_panel.dart';
 import 'package:bezpiecznik/czat/templates/template_fixtures.dart';
 import 'package:bezpiecznik/czat/templates/template_registry.dart';
 import 'package:bezpiecznik/czat/templates/template_renderer.dart';
+import 'package:bezpiecznik/wspolne/theme/bz_buttons.dart';
 import 'package:bezpiecznik/wspolne/theme/bz_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,7 +43,7 @@ void main() {
     expect((quoteWindowMaxHeight - 18) % 22, 0);
     final window = t.getSize(find.byType(ClipRRect).first);
     expect(window.height, quoteWindowMaxHeight);
-    final button = find.ancestor(of: find.text('Powiększ'), matching: find.byType(OutlinedButton));
+    final button = find.ancestor(of: find.text('Powiększ'), matching: find.byType(BzButton));
     expect(button, findsOneWidget);
     expect(t.getSize(button).height, greaterThanOrEqualTo(48));
     await t.tap(find.text('Powiększ'));

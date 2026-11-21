@@ -253,10 +253,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   child: const CprPinnedHost(),
                 ),
                 Padding(
+                  // The pill is wider than the content column (reference
+                  // start.png: 12 dp from the screen edge).
                   padding: EdgeInsets.fromLTRB(
-                    t.space4,
+                    t.space3,
                     t.space1,
-                    t.space4,
+                    t.space3,
                     t.space2 + MediaQuery.paddingOf(context).bottom,
                   ),
                   child: Composer(
