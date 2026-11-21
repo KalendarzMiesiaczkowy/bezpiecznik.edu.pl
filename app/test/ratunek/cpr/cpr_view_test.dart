@@ -349,6 +349,30 @@ void main() {
     rig.session.stop();
   });
 
+  testWidgets('pinned panel: bg-200, radius-lg top corners, float shadow; AED outlined and left-aligned; 112 hit >= 48', (tester) async {
+    final (rig, _) = await pumpCard(tester);
+    await tester.tap(find.text(cprStartLabel));
+    await tester.pump();
+    final t = tester.element(find.byKey(const ValueKey('cpr-pinned'))).bz;
+    final box = tester.widget<DecoratedBox>(find.byKey(const ValueKey('cpr-pinned')));
+    final deco = box.decoration as BoxDecoration;
+    expect(deco.color, t.bg200);
+    expect(deco.borderRadius, BorderRadius.vertical(top: Radius.circular(t.radiusLg)));
+    expect(deco.boxShadow, t.shadowFloat);
+    expect(deco.border, isNull);
+
+    final aed = find.byKey(const ValueKey('cpr-aed-how'));
+    expect(tester.widget<BzButton>(aed).variant, BzButtonVariant.secondary);
+    final panelLeft = tester.getTopLeft(find.byKey(const ValueKey('cpr-pinned'))).dx;
+    expect(tester.getTopLeft(aed).dx, panelLeft + t.space4);
+
+    final sos = find.widgetWithText(BzButton, '112');
+    final sosSize = tester.getSize(sos);
+    expect(sosSize.width, greaterThanOrEqualTo(48));
+    expect(sosSize.height, greaterThanOrEqualTo(48));
+    rig.session.stop();
+  });
+
   testWidgets('"Jak użyć AED": target >= 48 dp, stays after the reminder tick', (tester) async {
     final (rig, _) = await pumpCard(tester);
     await tester.tap(find.text(cprStartLabel));

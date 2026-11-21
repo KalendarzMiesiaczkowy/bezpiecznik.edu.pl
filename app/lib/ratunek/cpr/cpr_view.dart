@@ -208,8 +208,9 @@ class CprPinned extends ConsumerWidget {
     return DecoratedBox(
       key: const ValueKey('cpr-pinned'),
       decoration: BoxDecoration(
-        color: t.bg100,
-        border: Border(top: BorderSide(color: t.line150)),
+        color: t.bg200,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(t.radiusLg)),
+        boxShadow: t.shadowFloat,
       ),
       child: Padding(
         padding: EdgeInsets.all(t.space4),
@@ -316,7 +317,7 @@ class CprPinned extends ConsumerWidget {
                 child: BzButton(
                   key: const ValueKey('cpr-aed-how'),
                   label: cprAedHowLabel,
-                  variant: BzButtonVariant.ghost,
+                  variant: BzButtonVariant.secondary,
                   size: BzButtonSize.lg,
                   onPressed: () => unawaited(_insertAedCard(ref, aedId)),
                 ),
