@@ -47,7 +47,12 @@ jobs:
         working-directory: ./app
         env:
           PLANETILER_XMX: 5g
+          GH_TOKEN: ${{ github.token }}
         run: |
+          mkdir -p ~/development/data
+          if [ ! -s ~/development/data/zachodniopomorskie-latest.osm.pbf ]; then
+          gh release download data-v1 -p "zachodniopomorskie-latest.osm.pbf" -D ~/development/data
+          fi
           bash ../tools/build_tiles.sh
           uv run --script ../tools/build_knowledge.py
           uv run --script ../tools/build_points.py
