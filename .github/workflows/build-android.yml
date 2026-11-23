@@ -13,11 +13,11 @@ jobs:
       - name: Pobranie kodu repozytorium
         uses: actions/checkout@v4
 
-      - name: Konfiguracja środowiska Java (17 dla Androida)
+      - name: Konfiguracja środowiska Java (21 dla Androida)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
 
       - name: Konfiguracja środowiska Python
         uses: actions/setup-python@v5
