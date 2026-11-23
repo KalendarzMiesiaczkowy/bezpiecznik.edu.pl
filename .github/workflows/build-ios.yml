@@ -1,0 +1,42 @@
+name: Build iOS (No Codesign)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # Wymagane środowisko macOS do budowania na iOS
+    runs-on: macos-latest
+    steps:
+      - name: Pobranie kodu repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja środowiska Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+          # Wymagane dla iOS:
+          architecture: x64
+
+      - name: Instalacja zależności
+        working-directory: ./app
+        run: flutter pub get
+
+      # Pod maską iOS korzysta z CocoaPods do zarządzania zależnościami natywnymi
+      - name: Instalacja paczek CocoaPods
+        working-directory: ./app/ios
+        run: pod install
+
+      - name: Kompilacja aplikacji iOS (bez podpisywania)
+        working-directory: ./app
+        run: flutter build ios --release --no-codesign
+
+      - name: Udostępnienie pliku kompilacji (Runner.app)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release-app
+          path: app/build/ios/iphoneos/Runner.app
