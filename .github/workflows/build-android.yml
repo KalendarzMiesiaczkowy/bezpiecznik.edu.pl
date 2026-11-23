@@ -13,8 +13,7 @@ jobs:
       - name: Pobranie kodu repozytorium
         uses: actions/checkout@v4
 
-      # Konfiguracja środowisk (Java dla Androida, Python dla skryptów uv)
-      - name: Konfiguracja środowiska Java
+      - name: Konfiguracja środowiska Java (17 dla Androida)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -23,7 +22,7 @@ jobs:
       - name: Konfiguracja środowiska Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Bezpieczna, w miarę nowa wersja
+          python-version: '3.11'
 
       - name: Instalacja narzędzia uv
         run: pip install uv
@@ -34,17 +33,25 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Cache danych OSM i Planetilera
+        uses: actions/cache@v4
+        with:
+          path: ~/development
+          key: dev-osm-planetiler-v1
+
       - name: Instalacja zależności Fluttera
         working-directory: ./app
         run: flutter pub get
 
-      # NOWY KROK: Generowanie wymaganych plików sqlite i json przed buildem
-      - name: Generowanie assetów (uv)
-        working-directory: ./
+      - name: Generowanie mapy i assetów
+        working-directory: ./app
+        env:
+          PLANETILER_XMX: 5g
         run: |
-          uv run --script tools/build_knowledge.py
-          uv run --script tools/build_points.py
-          uv run --script tools/build_guides.py
+          bash ../tools/build_tiles.sh
+          uv run --script ../tools/build_knowledge.py
+          uv run --script ../tools/build_points.py
+          uv run --script ../tools/build_guides.py
 
       - name: Analiza kodu
         working-directory: ./app
