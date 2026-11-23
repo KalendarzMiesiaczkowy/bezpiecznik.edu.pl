@@ -1,0 +1,44 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie kodu repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja środowiska Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Konfiguracja środowiska Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Instalacja zależności
+        working-directory: ./app
+        run: flutter pub get
+
+      - name: Analiza kodu
+        working-directory: ./app
+        run: flutter analyze
+
+      - name: Kompilacja APK (Release)
+        working-directory: ./app
+        run: flutter build apk --release
+
+      - name: Udostępnienie pliku APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk
