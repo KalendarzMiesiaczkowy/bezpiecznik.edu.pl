@@ -40,11 +40,11 @@ jobs:
 
       # NOWY KROK: Generowanie wymaganych plików sqlite i json przed buildem
       - name: Generowanie assetów (uv)
-        working-directory: ./app
+        working-directory: ./
         run: |
-          uv run --script ../tools/build_knowledge.py
-          uv run --script ../tools/build_points.py
-          uv run --script ../tools/build_guides.py
+          uv run --script tools/build_knowledge.py
+          uv run --script tools/build_points.py
+          uv run --script tools/build_guides.py
 
       - name: Analiza kodu
         working-directory: ./app
