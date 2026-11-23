@@ -13,11 +13,20 @@ jobs:
       - name: Pobranie kodu repozytorium
         uses: actions/checkout@v4
 
+      # Konfiguracja środowisk (Java dla Androida, Python dla skryptów uv)
       - name: Konfiguracja środowiska Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+
+      - name: Konfiguracja środowiska Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Bezpieczna, w miarę nowa wersja
+
+      - name: Instalacja narzędzia uv
+        run: pip install uv
 
       - name: Konfiguracja środowiska Flutter
         uses: subosito/flutter-action@v2
@@ -25,9 +34,17 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Instalacja zależności
+      - name: Instalacja zależności Fluttera
         working-directory: ./app
         run: flutter pub get
+
+      # NOWY KROK: Generowanie wymaganych plików sqlite i json przed buildem
+      - name: Generowanie assetów (uv)
+        working-directory: ./app
+        run: |
+          uv run --script tools/build_knowledge.py
+          uv run --script tools/build_points.py
+          uv run --script tools/build_guides.py
 
       - name: Analiza kodu
         working-directory: ./app
